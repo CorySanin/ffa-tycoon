@@ -1,0 +1,41 @@
+{
+  "name": "ffa-tycoon",
+  "version": "1.0.0",
+  "description": "ffa-tycoon.com",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "log": "6.0.0",
+    "json5": "2.2.0",
+    "express": "4.17.1",
+    "ejs": "3.1.6",
+    "helmet": "4.4.1",
+    "body-parser": "1.19.0",
+    "better-sqlite3": "7.1.2",
+    "otpauth": "6.2.2"
+  },
+  "devDependencies": {
+    "gulp": "^4.0.2",
+    "gulp-clean-css": "4.3.0",
+    "gulp-concat-css": "3.1.0",
+    "gulp-sass": "4.1.0",
+    "gulp-uglify": "3.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/CorySanin/ffa-tycoon.git"
+  },
+  "keywords": [
+    "website",
+    "openrct2",
+    "multiplayer"
+  ],
+  "author": "Cory Sanin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/CorySanin/ffa-tycoon/issues"
+  },
+  "homepage": "https://gitlab.com/CorySanin/ffa-tycoon#readme"
+}
