@@ -1,13 +1,16 @@
 {
     "port": 8080,
     "totp": "JBSWY3DPEHPK3PXP",
+    "archivedir": "storage/archive",
     "db": {
         "path": "storage/db/mydb.db"
     },
     "servers": [
         {
-            "hostname": "openrct2-dev",
-            "dir": "/usr/src/ffa-tycoon/storage/server-01"
+            "name": "server-01",
+            "group": "develop",
+            "hostname": "localhost",
+            "dir": "storage/server-01"
         }
     ]
 }
