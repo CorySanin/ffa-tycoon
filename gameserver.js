@@ -2,6 +2,7 @@ const net = require('net');
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
+const FileMan = require('./fileMan');
 const REMOTEPORT = 35711;
 
 class GameServer {
@@ -21,7 +22,7 @@ class GameServer {
         let fullName = path.join(this._dir, 'save', `${filename}.sv6`);
         await this.Execute(`save ${filename}`);
         try {
-            if (await this.WaitForFile(fullName)) {
+            if (await FileMan.WaitForFile(fullName)) {
                 await fsp.rename(fullName, destination);
                 return true;
             }
@@ -49,43 +50,6 @@ class GameServer {
                 console.log('Connection closed');
                 resolve(null);
             });
-        });
-    }
-
-    FileExists = (filename) => {
-        return new Promise(async (resolve) => {
-            try {
-                await fsp.access(filename)
-                resolve(true)
-            }
-            catch {
-                resolve(false);
-            }
-        });
-    }
-
-    WaitForFile = (filename, timeout = 3000) => {
-        return new Promise(async (resolve) => {
-            let dirname = path.dirname(filename);
-            let watcher = fs.watch(dirname);
-            if (await this.FileExists(filename)) {
-                watcher.close();
-                resolve(true);
-            }
-            else {
-                let t = setTimeout(() => {
-                    watcher.close();
-                    resolve(false);
-                }, timeout);
-                watcher.on('change', async () => {
-                    let match = await this.FileExists(filename);
-                    if (match) {
-                        clearTimeout(t);
-                        watcher.close();
-                        resolve(true);
-                    }
-                });
-            }
         });
     }
 }

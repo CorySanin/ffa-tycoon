@@ -1,14 +1,15 @@
 const express = require('express');
 const Helmet = require('helmet');
 const bodyParser = require('body-parser');
-const net = require('net');
 const TOTP = require('otpauth').TOTP;
 const moment = require('moment');
+const FormData = require('form-data');
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const DB = require('./db');
 const GameServer = require('./gameserver');
+const FileMan = require('./fileMan');
 
 const exists = async (filename) => {
     try {
@@ -25,10 +26,11 @@ class Web {
         const app = express();
         // this._db = new DB(options.db);
         // const db = this._db;
-        this._totp = process.env.totp || options.totp || '';
+        let port = process.env.PORT || options.port || 8080;
+        this._totp = process.env.TOTP || options.totp || '';
+        this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
-        let port = process.env.PORT || options.port || 8080;
 
         (options.servers || []).forEach(serverinfo => {
             this._servers.push(new GameServer(serverinfo));
@@ -111,11 +113,21 @@ class Web {
                 this._servers.filter(server => server._group == group).forEach(async server => {
                     try {
                         let dirname = path.join(this._archive, `${datestring}_${server._name}`);
+                        let parksave = path.join(dirname, 'park.sv6');
 
                         if ((await exists(dirname))
                             || !!(await fsp.mkdir(dirname))
-                            || !(await server.SavePark(path.join(dirname, 'park.sv6')))) {
+                            || !(await server.SavePark(parksave))) {
                             result.status = 'bad';
+                        }
+                        else {
+                            const body = new FormData();
+                            body.append('park', fs.createReadStream(parksave));
+
+                            let thumbnail = await FileMan.DownloadImage(`http://${this._screenshotter}/upload`, {
+                                method: 'POST',
+                                body
+                            }, dirname, 'thumbnail');
                         }
                     }
                     catch (ex) {
@@ -123,7 +135,6 @@ class Web {
                     }
                 });
                 // TODO: get server info
-                // TODO: get screenshot
                 // TODO: insert in db
             }
             res.send(result);

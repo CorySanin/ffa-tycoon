@@ -2,6 +2,7 @@
     "port": 8080,
     "totp": "JBSWY3DPEHPK3PXP",
     "archivedir": "storage/archive",
+    "screenshotter": "screenshotter:8080",
     "db": {
         "path": "storage/db/mydb.db"
     },
@@ -9,7 +10,7 @@
         {
             "name": "server-01",
             "group": "develop",
-            "hostname": "localhost",
+            "hostname": "openrct2-dev",
             "dir": "storage/server-01"
         }
     ]
