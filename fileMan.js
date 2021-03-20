@@ -2,7 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const fetch = require('node-fetch');
-const sharp = require('sharp');
 
 
 let FileExists = (filename) => {
@@ -43,10 +42,11 @@ let WaitForFile = (filename, timeout = 3000) => {
 }
 
 let DownloadImage = async (url, options, directory, name) => {
-    let img = await fetch(url, options)
-    let filename = path.join(directory, `${name}.png`);
+    let img = await fetch(url, options);
+    let filename = `${name}.png`;
+    let filepath = path.join(directory, filename);
 
-    await fsp.writeFile(filename, await img.buffer());
+    await fsp.writeFile(filepath, await img.buffer());
 
     return filename;
 }

@@ -17,8 +17,7 @@
     "log": "6.0.0",
     "moment": "2.29.1",
     "node-fetch": "2.6.1",
-    "otpauth": "6.2.2",
-    "sharp": "0.27.2"
+    "otpauth": "6.2.2"
   },
   "devDependencies": {
     "gulp": "^4.0.2",

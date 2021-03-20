@@ -24,8 +24,7 @@ const exists = async (filename) => {
 class Web {
     constructor(options = {}) {
         const app = express();
-        // this._db = new DB(options.db);
-        // const db = this._db;
+        const db = this._db = new DB(options.db);
         let port = process.env.PORT || options.port || 8080;
         this._totp = process.env.TOTP || options.totp || '';
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
@@ -107,35 +106,62 @@ class Web {
             let result = {
                 status: 'bad'
             };
-            if (this.CheckTotp(req) || process.env.TESTING || true) {
+            if (this.CheckTotp(req) || process.env.TESTING) {
                 let datestring = moment().format('YYYY-MM-DD_HH-mm-ss');
                 result.status = 'ok';
-                this._servers.filter(server => server._group == group).forEach(async server => {
-                    try {
-                        let dirname = path.join(this._archive, `${datestring}_${server._name}`);
-                        let parksave = path.join(dirname, 'park.sv6');
 
-                        if ((await exists(dirname))
-                            || !!(await fsp.mkdir(dirname))
+                const serversingroup = this._servers.filter(server => server._group == group);
+
+                for (const serverindx in serversingroup) {
+                    const server = serversingroup[serverindx];
+                    try {
+                        let dirname = `${datestring}_${server._name}`;
+                        let archivepath = path.join(this._archive, dirname);
+                        let parksave = path.join(archivepath, 'park.sv6');
+
+                        if ((await exists(archivepath))
+                            || !!(await fsp.mkdir(archivepath))
                             || !(await server.SavePark(parksave))) {
                             result.status = 'bad';
                         }
                         else {
-                            const body = new FormData();
-                            body.append('park', fs.createReadStream(parksave));
 
-                            let thumbnail = await FileMan.DownloadImage(`http://${this._screenshotter}/upload`, {
-                                method: 'POST',
-                                body
-                            }, dirname, 'thumbnail');
+                            let thumbnail, largeimg;
+                            try {
+                                const body = new FormData();
+                                body.append('park', fs.createReadStream(parksave));
+                                thumbnail = await FileMan.DownloadImage(`http://${this._screenshotter}/upload`, {
+                                    method: 'POST',
+                                    body
+                                }, archivepath, 'thumbnail');
+                                largeimg = await FileMan.DownloadImage(`http://${this._screenshotter}/upload?zoom=0`, {
+                                    method: 'POST',
+                                    body
+                                }, archivepath, 'fullsize');
+                            }
+                            catch (ex) {
+                                console.log('Problem downloading thumbnail', ex);
+                            }
+                            this._db.AddPark({
+                                name: server._name,
+                                group: server._group,
+                                scenario: null,
+                                dir: dirname,
+                                thumbnail,
+                                largeimg
+                            });
                         }
                     }
                     catch (ex) {
-                        console.log(ex);
+                        console.log(`Error saving ${server.name}`, ex);
+                        result.status = 'bad';
                     }
-                });
+                }
+
+                // this._servers.filter(server => server._group == group).forEach(async server => {
+
+                // });
                 // TODO: get server info
-                // TODO: insert in db
             }
             res.send(result);
         });
