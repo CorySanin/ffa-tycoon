@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const fetch = require('node-fetch');
+const FormData = require('form-data');
 
 
 let FileExists = (filename) => {
@@ -51,8 +52,18 @@ let DownloadImage = async (url, options, directory, name) => {
     return filename;
 }
 
+let DownloadPark = async (url, parksave, directory, name) => {
+    const body = new FormData();
+    body.append('park', fs.createReadStream(parksave));
+    return await DownloadImage(url, {
+        method: 'POST',
+        body
+    }, directory, name);
+}
+
 module.exports = {
     FileExists,
     WaitForFile,
-    DownloadImage
+    DownloadImage,
+    DownloadPark
 }

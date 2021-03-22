@@ -3,7 +3,6 @@ const Helmet = require('helmet');
 const bodyParser = require('body-parser');
 const TOTP = require('otpauth').TOTP;
 const moment = require('moment');
-const FormData = require('form-data');
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
@@ -128,16 +127,12 @@ class Web {
 
                             let thumbnail, largeimg;
                             try {
-                                const body = new FormData();
-                                body.append('park', fs.createReadStream(parksave));
-                                thumbnail = await FileMan.DownloadImage(`http://${this._screenshotter}/upload`, {
-                                    method: 'POST',
-                                    body
-                                }, archivepath, 'thumbnail');
-                                largeimg = await FileMan.DownloadImage(`http://${this._screenshotter}/upload?zoom=0`, {
-                                    method: 'POST',
-                                    body
-                                }, archivepath, 'fullsize');
+                                let values = await Promise.all([
+                                    FileMan.DownloadPark(`http://${this._screenshotter}/upload`, parksave, archivepath, 'thumbnail'),
+                                    FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=0`, parksave, archivepath, 'fullsize'),
+                                ]);
+                                thumbnail = values[0];
+                                largeimg = values[1];
                             }
                             catch (ex) {
                                 console.log('Problem downloading thumbnail', ex);
