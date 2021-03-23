@@ -9,6 +9,7 @@ class GameServer {
     constructor(server = {}) {
         this._name = server.name || 'server';
         this._group = server.group || 'default';
+        this._mode = server.gamemode || 'multiplayer';
         this._hostname = server.hostname || '127.0.0.1';
         this._port = server.port || REMOTEPORT;
         this._dir = server.dir || false;

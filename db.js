@@ -3,29 +3,51 @@ const LOG = require('log');
 const sqlite = require('better-sqlite3');
 const log = LOG.get('db')
 const TABLE = 'parks';
+const ITEMSPERPAGE = 30;
 
 class DB {
     constructor(options = {}) {
+        this.ITEMSPERPAGE = ITEMSPERPAGE;
         this._db = new sqlite(process.env.DBPATH || options.path || path.join(__dirname, 'storage', 'db', 'db.db'));
         const db = this._db;
-        
-        if(!db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='${TABLE}';`).get()){
-            db.prepare(`CREATE TABLE ${TABLE} (id INTEGER PRIMARY KEY, name VARCHAR(128), groupname VARCHAR(128), date DATETIME, scenario VARCHAR(64), dir VARCHAR(64), thumbnail VARCHAR(16), largeimg VARCHAR(16));`).run();
+
+        if (!db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='${TABLE}';`).get()) {
+            db.prepare(`CREATE TABLE ${TABLE} (id INTEGER PRIMARY KEY, name VARCHAR(128), groupname VARCHAR(128), gamemode VARCHAR(128), date DATETIME, scenario VARCHAR(64), dir VARCHAR(64), thumbnail VARCHAR(16), largeimg VARCHAR(16));`).run();
         }
 
         this._queries = {
-            ADDPARK: db.prepare(`INSERT INTO ${TABLE} (name,groupname,date,scenario,dir,thumbnail,largeimg) VALUES (@name, @group, @date, @scenario, @dir, @thumbnail, @largeimg);`),
-            GETPARKS: db.prepare(`SELECT * FROM ${TABLE} ORDER BY date DESC;`),
+            ADDPARK: db.prepare(`INSERT INTO ${TABLE} (name,groupname,gamemode,date,scenario,dir,thumbnail,largeimg) VALUES (@name, @group, @gamemode, @date, @scenario, @dir, @thumbnail, @largeimg);`),
+            GETPARKS: db.prepare(`SELECT * FROM ${TABLE} ORDER BY date DESC LIMIT @offset, ${ITEMSPERPAGE};`),
+            GETPARKCount: db.prepare(`SELECT COUNT(*) as count FROM ${TABLE}`),
             GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`)
         }
     }
 
-    AddPark(params={}){
+    AddPark(params = {}) {
         params.name = params.name || 'no name';
         params.group = params.group || 'default';
+        params.gamemode = params.gamemode || 'multiplayer';
         params.date = params.date || (new Date()).getTime();
         return this._queries.ADDPARK.run(params);
     }
+
+    GetParks(page = 1) {
+        return this._queries.GETPARKS.all({
+            offset: (page - 1) * ITEMSPERPAGE
+        });
+    }
+
+    GetParkCount() {
+        let resp = this._queries.GETPARKCount.get();
+        resp.pages = Math.ceil(resp.count / ITEMSPERPAGE);
+        return resp;
+    }
+
+    GetPark(id = -1) {
+        return this._queries.GETPARK.get({
+            id
+        });
+    }
 }
 
-module.exports = DB; 
+module.exports = DB;

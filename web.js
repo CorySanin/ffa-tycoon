@@ -100,6 +100,26 @@ class Web {
 
         //#endregion
 
+        app.get('/api/parks/count', (req, res) => {
+            res.send(this.InjectStatus(this._db.GetParkCount(), 'good'));
+        });
+
+        app.get('/api/parks/:page?', (req, res) => {
+            let count = this._db.GetParkCount();
+            let page = Math.max(Math.min(parseInt(req.params.page) || 1, count.pages), 1);
+            res.send({
+                status: 'good',
+                page,
+                parks: this._db.GetParks(page),
+                count: count.count,
+                pages: count.pages
+            });
+        });
+
+        app.get('/api/park/:id', (req, res) => {
+            res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.id) || 0), 'good'));
+        });
+
         app.get('/api/save/group/:group', async (req, res) => {
             let group = req.params.group;
             let result = {
@@ -140,6 +160,7 @@ class Web {
                             this._db.AddPark({
                                 name: server._name,
                                 group: server._group,
+                                gamemode: server._mode,
                                 scenario: null,
                                 dir: dirname,
                                 thumbnail,
@@ -162,6 +183,18 @@ class Web {
         });
 
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
+    }
+
+    InjectStatus = (obj, status) => {
+        if (obj) {
+            obj.status = status;
+            return obj;
+        }
+        else{
+            return {
+                status: 'bad'
+            };
+        }
     }
 
     CheckTotp = (req) => {

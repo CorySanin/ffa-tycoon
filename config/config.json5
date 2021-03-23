@@ -10,6 +10,7 @@
         {
             "name": "server-01",
             "group": "develop",
+            "gamemode": "free for all",
             "hostname": "openrct2-dev",
             "dir": "storage/server-01"
         }
