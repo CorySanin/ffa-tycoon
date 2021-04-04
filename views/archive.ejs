@@ -1,0 +1,25 @@
+<h1>Park Archive</h1>
+
+<table id="parkTable">
+    <thead>
+        <tr id="parkTableHeader">
+            <th id="name_header">Name</th>
+            <th id="date_header">Date</th>
+            <th id="groupname_header">Group</th>
+            <th id="gamemode_header">Mode</th>
+            <th id="scenario_header">Scenario</th>
+        </tr>
+    </thead>
+    <tbody id="parkTableBody">
+    </tbody>
+</table>
+
+<div id="pagination"></div>
+<script nonce="<%= nonce %>">
+    window.archivequeryparams = {
+        page: <%= pagenum %>,
+        orderby: '<%= order.orderby %>',
+        order: <%= order.order %>
+    };
+</script>
+<script src="/assets/js/browser.js?v1"></script>

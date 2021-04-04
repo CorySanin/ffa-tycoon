@@ -3,12 +3,15 @@ const Helmet = require('helmet');
 const bodyParser = require('body-parser');
 const TOTP = require('otpauth').TOTP;
 const moment = require('moment');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
 const DB = require('./db');
 const GameServer = require('./gameserver');
 const FileMan = require('./fileMan');
+
+const CSPNONCE = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
 const exists = async (filename) => {
     try {
@@ -19,6 +22,15 @@ const exists = async (filename) => {
         return false;
     }
 };
+
+const genNonceForCSP = (length = 16) => {
+    let bytes = crypto.randomBytes(length);
+    let chars = [];
+    for (let i = 0; i < bytes.length; i++) {
+        chars.push(CSPNONCE[bytes[i] % CSPNONCE.length]);
+    }
+    return chars.join('');
+}
 
 class Web {
     constructor(options = {}) {
@@ -62,16 +74,26 @@ class Web {
                 });
         });
 
-        app.get('/archive', (req, res) => {
+        app.get('/archive/:page?', (req, res) => {
+            let page = Math.max(parseInt(req.params.page) || 1, 1);
+            let order = {
+                orderby: req.query.sort || req.query.orderby,
+                order: (req.query.asc || req.query.order) === 'ASC'
+            };
+            let nonce = genNonceForCSP();
             res.render('template',
                 {
                     page: {
                         view: 'archive',
                         title: 'Previous Parks'
-                    }
+                    },
+                    order,
+                    pagenum: page,
+                    nonce
                 },
                 function (err, html) {
                     if (!err) {
+                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${nonce}'`)
                         res.send(html);
                     }
                     else {
@@ -110,7 +132,7 @@ class Web {
             res.send({
                 status: 'good',
                 page,
-                parks: this._db.GetParks(page),
+                parks: this._db.GetParks(page, req.query.sort || req.query.orderby, (req.query.asc || req.query.order) === 'true'),
                 count: count.count,
                 pages: count.pages
             });
@@ -190,7 +212,7 @@ class Web {
             obj.status = status;
             return obj;
         }
-        else{
+        else {
             return {
                 status: 'bad'
             };

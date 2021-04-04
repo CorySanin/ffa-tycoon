@@ -17,10 +17,17 @@ class DB {
 
         this._queries = {
             ADDPARK: db.prepare(`INSERT INTO ${TABLE} (name,groupname,gamemode,date,scenario,dir,thumbnail,largeimg) VALUES (@name, @group, @gamemode, @date, @scenario, @dir, @thumbnail, @largeimg);`),
-            GETPARKS: db.prepare(`SELECT * FROM ${TABLE} ORDER BY date DESC LIMIT @offset, ${ITEMSPERPAGE};`),
+            GETPARKS: {},
             GETPARKCount: db.prepare(`SELECT COUNT(*) as count FROM ${TABLE}`),
             GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`)
-        }
+        };
+
+        ['name', 'groupname', 'gamemode', 'date', 'scenario'].forEach(col => {
+            this._queries.GETPARKS[col] = {
+                ASC: db.prepare(`SELECT * FROM ${TABLE} ORDER BY ${col} ASC LIMIT @offset, ${ITEMSPERPAGE};`),
+                DESC: db.prepare(`SELECT * FROM ${TABLE} ORDER BY ${col} DESC LIMIT @offset, ${ITEMSPERPAGE};`)
+            };
+        });
     }
 
     AddPark(params = {}) {
@@ -31,8 +38,8 @@ class DB {
         return this._queries.ADDPARK.run(params);
     }
 
-    GetParks(page = 1) {
-        return this._queries.GETPARKS.all({
+    GetParks(page = 1, orderby = 'date', order = false) {
+        return this._queries.GETPARKS[orderby][order? 'ASC' : 'DESC'].all({
             offset: (page - 1) * ITEMSPERPAGE
         });
     }

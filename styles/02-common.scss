@@ -1,0 +1,88 @@
+$background : #fff;
+$foreground : #FF6F00;
+$highlight  : #ffcc80;
+
+html,
+body {
+    font-family     : Verdana, Geneva, Tahoma, sans-serif;
+    padding         : 0px;
+    box-sizing      : border-box;
+    height          : 100%;
+    background-color: $background;
+    color           : #000;
+}
+
+* {
+    box-sizing: inherit;
+}
+
+.preload * {
+    transition        : none !important;
+    -webkit-transition: none !important;
+    -moz-transition   : none !important;
+    -ms-transition    : none !important;
+    -o-transition     : none !important;
+}
+
+h1 {
+    font-size  : 2.5em;
+    line-height: 1.2em;
+}
+
+h2 {
+    font-size  : 1.9em;
+    line-height: 1.2em;
+}
+
+h3 {
+    font-size  : 1.5em;
+    line-height: 1.2em;
+}
+
+h4 {
+    font-size  : 1.3em;
+    line-height: 1.2em;
+}
+
+h5 {
+    font-size  : 1.2em;
+    line-height: 1.2em;
+}
+
+h6 {
+    font-size  : 1.1em;
+    line-height: 1.2em;
+}
+
+ul,
+ol {
+    padding-left: 1.2em;
+    line-height : 1.5em;
+}
+
+li {
+    display      : list-item;
+    list-style   : disc;
+    margin-top   : 3px;
+    margin-bottom: 3px;
+}
+
+ol li {
+    list-style: decimal;
+}
+
+a {
+    color          : initial;
+    text-decoration: underline;
+}
+
+img {
+    border    : none;
+    max-width : 100%;
+    margin-top: initial;
+}
+
+p {
+    line-height: 1.5em;
+    margin-bottom: 1em;
+}

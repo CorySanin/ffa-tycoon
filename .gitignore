@@ -101,3 +101,5 @@ public
 # custom .gitignore
 .vscode
 storage/
+assets/css/
+assets/js/
