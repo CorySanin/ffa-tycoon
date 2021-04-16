@@ -62,7 +62,8 @@ class Web {
                     page: {
                         view: 'index',
                         title: 'Public OpenRCT2 Multiplayer Servers'
-                    }
+                    },
+                    servers: this._servers
                 },
                 function (err, html) {
                     if (!err) {
@@ -94,6 +95,26 @@ class Web {
                 function (err, html) {
                     if (!err) {
                         res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${nonce}'`)
+                        res.send(html);
+                    }
+                    else {
+                        res.send(err);
+                    }
+                });
+        });
+
+        app.get('/park/:park', (req, res) => {
+            let park = db.GetPark(parseInt(req.params.park));
+            res.render('template',
+                {
+                    page: {
+                        view: 'park',
+                        title: ``
+                    },
+                    park
+                },
+                function (err, html) {
+                    if (!err) {
                         res.send(html);
                     }
                     else {

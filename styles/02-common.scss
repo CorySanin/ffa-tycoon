@@ -1,8 +1,16 @@
+html {
+    height: 100%;
+}
+
 html,
 body {
-    padding         : 0px;
-    box-sizing      : border-box;
-    height          : 100%;
+    padding: 0px;
+    box-sizing: border-box;
+    min-height: 100%;
+
+    > #index {
+        background-image: url(/assets/images/grass.png);
+    }
 }
 
 * {

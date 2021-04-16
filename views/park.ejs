@@ -1,0 +1,22 @@
+<div class="content">
+    <div class="columns is-desktop">
+        <div class="column">
+            <h1>
+                <%= park.name %> <span id="parkdate">(<%= (new Date(park.date)).toLocaleDateString() %>)</span>
+            </h1>
+            <span id="rawdate" class="is-hidden">
+                <%= park.date %>
+            </span>
+            <p>
+                <%= park.groupname %> - <%= park.gamemode %>
+            </p>
+            <a href="/archive/<%= park.dir %>/park.sv6" class="button is-primary">Download</a>
+        </div>
+        <div class="column is-two-thirds-widescreen">
+            <a href="/archive/<%= park.dir %>/fullsize.png">
+                <img src="/archive/<%= park.dir %>/thumbnail.png" />
+            </a>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/park.js?v1"></script>
