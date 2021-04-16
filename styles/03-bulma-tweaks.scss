@@ -1,0 +1,18 @@
+.navbar {
+    margin-bottom: .5em;
+
+    .navbar-menu {
+        display: flex;
+    }
+}
+
+.is-clickable {
+    user-select: none;
+}
+
+@media screen and (min-width: 675px) {
+    #body {
+        width: calc(100% - 200px);
+        margin: auto;
+    }
+}

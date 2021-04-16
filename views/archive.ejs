@@ -1,25 +1,28 @@
-<h1>Park Archive</h1>
+<div class="content">
+    <h1>Park Archive</h1>
 
-<table id="parkTable">
-    <thead>
-        <tr id="parkTableHeader">
-            <th id="name_header">Name</th>
-            <th id="date_header">Date</th>
-            <th id="groupname_header">Group</th>
-            <th id="gamemode_header">Mode</th>
-            <th id="scenario_header">Scenario</th>
-        </tr>
-    </thead>
-    <tbody id="parkTableBody">
-    </tbody>
-</table>
+    <table id="parkTable" class="table">
+        <thead>
+            <tr id="parkTableHeader">
+                <th id="name_header" class="is-clickable">Name</th>
+                <th id="date_header" class="is-clickable">Date</th>
+                <th id="groupname_header" class="is-clickable">Group</th>
+                <th id="gamemode_header" class="is-clickable">Mode</th>
+                <th id="scenario_header" class="is-clickable">Scenario</th>
+            </tr>
+        </thead>
+        <tbody id="parkTableBody">
+        </tbody>
+    </table>
+</div>
 
-<div id="pagination"></div>
+<nav id="pagination" class="pagination" role="navigation" aria-label="pagination">
+</nav>
 <script nonce="<%= nonce %>">
     window.archivequeryparams = {
         page: <%= pagenum %>,
         orderby: '<%= order.orderby %>',
-        order: <%= order.order %>
+            order: <%= order.order %>
     };
 </script>
 <script src="/assets/js/browser.js?v1"></script>
