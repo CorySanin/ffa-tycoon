@@ -35,8 +35,10 @@ const genNonceForCSP = (length = 16) => {
 class Web {
     constructor(options = {}) {
         const app = express();
+        const privateapp = express();
         const db = this._db = new DB(options.db);
-        let port = process.env.PORT || options.port || 8080;
+        const port = process.env.PORT || options.port || 8080;
+        const privateport = process.env.PRIVATEPORT || options.privateport || 8081;
         this._totp = process.env.TOTP || options.totp || '';
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
@@ -53,6 +55,13 @@ class Web {
         app.use(bodyParser.json());
         app.use('/assets/', express.static('assets'));
         app.use('/archive/', express.static(this._archive));
+
+        privateapp.set('trust proxy', 1);
+        privateapp.set('view engine', 'ejs');
+        privateapp.use(Helmet());
+        privateapp.use(bodyParser.urlencoded({ extended: true }));
+        privateapp.use(bodyParser.json());
+        privateapp.use('/assets/', express.static('assets'));
 
         //#region web endpoints
 
@@ -163,12 +172,12 @@ class Web {
             res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.id) || 0), 'good'));
         });
 
-        app.get('/api/save/group/:group', async (req, res) => {
+        let savegroup = async (req, res, ispublic = true) => {
             let group = req.params.group;
             let result = {
                 status: 'bad'
             };
-            if (this.CheckTotp(req) || process.env.TESTING) {
+            if (!ispublic || this.CheckTotp(req)) {
                 let datestring = moment().format('YYYY-MM-DD_HH-mm-ss');
                 result.status = 'ok';
 
@@ -223,9 +232,18 @@ class Web {
                 // TODO: get server info
             }
             res.send(result);
+        };
+
+        app.get('/api/save/group/:group', async (req, res) => {
+            await savegroup(req, res, true);
+        });
+
+        privateapp.get('/api/save/group/:group', async (req, res) => {
+            await savegroup(req, res, false);
         });
 
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
+        privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
     }
 
     InjectStatus = (obj, status) => {
