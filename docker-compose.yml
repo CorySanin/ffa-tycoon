@@ -1,0 +1,36 @@
+version: '2'
+
+services:
+   ffa-tycoon:
+      container_name: ffa-tycoon
+      build:
+         context: ./
+         dockerfile: ./Dockerfile
+      ports:
+         - 8080:8080
+      volumes:
+         - ./storage:/usr/src/ffa-tycoon/storage
+         - ./config:/usr/src/ffa-tycoon/config
+      environment:
+         TZ: America/Chicago
+         TESTING: "yes"
+
+   openrct2-dev:
+      container_name: openrct2-for-ffatycoon
+      image: corysanin/openrct2-cli:develop-ubuntu
+      ports:
+         - 35711:35711
+         - 11753:11753
+         - 11754:11754/udp
+      volumes:
+         - ./storage/server-01:/home/openrct2/.config/OpenRCT2
+      command:
+         - "host"
+         - "https://bit.do/openrct2-bpb"
+   
+   screenshotter:
+      container_name: screenshotter-for-ffatycoon
+      image: corysanin/rct-screenshotter
+      volumes:
+         - "~/.steam/steam/steamapps/common/Rollercoaster Tycoon 2:/game"
+   

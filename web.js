@@ -150,6 +150,42 @@ class Web {
                 });
         });
 
+        privateapp.get('/', (req, res) => {
+            res.render('admin/template',
+                {
+                    page: {
+                        view: 'index',
+                        title: 'Home'
+                    }
+                },
+                function (err, html) {
+                    if (!err) {
+                        res.send(html);
+                    }
+                    else {
+                        res.send(err);
+                    }
+                });
+        });
+
+        privateapp.get('/archive', (req, res) => {
+            res.render('admin/template',
+                {
+                    page: {
+                        view: 'index',
+                        title: 'Home'
+                    }
+                },
+                function (err, html) {
+                    if (!err) {
+                        res.send(html);
+                    }
+                    else {
+                        res.send(err);
+                    }
+                });
+        });
+
         //#endregion
 
         app.get('/api/parks/count', (req, res) => {
