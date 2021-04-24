@@ -11,10 +11,17 @@
             servers.forEach(function(server){ %>
             <div class="block">
                 <span class="subtitle"><%= server._name %></span>
-                <p>
-                    <%= server._group %> -
-                    <%= server._mode %>
-                </p>
+                
+                <div class="parkstats">
+                    <div><span>Group:</span> <%= server._group %></div>
+                    <div><span>Mode:</span> <%= server._mode %></div>
+                    <% if (server._details) { %>
+                    <div><span>Scenario:</span> <%= server._details.park.name %></div>
+                    <div><span>Guests:</span> <%= server._details.park.guests %></div>
+                    <div><span>Rating:</span> <%= server._details.park.rating %></div>
+                    <div><span>Online:</span> <%= server._details.network.players.length - 1 %></div>
+                    <% } %>
+                </div>
             </div>
         <% }); } %>
     </div>

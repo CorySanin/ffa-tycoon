@@ -65,7 +65,8 @@ class Web {
 
         //#region web endpoints
 
-        app.get('/', (req, res) => {
+        app.get('/', async (req, res) => {
+            await Promise.all(this._servers.map(s => s.GetDetails()));
             res.render('template',
                 {
                     page: {
@@ -150,13 +151,15 @@ class Web {
                 });
         });
 
-        privateapp.get('/', (req, res) => {
+        privateapp.get('/', async (req, res) => {
+            await Promise.all(this._servers.map(s => s.GetDetails()));
             res.render('admin/template',
                 {
                     page: {
                         view: 'index',
                         title: 'Home'
-                    }
+                    },
+                    servers: this._servers
                 },
                 function (err, html) {
                     if (!err) {
@@ -165,14 +168,15 @@ class Web {
                     else {
                         res.send(err);
                     }
-                });
+                }
+            );
         });
 
         privateapp.get('/archive', (req, res) => {
             res.render('admin/template',
                 {
                     page: {
-                        view: 'index',
+                        view: 'archive',
                         title: 'Home'
                     }
                 },
@@ -249,7 +253,7 @@ class Web {
                                 name: server._name,
                                 group: server._group,
                                 gamemode: server._mode,
-                                scenario: null,
+                                scenario: (await server.GetDetails()).park.name,
                                 dir: dirname,
                                 thumbnail,
                                 largeimg
@@ -261,11 +265,6 @@ class Web {
                         result.status = 'bad';
                     }
                 }
-
-                // this._servers.filter(server => server._group == group).forEach(async server => {
-
-                // });
-                // TODO: get server info
             }
             res.send(result);
         };

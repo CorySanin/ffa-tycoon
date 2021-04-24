@@ -2,6 +2,7 @@ const net = require('net');
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
+const moment = require('moment');
 const FileMan = require('./fileMan');
 const REMOTEPORT = 35711;
 
@@ -13,6 +14,7 @@ class GameServer {
         this._hostname = server.hostname || '127.0.0.1';
         this._port = server.port || REMOTEPORT;
         this._dir = server.dir || false;
+        this._details = null;
     }
 
     SavePark = async (destination) => {
@@ -28,10 +30,20 @@ class GameServer {
                 return true;
             }
         }
-        catch (ex){
+        catch (ex) {
             console.log(ex);
         }
         return false;
+    }
+
+    GetDetails = async () => {
+        let d = moment();
+        if(!this._details || d.isAfter(this._details.expiration)){
+            if(this._details = await this.Execute('park')){
+                this._details.expiration = d.add(3, 'minutes');
+            }
+        }
+        return this._details;
     }
 
     Execute = (command) => {
@@ -42,13 +54,11 @@ class GameServer {
             });
 
             client.on('data', function (data) {
-                console.log('Received: ' + data);
                 resolve(JSON.parse(data));
                 client.destroy();
             });
 
             client.on('close', function () {
-                console.log('Connection closed');
                 resolve(null);
             });
         });

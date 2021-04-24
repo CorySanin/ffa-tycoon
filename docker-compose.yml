@@ -8,6 +8,7 @@ services:
          dockerfile: ./Dockerfile
       ports:
          - 8080:8080
+         - 8081:8081
       volumes:
          - ./storage:/usr/src/ffa-tycoon/storage
          - ./config:/usr/src/ffa-tycoon/config
@@ -16,7 +17,7 @@ services:
          TESTING: "yes"
 
    openrct2-dev:
-      container_name: openrct2-for-ffatycoon
+      container_name: openrct2-for-ffatycoon-dev
       image: corysanin/openrct2-cli:develop-ubuntu
       ports:
          - 35711:35711
@@ -24,6 +25,18 @@ services:
          - 11754:11754/udp
       volumes:
          - ./storage/server-01:/home/openrct2/.config/OpenRCT2
+      command:
+         - "host"
+         - "https://bit.do/openrct2-bpb"
+   
+   openrct2-release:
+      container_name: openrct2-for-ffatycoon-release
+      image: corysanin/openrct2-cli:latest-alpine
+      ports:
+         - 35712:35711
+         - 11754:11753
+      volumes:
+         - ./storage/server-02:/home/openrct2/.config/OpenRCT2
       command:
          - "host"
          - "https://bit.do/openrct2-bpb"
