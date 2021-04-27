@@ -36,9 +36,9 @@ class GameServer {
         return false;
     }
 
-    GetDetails = async () => {
+    GetDetails = async (force = false) => {
         let d = moment();
-        if(!this._details || d.isAfter(this._details.expiration)){
+        if(force || !this._details || d.isAfter(this._details.expiration)){
             if(this._details = await this.Execute('park')){
                 this._details.expiration = d.add(3, 'minutes');
             }

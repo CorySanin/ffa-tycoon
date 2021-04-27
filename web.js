@@ -172,6 +172,33 @@ class Web {
             );
         });
 
+        privateapp.get('/server/:index', async (req, res) => {
+            let serverindex = parseInt(req.params.index);
+            if (serverindex < this._servers.length && serverindex >= 0) {
+                let server = this._servers[serverindex];
+                await server.GetDetails(true);
+                res.render('admin/template',
+                    {
+                        page: {
+                            view: 'server',
+                            title: 'Server'
+                        },
+                        server
+                    },
+                    function (err, html) {
+                        if (!err) {
+                            res.send(html);
+                        }
+                        else {
+                            res.send(err);
+                        }
+                    });
+            }
+            else {
+                res.send('error');
+            }
+        });
+
         privateapp.get('/archive', (req, res) => {
             res.render('admin/template',
                 {

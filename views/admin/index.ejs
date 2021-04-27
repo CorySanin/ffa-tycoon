@@ -8,9 +8,9 @@
     <div class="box">
         <h2>Servers</h2>
         <% if (servers) {
-            servers.forEach(function(server){ %>
+            servers.forEach(function(server, i){ %>
             <div class="block">
-                <span class="subtitle"><%= server._name %></span>
+                <span class="subtitle"><a href="/server/<%= i %>"><%= server._name %></a></span>
                 
                 <div class="parkstats">
                     <div><span>Group:</span> <%= server._group %></div>

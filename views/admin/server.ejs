@@ -1,0 +1,59 @@
+<div class="content">
+    <h1>
+        <%= server._name %>
+    </h1>
+
+    <div class="parkstats block" id="parkstats">
+        <div><span>Group:</span>
+            <%= server._group %>
+        </div>
+        <div><span>Mode:</span>
+            <%= server._mode %>
+        </div>
+        <% if (server._details) { %>
+            <div><span>Scenario:</span>
+                <%= server._details.park.name %>
+            </div>
+            <div><span>Guests:</span>
+                <%= server._details.park.guests %>
+            </div>
+            <div><span>Rating:</span>
+                <%= server._details.park.rating %>
+            </div>
+            <div><span>Online:</span>
+                <%= server._details.network.players.length - 1 %>
+            </div>
+            <% } %>
+    </div>
+
+    <div class="block" id="users">
+        <table id="parkTable" class="table">
+            <tbody>
+                <% if (server._details) { server._details.network.players.forEach(function(player){ if (player.id !== 0) { %>
+                    <tr>
+                        <td>
+                            <%= player.name %>
+                        </td>
+                        <td>
+                            <%= player.ip %>
+                        </td>
+                        <td>
+                            <select name="group">
+                                <% server._details.network.groups.forEach(function(group){ %>
+                                    <option value="<%= group.id %>" <% if (group.id === player.group) { %>selected<% } %>><%= group.name %></option>
+                                <% }); %>
+                            </select>
+                        </td>
+                        <td>
+                            <button>Kick</button>
+                        </td>
+                    </tr>
+                <% }}); } %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="block" id="newsfeed">
+
+    </div>
+</div>
