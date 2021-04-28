@@ -29,8 +29,10 @@
     <div class="block" id="users">
         <table id="parkTable" class="table">
             <tbody>
-                <% if (server._details) { server._details.network.players.forEach(function(player){ if (player.id !== 0) { %>
-                    <tr>
+                <% if (server._details) { server._details.network.players.forEach(function(player){ if (player.id !==0)
+                    { 
+                        let d = (new Date()).getTime(); %>
+                    <tr id="row-<%= player.hash %>">
                         <td>
                             <%= player.name %>
                         </td>
@@ -38,14 +40,18 @@
                             <%= player.ip %>
                         </td>
                         <td>
-                            <select name="group">
-                                <% server._details.network.groups.forEach(function(group){ %>
-                                    <option value="<%= group.id %>" <% if (group.id === player.group) { %>selected<% } %>><%= group.name %></option>
-                                <% }); %>
-                            </select>
+                            <div class="select is-small">
+                                <select name="group-<%= player.id %>-<%= d %>" class="groupselect" id="groupselect-<%= player.hash %>">
+                                    <% server._details.network.groups.forEach(function(group){ %>
+                                        <option value="<%= group.id %>" <% if (group.id === player.group) { %>selected<% }
+                                                %>><%= group.name %>
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
                         </td>
                         <td>
-                            <button>Kick</button>
+                            <button class="kickbtn button is-small is-danger is-outlined" id="kickbtn-<%= player.hash %>">Kick</button>
                         </td>
                     </tr>
                 <% }}); } %>
@@ -57,3 +63,5 @@
 
     </div>
 </div>
+
+<script src="/assets/js/serverscreen.js?v1"></script>

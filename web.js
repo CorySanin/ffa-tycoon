@@ -304,6 +304,28 @@ class Web {
             await savegroup(req, res, false);
         });
 
+        privateapp.post('/api/server/:server/player/:player', async (req, res) => {
+            let server = parseInt(req.params.server);
+            let player = req.params.player
+            let result = {
+                status: 'bad'
+            };
+
+            if (server < this._servers.length && server >= 0) {
+                if (req.body.action === 'update') {
+                    if ((await this._servers[server].Execute(`update player ${player} ${req.body.properties.group}`)).result) {
+                        result.status = 'ok';
+                    }
+                }
+                else if(req.body.action === 'kick') {
+                    if ((await this._servers[server].Execute(`kick ${player}`)).result) {
+                        result.status = 'ok';
+                    }
+                }
+            }
+            res.send(result);
+        });
+
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
         privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
     }
