@@ -4,7 +4,10 @@ document.addEventListener("DOMContentLoaded", function () {
         return s[s.length - 1];
     }
 
-    let serverid = getServerID();
+    const serverid = getServerID();
+    
+    const sendbtn = document.getElementById('sendbtn');
+    const broadcastmsg = document.getElementById('broadcastmsg');
 
     function changePlayerGroup() {
         let hash = this.id.split('-', 2)[1];
@@ -58,6 +61,31 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function sendMessage() {
+        broadcastmsg.disabled = sendbtn.disabled = true;
+        fetch(`/api/server/${serverid}/send`, {
+            method: 'POST',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: broadcastmsg.value
+            })
+        }).then(response => response.json())
+        .then(data => {
+            if(!(broadcastmsg.disabled = sendbtn.disabled = !('status' in data && data.status === 'ok'))){
+                broadcastmsg.value = '';
+            }
+            else{
+                broadcastmsg.classList.add('is-danger');
+            }
+        }).catch(e => {
+            console.log(e);
+            broadcastmsg.classList.add('is-danger');
+        });
+    }
+
     for (const select of document.getElementsByClassName('groupselect')) {
         select.addEventListener('change', changePlayerGroup);
     }
@@ -65,4 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
     for (const select of document.getElementsByClassName('kickbtn')) {
         select.addEventListener('click', kickPlayer);
     }
+
+    sendbtn.addEventListener('click', sendMessage);
 });

@@ -26,6 +26,11 @@
             <% } %>
     </div>
 
+    <div class="block sendform" id="broadcast">
+        <input id="broadcastmsg" class="input" type="text" placeholder="Broadcast Message">
+        <button id="sendbtn" class="button is-primary is-outlined">Send</button>
+    </div>
+
     <div class="block" id="users">
         <table id="parkTable" class="table">
             <tbody>
@@ -50,7 +55,7 @@
                                 </select>
                             </div>
                         </td>
-                        <td>
+                        <td class="align-right">
                             <button class="kickbtn button is-small is-danger is-outlined" id="kickbtn-<%= player.hash %>">Kick</button>
                         </td>
                     </tr>

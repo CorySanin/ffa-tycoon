@@ -44,6 +44,11 @@ let WaitForFile = (filename, timeout = 3000) => {
 
 let DownloadImage = async (url, options, directory, name) => {
     let img = await fetch(url, options);
+
+    if(!img.ok){
+        return null;
+    }
+
     let filename = `${name}.png`;
     let filepath = path.join(directory, filename);
 

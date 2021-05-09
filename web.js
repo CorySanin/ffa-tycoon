@@ -190,12 +190,12 @@ class Web {
                             res.send(html);
                         }
                         else {
-                            res.send(err);
+                            res.status(500).send(err);
                         }
                     });
             }
             else {
-                res.send('error');
+                res.status(400).send('error');
             }
         });
 
@@ -212,7 +212,7 @@ class Web {
                         res.send(html);
                     }
                     else {
-                        res.send(err);
+                        res.status(500).send(err);
                     }
                 });
         });
@@ -244,9 +244,11 @@ class Web {
             let result = {
                 status: 'bad'
             };
+            let status = 400;
             if (!ispublic || this.CheckTotp(req)) {
                 let datestring = moment().format('YYYY-MM-DD_HH-mm-ss');
                 result.status = 'ok';
+                status = 200;
 
                 const serversingroup = this._servers.filter(server => server._group == group);
 
@@ -261,6 +263,7 @@ class Web {
                             || !!(await fsp.mkdir(archivepath))
                             || !(await server.SavePark(parksave))) {
                             result.status = 'bad';
+                            status = 500;
                         }
                         else {
 
@@ -290,18 +293,36 @@ class Web {
                     catch (ex) {
                         console.log(`Error saving ${server.name}`, ex);
                         result.status = 'bad';
+                        status = 500;
                     }
                 }
             }
-            res.send(result);
+            res.status(status).send(result);
         };
 
-        app.get('/api/save/group/:group', async (req, res) => {
+        app.get('/api/group/save/:group', async (req, res) => {
             await savegroup(req, res, true);
         });
 
-        privateapp.get('/api/save/group/:group', async (req, res) => {
+        privateapp.get('/api/group/save/:group', async (req, res) => {
             await savegroup(req, res, false);
+        });
+
+        privateapp.post('/api/server/:server/send', async (req, res) => {
+            let server = parseInt(req.params.server);
+            let message = req.body.message;
+            let result = {
+                status: 'bad'
+            };
+            let status = 400;
+
+            if (server < this._servers.length && server >= 0 && message) {
+                if ((await this._servers[server].Execute(`say ${message}`)).result) {
+                    result.status = 'ok';
+                    status = 200;
+                }
+            }
+            res.status(status).send(result);
         });
 
         privateapp.post('/api/server/:server/player/:player', async (req, res) => {
@@ -310,20 +331,23 @@ class Web {
             let result = {
                 status: 'bad'
             };
+            let status = 400;
 
             if (server < this._servers.length && server >= 0) {
                 if (req.body.action === 'update') {
                     if ((await this._servers[server].Execute(`update player ${player} ${req.body.properties.group}`)).result) {
                         result.status = 'ok';
+                        status = 200;
                     }
                 }
-                else if(req.body.action === 'kick') {
+                else if (req.body.action === 'kick') {
                     if ((await this._servers[server].Execute(`kick ${player}`)).result) {
                         result.status = 'ok';
+                        status = 200;
                     }
                 }
             }
-            res.send(result);
+            res.status(status).send(result);
         });
 
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));

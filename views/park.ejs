@@ -12,11 +12,13 @@
             </p>
             <a href="/archive/<%= park.dir %>/park.sv6" class="button is-primary">Download</a>
         </div>
+        <% if (park.thumbnail || park.largeimg) { %>
         <div class="column is-two-thirds-widescreen">
-            <a href="/archive/<%= park.dir %>/fullsize.png">
-                <img src="/archive/<%= park.dir %>/thumbnail.png" />
+            <a href="/archive/<%= park.dir %>/<%= park.largeimg || park.thumbnail %>">
+                <img src="/archive/<%= park.dir %>/<%= park.thumbnail || park.largeimg %>" />
             </a>
         </div>
+        <% } %>
     </div>
 </div>
 <script src="/assets/js/park.js?v1"></script>
