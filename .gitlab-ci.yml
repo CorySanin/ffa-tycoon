@@ -11,5 +11,5 @@ stages:
 build:
     stage: build
     script:
-        - docker build -t registry.gitlab.com/corysanin/ffa-tycoon .
-        - if [ ! -z ${DOCKER_PASSWORD+x} ]; then echo "$DOCKER_PASSWORD" | docker login registry.gitlab.com -u "$DOCKER_USERNAME" --password-stdin; docker push "registry.gitlab.com/corysanin/ffa-tycoon"; fi
+        - docker build -t "$CI_REGISTRY/corysanin/ffa-tycoon" .
+        - if [ ! -z ${PROTECTEDBRANCH+x} ]; then docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY; docker push "$CI_REGISTRY/corysanin/ffa-tycoon"; fi
