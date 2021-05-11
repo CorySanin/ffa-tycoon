@@ -5,6 +5,20 @@ const fsp = fs.promises;
 const moment = require('moment');
 const FileMan = require('./fileMan');
 const REMOTEPORT = 35711;
+const mv = require('mv');
+
+async function mvPromise(src, dest) {
+    return new Promise((resolve, reject) => {
+        mv(src, dest, err => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
 
 class GameServer {
     constructor(server = {}) {
@@ -26,7 +40,7 @@ class GameServer {
         await this.Execute(`save ${filename}`);
         try {
             if (await FileMan.WaitForFile(fullName)) {
-                await fsp.rename(fullName, destination);
+                await mvPromise(fullName, destination);
                 return true;
             }
         }
@@ -38,8 +52,8 @@ class GameServer {
 
     GetDetails = async (force = false) => {
         let d = moment();
-        if(force || !this._details || d.isAfter(this._details.expiration)){
-            if(this._details = await this.Execute('park')){
+        if (force || !this._details || d.isAfter(this._details.expiration)) {
+            if (this._details = await this.Execute('park')) {
                 this._details.expiration = d.add(3, 'minutes');
             }
         }

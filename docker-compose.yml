@@ -31,7 +31,7 @@ services:
    
    openrct2-release:
       container_name: openrct2-for-ffatycoon-release
-      image: corysanin/openrct2-cli:latest-alpine
+      image: corysanin/openrct2-cli:latest-ubuntu
       ports:
          - 35712:35711
          - 11754:11753
