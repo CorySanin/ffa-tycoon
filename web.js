@@ -43,10 +43,19 @@ class Web {
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
+        this._parktypes = [];
 
         (options.servers || []).forEach(serverinfo => {
             this._servers.push(new GameServer(serverinfo));
         });
+
+        fsp.readdir(path.join(__dirname, 'parks'), { withFileTypes: true }).then(files => {
+            for (const file of files) {
+                if (file.isDirectory()) {
+                    this._parktypes.push(file.name);
+                }
+            }
+        }).catch(err => console.log(err));
 
         app.set('trust proxy', 1);
         app.set('view engine', 'ejs');
@@ -218,6 +227,25 @@ class Web {
         });
 
         //#endregion
+
+        app.get('/parks/:type/?', async (req, res) => {
+            let type = req.params.type;
+            if (this._parktypes.includes(type)) {
+                let dir = path.join(__dirname, 'parks', type);
+                let files = await fsp.readdir(dir);
+                let file = files[Math.floor(Math.random() * files.length)];
+                res.set('Content-Disposition', `attachment; filename="${file}"`);
+                res.sendFile(path.join(dir, file), (err) => {
+                    if (err) {
+                        res.status(500).send('500 server error');
+                        console.log(`Error sending park file: ${err}`);
+                    }
+                });
+            }
+            else {
+                res.status(404).send('404');
+            }
+        });
 
         app.get('/api/parks/count', (req, res) => {
             res.send(this.InjectStatus(this._db.GetParkCount(), 'good'));

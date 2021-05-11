@@ -27,7 +27,7 @@ services:
          - ./storage/server-01:/home/openrct2/.config/OpenRCT2
       command:
          - "host"
-         - "https://bit.do/openrct2-bpb"
+         - "https://ffa-tycoon.com/parks/sandbox"
    
    openrct2-release:
       container_name: openrct2-for-ffatycoon-release
@@ -39,7 +39,7 @@ services:
          - ./storage/server-02:/home/openrct2/.config/OpenRCT2
       command:
          - "host"
-         - "https://bit.do/openrct2-bpb"
+         - "https://ffa-tycoon.com/parks/sandbox"
    
    screenshotter:
       container_name: screenshotter-for-ffatycoon
