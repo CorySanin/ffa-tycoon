@@ -5,9 +5,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const serverid = getServerID();
-    
+
     const sendbtn = document.getElementById('sendbtn');
     const broadcastmsg = document.getElementById('broadcastmsg');
+    const archivebtn = document.getElementById('archivebtn');
+    const stopbtn = document.getElementById('stopbtn');
 
     function changePlayerGroup() {
         let hash = this.id.split('-', 2)[1];
@@ -26,16 +28,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             })
         }).then(response => response.json())
-        .then(data => {
-            if('status' in data && data.status === 'ok'){
-                this.disabled = false;
-            }
-            else{
+            .then(data => {
+                if ('status' in data && data.status === 'ok') {
+                    this.disabled = false;
+                }
+                else {
+                    this.parentElement.classList.add('is-danger');
+                }
+            }).catch(e => {
                 this.parentElement.classList.add('is-danger');
-            }
-        }).catch(e => {
-            this.parentElement.classList.add('is-danger');
-        });
+            });
     }
 
     function kickPlayer() {
@@ -51,14 +53,14 @@ document.addEventListener("DOMContentLoaded", function () {
                 action: 'kick'
             })
         }).then(response => response.json())
-        .then(data => {
-            if('status' in data && data.status === 'ok'){
-                let row = document.getElementById(`row-${hash}`);
-                row.parentElement.removeChild(row);
-            }
-        }).catch(e => {
-            console.log(e);
-        });
+            .then(data => {
+                if ('status' in data && data.status === 'ok') {
+                    let row = document.getElementById(`row-${hash}`);
+                    row.parentElement.removeChild(row);
+                }
+            }).catch(e => {
+                console.log(e);
+            });
     }
 
     function sendMessage() {
@@ -73,26 +75,64 @@ document.addEventListener("DOMContentLoaded", function () {
                 message: broadcastmsg.value
             })
         }).then(response => response.json())
-        .then(data => {
-            if(!(broadcastmsg.disabled = sendbtn.disabled = !('status' in data && data.status === 'ok'))){
-                broadcastmsg.value = '';
-            }
-            else{
+            .then(data => {
+                if (!(broadcastmsg.disabled = sendbtn.disabled = !('status' in data && data.status === 'ok'))) {
+                    broadcastmsg.value = '';
+                }
+                else {
+                    broadcastmsg.classList.add('is-danger');
+                }
+            }).catch(e => {
+                console.log(e);
                 broadcastmsg.classList.add('is-danger');
-            }
-        }).catch(e => {
-            console.log(e);
-            broadcastmsg.classList.add('is-danger');
-        });
+            });
     }
 
     for (const select of document.getElementsByClassName('groupselect')) {
         select.addEventListener('change', changePlayerGroup);
     }
-    
+
     for (const select of document.getElementsByClassName('kickbtn')) {
         select.addEventListener('click', kickPlayer);
     }
 
     sendbtn.addEventListener('click', sendMessage);
+    archivebtn.addEventListener('click', () => {
+        archivebtn.disabled = true;
+        archivebtn.classList.remove('is-primary', 'is-danger');
+        fetch(`/api/server/${serverid}/save`, {
+            method: 'GET',
+            cache: 'no-cache'
+        }).then(response => response.json())
+            .then(data => {
+                if ((archivebtn.disabled = !('status' in data && data.status === 'ok'))) {
+                    archivebtn.classList.add('is-danger');
+                }
+                else{
+                    archivebtn.classList.add('is-primary');
+                }
+            }).catch(e => {
+                console.log(e);
+                archivebtn.classList.add('is-danger');
+            });
+    });
+    stopbtn.addEventListener('click', () => {
+        stopbtn.disabled = true;
+        stopbtn.classList.remove('is-primary', 'is-danger');
+        fetch(`/api/server/${serverid}/stop`, {
+            method: 'GET',
+            cache: 'no-cache'
+        }).then(response => response.json())
+            .then(data => {
+                if ((stopbtn.disabled = !('status' in data && data.status === 'ok'))) {
+                    stopbtn.classList.add('is-danger');
+                }
+                else{
+                    stopbtn.classList.add('is-primary');
+                }
+            }).catch(e => {
+                console.log(e);
+                stopbtn.classList.add('is-danger');
+            });
+    });
 });

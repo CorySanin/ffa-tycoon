@@ -239,8 +239,7 @@ class Web {
             res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.id) || 0), 'good'));
         });
 
-        let savegroup = async (req, res, ispublic = true) => {
-            let group = req.params.group;
+        let saveServers = async (req, res, servers, ispublic = true) => {
             let result = {
                 status: 'bad'
             };
@@ -250,10 +249,8 @@ class Web {
                 result.status = 'ok';
                 status = 200;
 
-                const serversingroup = this._servers.filter(server => server._group == group);
-
-                for (const serverindx in serversingroup) {
-                    const server = serversingroup[serverindx];
+                for (const serverindx in servers) {
+                    const server = servers[serverindx];
                     try {
                         let dirname = `${datestring}_${server._name}`;
                         let archivepath = path.join(this._archive, dirname);
@@ -301,11 +298,119 @@ class Web {
         };
 
         app.get('/api/group/save/:group', async (req, res) => {
-            await savegroup(req, res, true);
+            await saveServers(req, res, this._servers.filter(server => server._group == req.params.group), true);
         });
 
         privateapp.get('/api/group/save/:group', async (req, res) => {
-            await savegroup(req, res, false);
+            await saveServers(req, res, this._servers.filter(server => server._group == req.params.group), false);
+        });
+
+        privateapp.get('/api/group/:group/save', async (req, res) => {
+            await saveServers(req, res, this._servers.filter(server => server._group == req.params.group), false);
+        });
+
+        privateapp.get('/api/server/:server/save', async (req, res) => {
+            let servernum = parseInt(req.params.server);
+            if (servernum >= 0 && servernum < this._servers.length) {
+                await saveServers(req, res, [this._servers[servernum]], false);
+            }
+            else {
+                res.status(400).send({
+                    status: 'bad'
+                });
+            }
+        });
+
+        privateapp.get('/api/group/:group/stop', async (req, res) => {
+            const servers = this._servers.filter(server => server._group == req.params.group);
+            let result = {
+                status: 'ok'
+            };
+            let status = 200;
+            if (servers.length > 0) {
+                for (const serverindx in servers) {
+                    const server = servers[serverindx];
+                    try {
+                        server.Execute('stop');
+                    }
+                    catch (ex) {
+                        console.log(`Error stopping server: ${ex}`);
+                        result = {
+                            status: 'bad'
+                        };
+                        status = 500;
+                    }
+                }
+            }
+            else {
+                result = {
+                    status: 'bad'
+                };
+                status = 400;
+            }
+            res.status(status).send(result);
+        });
+
+        privateapp.get('/api/server/:server/stop', async (req, res) => {
+            let servernum = parseInt(req.params.server);
+            let result = {
+                status: 'ok'
+            };
+            let status = 200;
+            if (servernum >= 0 && servernum < this._servers.length) {
+                const server = this._servers[servernum];
+                try {
+                    server.Execute('stop');
+                }
+                catch (ex) {
+                    console.log(`Error stopping server: ${ex}`);
+                    result = {
+                        status: 'bad'
+                    };
+                    status = 500;
+                }
+            }
+            else {
+                result = {
+                    status: 'bad'
+                };
+                status = 400;
+            }
+            res.status(status).send(result);
+        });
+
+        privateapp.post('/api/group/:group/send', async (req, res) => {
+            const message = req.body.message;
+            const servers = this._servers.filter(server => server._group == req.params.group);
+            let result = {
+                status: 'ok'
+            };
+            let status = 200;
+            if (servers.length > 0) {
+                for (const serverindx in servers) {
+                    const server = servers[serverindx];
+                    try {
+                        if (!(await this._servers[server].Execute(`say ${message}`)).result) {
+                            result.status = 'bad';
+                            status = 500;
+                        }
+                    }
+                    catch (ex) {
+                        console.log(`Error sending messages: ${ex}`);
+                        result = {
+                            status: 'bad'
+                        };
+                        status = 500;
+                    }
+                }
+            }
+            else {
+                result = {
+                    status: 'bad'
+                };
+                status = 400;
+            }
+            res.status(status).send(result);
         });
 
         privateapp.post('/api/server/:server/send', async (req, res) => {
