@@ -13,13 +13,23 @@
                 <span class="subtitle"><%= server._name %></span>
                 
                 <div class="parkstats">
-                    <div><span>Group:</span> <%= server._group %></div>
-                    <div><span>Mode:</span> <%= server._mode %></div>
+                    <div><span class="property">Group:</span> <%= server._group %></div>
+                    <div><span class="property">Mode:</span> <%= server._mode %></div>
                     <% if (server._details) { %>
-                    <div><span>Scenario:</span> <%= server._details.park.name %></div>
-                    <div><span>Guests:</span> <%= server._details.park.guests %></div>
-                    <div><span>Rating:</span> <%= server._details.park.rating %></div>
-                    <div><span>Online:</span> <%= server._details.network.players.length - 1 %></div>
+                    <div><span class="property">Scenario:</span> <%= server._details.park.name %></div>
+                    <div><span class="property">Guests:</span> <%= server._details.park.guests %></div>
+                    <div><span class="property">Rating:</span> <span class="<%
+                        if(server._details.park.rating >= 550){
+                            echo('is-success');
+                        }
+                        else if (server._details.park.rating > 350){
+                            echo('is-warning');
+                        }
+                        else{
+                            echo('is-danger');
+                        }
+                        %>"><%= server._details.park.rating %></span></div>
+                    <div><span class="property">Online:</span> <%= server._details.network.players.length - 1 %></div>
                     <% } %>
                 </div>
             </div>

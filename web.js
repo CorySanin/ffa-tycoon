@@ -12,6 +12,9 @@ const GameServer = require('./gameserver');
 const FileMan = require('./fileMan');
 
 const CSPNONCE = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const VIEWOPTIONS = {
+    outputFunctionName: 'echo'
+};
 
 const exists = async (filename) => {
     try {
@@ -59,6 +62,7 @@ class Web {
 
         app.set('trust proxy', 1);
         app.set('view engine', 'ejs');
+        app.set('view options', VIEWOPTIONS);
         app.use(Helmet());
         app.use(bodyParser.urlencoded({ extended: true }));
         app.use(bodyParser.json());
@@ -67,6 +71,7 @@ class Web {
 
         privateapp.set('trust proxy', 1);
         privateapp.set('view engine', 'ejs');
+        privateapp.set('view options', VIEWOPTIONS);
         privateapp.use(Helmet());
         privateapp.use(bodyParser.urlencoded({ extended: true }));
         privateapp.use(bodyParser.json());

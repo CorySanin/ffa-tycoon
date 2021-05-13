@@ -23,6 +23,11 @@ body {
     box-sizing: inherit;
 }
 
+[role="doc-subtitle"] {
+    font-style: italic;
+    font-size: 1.25em;
+}
+
 .parkstats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 15fr));
@@ -30,7 +35,7 @@ body {
     row-gap: 0.5em;
     align-items: center;
 
-    > div span {
+    > div span.property {
         font-weight: bold;
     }
 }
