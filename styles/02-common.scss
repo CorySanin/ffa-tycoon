@@ -28,6 +28,19 @@ body {
     font-size: 1.25em;
 }
 
+footer > .box {
+    padding: 0;
+
+    a {
+        padding: .5rem 1.25rem;
+        border-radius: 6px;
+
+        &:hover{
+            text-decoration: underline;
+        }
+    }
+}
+
 .parkstats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 15fr));
