@@ -272,10 +272,10 @@ class Web {
             res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.id) || 0), 'good'));
         });
 
-        let getMissingImages = async (fullsize) => {
+        let getMissingImage = async (fullsize) => {
             let filename = fullsize ? 'fullsize' : 'thumbnail';
             let zoom = fullsize ? 0 : 3;
-            let park = db.getMissingImages(fullsize);
+            let park = db.getMissingImage(fullsize);
 
             if (park) {
                 let dirname = park.dir;
@@ -506,7 +506,7 @@ class Web {
 
         let imagetype = true;
         setInterval(() => {
-            getMissingImages(imagetype = !imagetype);
+            getMissingImage(imagetype = !imagetype);
         }, 5 * 60 * 1000);
 
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
