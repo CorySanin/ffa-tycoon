@@ -133,7 +133,7 @@ class Web {
                 {
                     page: {
                         view: 'park',
-                        title: ``
+                        title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
                     },
                     park
                 },
