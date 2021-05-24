@@ -19,7 +19,13 @@ class DB {
             ADDPARK: db.prepare(`INSERT INTO ${TABLE} (name,groupname,gamemode,date,scenario,dir,thumbnail,largeimg) VALUES (@name, @group, @gamemode, @date, @scenario, @dir, @thumbnail, @largeimg);`),
             GETPARKS: {},
             GETPARKCount: db.prepare(`SELECT COUNT(*) as count FROM ${TABLE}`),
-            GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`)
+            GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`),
+            IMAGES: {
+                GETMISSINGTHUMBNAIL: db.prepare(`SELECT * FROM ${TABLE} WHERE thumbnail IS NULL LIMIT 1;`),
+                GETMISSINGIMAGE: db.prepare(`SELECT * FROM ${TABLE} WHERE largeimg IS NULL LIMIT 1;`),
+                REPLACETHUMBNAIL: db.prepare(`UPDATE ${TABLE} SET thumbnail = @thumbnail WHERE id = @id;`),
+                REPLACEIMAGE: db.prepare(`UPDATE ${TABLE} SET largeimg = @largeimg WHERE id = @id;`),
+            }
         };
 
         ['name', 'groupname', 'gamemode', 'date', 'scenario'].forEach(col => {
@@ -39,7 +45,7 @@ class DB {
     }
 
     GetParks(page = 1, orderby = 'date', order = false) {
-        return this._queries.GETPARKS[orderby][order? 'ASC' : 'DESC'].all({
+        return this._queries.GETPARKS[orderby][order ? 'ASC' : 'DESC'].all({
             offset: (page - 1) * ITEMSPERPAGE
         });
     }
@@ -53,6 +59,18 @@ class DB {
     GetPark(id = -1) {
         return this._queries.GETPARK.get({
             id
+        });
+    }
+
+    getMissingImage(fullsize = true) {
+        return (fullsize ? this._queries.IMAGES.GETMISSINGIMAGE : this._queries.IMAGES.GETMISSINGTHUMBNAIL).get();
+    }
+
+    ReplaceImage(fullsize = true, id, filename) {
+        return (fullsize ? this._queries.IMAGES.REPLACEIMAGE : this._queries.IMAGES.REPLACETHUMBNAIL).run({
+            id,
+            thumbnail: filename,
+            largeimg: filename
         });
     }
 }

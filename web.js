@@ -272,6 +272,22 @@ class Web {
             res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.id) || 0), 'good'));
         });
 
+        let getMissingImages = async (fullsize) => {
+            let filename = fullsize ? 'fullsize' : 'thumbnail';
+            let zoom = fullsize ? 0 : 3;
+            let park = db.getMissingImages(fullsize);
+
+            if (park) {
+                let dirname = park.dir;
+                let archivepath = path.join(this._archive, dirname);
+                let parksave = path.join(archivepath, 'park.sv6');
+                let image = await FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=${zoom}`, parksave, archivepath, filename);
+                if (image) {
+                    db.ReplaceImage(fullsize, park.id, image);
+                }
+            }
+        }
+
         let saveServers = async (req, res, servers, ispublic = true) => {
             let result = {
                 status: 'bad'
@@ -300,7 +316,7 @@ class Web {
                             let thumbnail, largeimg;
                             try {
                                 let values = await Promise.all([
-                                    FileMan.DownloadPark(`http://${this._screenshotter}/upload`, parksave, archivepath, 'thumbnail'),
+                                    FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=3`, parksave, archivepath, 'thumbnail'),
                                     FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=0`, parksave, archivepath, 'fullsize'),
                                 ]);
                                 thumbnail = values[0];
@@ -487,6 +503,11 @@ class Web {
             }
             res.status(status).send(result);
         });
+
+        let imagetype = true;
+        setInterval(() => {
+            getMissingImages(imagetype = !imagetype);
+        }, 5 * 60 * 1000);
 
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
         privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
