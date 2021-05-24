@@ -1,3 +1,101 @@
 <div class="content">
-    Guide coming soon.
+    <div class="box">
+        <h1>How To Set Up An OpenRCT2 Server</h1>
+        <p role="doc-subtitle">Get a multiplayer server up and running like a pro!</p>
+        <p>
+            This guide assumes a typical network configuration. You may need to diverge from these steps to fit your
+            needs.
+        </p>
+        <p>
+            What you'll need:
+        <ul>
+            <li>A working OpenRCT2 installation</li>
+            <li>An internet connection</li>
+        </ul>
+        </p>
+    </div>
+    <div class="box" id="localip">
+        <p>
+            First, you'll need to find your local IP address.
+            Open up Command Prompt in Windows or the Terminal if you're running Mac OS or Linux.
+        <ul>
+            <li>In Windows, type <code>ipconfig</code> and press enter</li>
+            <li>For Mac OS, type <code>ifconfig</code> and press enter</li>
+            <li>In Linux, it'll either be <code>ifconfig</code> or <code>ip addr</code>, depending on your distro</li>
+        </ul>
+        </p>
+
+        <div>
+            <img src="/assets/images/guide/ipconfig_example.png"
+                alt="Local IP address and default gateway displayed by ipconfig" />
+        </div>
+
+        <p>
+            You'll now see a list of all your network adapters and their associated addresses.
+            Look for an ethernet adapter if your connection is wired or wireless LAN if you're on WiFi.
+            For the Unix folk out there, that's "eth" and "wlan" respectively.
+            Make note of your IP address. It'll be 4 groups of numbers, separated by decimals.
+            It's common for local IP addresses to start with <code>192.168...</code>, but that's not always the
+            case.<br />
+            If you're on Windows, also make a note of your default gateway and go down next section.
+            On all other platforms, do <code>netstat -rn</code>. The default gateway will be in the first row in the
+            "Gateway"
+            column.
+        </p>
+    </div>
+    <div class="box" id="portforwarding">
+        <p>
+            Now that you have your local IP and your default gateway, the next step is to port forward.
+            Open your web browser and type <code>http://</code> and then your default gateway into your address bar.
+            For example, if your default gateway is <code>192.168.1.1</code>, go type in <code>http://192.168.1.1</code>
+            and press enter.
+            This will bring you to your router's configuration page.
+        </p>
+
+        <div>
+            <img src="/assets/images/guide/routerlogin.png"
+                alt="An example router login screen" />
+        </div>
+
+        <p>
+            Unless the username or password has been changed by someone in your household,
+            you'll need to look up what the default credentials are online as they vary with make and model.
+            A simple search of "{brand name} router default login" should turn up some results.
+            You may have to try more than one.
+            Note: the password on this screen is NOT the same as your WiFi password.
+        </p>
+        <p>
+            Next you'll need to find where port forwarding rules are set in your router's configuration site.
+            Unfortunately, this also varies quite a bit between brands.
+            It shouldn't be too difficult to locate, but if you're stumped, do another web search.
+        </p>
+        <p>
+            Once on the page, you'll need to add a rule to forward port 11753 to your local IP address.
+            If it has two fields for port numbers (such as inbound & local), use the same port number for both.
+            And the protocol is TCP. Look for a "save" or "apply" button and click it.
+            In theory, the port should be open now!
+        </p>
+    </div>
+
+    <div class="box" id="startserver">
+        <p>
+            Finally it is time to start the server! In OpenRCT2's server browser, click "Start Server".
+            Verify that port is 11753 and set the server name to something unique so you can tell it apart on the browser.
+            Select "Advertise" if you want it to appear on the server browser.
+            Otherwise your server is only accessible by direct connection to your <a href="https://ip.me/">public IP address</a>.
+            Lastly, choose to start a new game or load from a scenario.
+        </p>
+        <p>
+            At this point, your server should be live and available to anyone.
+            To verify, you can check port 11753 on <a href="https://canyouseeme.org/">canyouseeme.org</a>.
+            If it says that it can't see a service on that port, you may have port forwarded incorrectly or the server isn't running.
+            If the check succeeds, congratulations! Your server is live!
+            If you selected the "Advertise" option, you can check the <a href="https://servers.openrct2.io/">server list</a> for your server.
+        </p>
+
+        <div>
+            <img src="/assets/images/guide/canyouseeme.png"
+                alt="This is what success on canyouseeme.org looks like" />
+        </div>
+    </div>
 </div>
