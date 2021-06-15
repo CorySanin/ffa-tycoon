@@ -20,6 +20,7 @@ class DB {
             GETPARKS: {},
             GETPARKCount: db.prepare(`SELECT COUNT(*) as count FROM ${TABLE}`),
             GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`),
+            DELETEPARK: db.prepare(`DELETE FROM ${TABLE} WHERE id = @id;`),
             IMAGES: {
                 GETMISSINGTHUMBNAIL: db.prepare(`SELECT * FROM ${TABLE} WHERE thumbnail IS NULL LIMIT 1;`),
                 GETMISSINGIMAGE: db.prepare(`SELECT * FROM ${TABLE} WHERE largeimg IS NULL LIMIT 1;`),
@@ -77,6 +78,10 @@ class DB {
 
     RemoveImages(id) {
         return this._queries.IMAGES.REMOVEIMAGES.run({id});
+    }
+
+    DeletePark(id) {
+        return this._queries.DELETEPARK.run({id});
     }
 }
 

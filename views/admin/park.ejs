@@ -11,10 +11,11 @@
                 <%= park.scenario %> - <%= park.groupname %> - <%= park.gamemode %>
             </p>
             <a href="/archive/<%= park.dir %>/park.sv6" class="button is-primary">Download</a>
+            <button id="deletebtn" class="button">Delete</button>
             <form action="/api/park/<%= park.id %>/">
                 <div class="fileupload">
                     <label for="parkfile" class="input">No file selected</label>
-                    <label for="parkfile" class="button is-primary is-light">Select File</label>
+                    <label for="parkfile" class="button">Select File</label>
                     <input class="fileinput" type="file" name="parkfile" id="parkfile" />
                     <button class="button is-primary" disabled type="button">Upload</button>
                 </div>
@@ -30,4 +31,4 @@
     </div>
 </div>
 <script src="/assets/js/park.js?v1"></script>
-<script src="/assets/js/park-upload.js?v1"></script>
+<script src="/assets/js/park-admin.js?v1"></script>

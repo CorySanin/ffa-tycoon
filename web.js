@@ -134,22 +134,27 @@ class Web {
 
         app.get('/park/:park', (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
-            res.render('template',
-                {
-                    page: {
-                        view: 'park',
-                        title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+            if (park) {
+                res.render('template',
+                    {
+                        page: {
+                            view: 'park',
+                            title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+                        },
+                        park
                     },
-                    park
-                },
-                function (err, html) {
-                    if (!err) {
-                        res.send(html);
-                    }
-                    else {
-                        res.send(err);
-                    }
-                });
+                    function (err, html) {
+                        if (!err) {
+                            res.send(html);
+                        }
+                        else {
+                            res.send(err);
+                        }
+                    });
+            }
+            else {
+                res.status(404).send('404');
+            }
         });
 
         app.get('/guide', (req, res) => {
@@ -248,22 +253,27 @@ class Web {
 
         privateapp.get('/park/:park', (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
-            res.render('admin/template',
-                {
-                    page: {
-                        view: 'park',
-                        title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+            if (park) {
+                res.render('admin/template',
+                    {
+                        page: {
+                            view: 'park',
+                            title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+                        },
+                        park
                     },
-                    park
-                },
-                function (err, html) {
-                    if (!err) {
-                        res.send(html);
-                    }
-                    else {
-                        res.send(err);
-                    }
-                });
+                    function (err, html) {
+                        if (!err) {
+                            res.send(html);
+                        }
+                        else {
+                            res.send(err);
+                        }
+                    });
+            }
+            else {
+                res.status(404).send('404');
+            }
         });
 
         //#endregion
@@ -545,6 +555,28 @@ class Web {
                         status: 'ok'
                     });
                 }
+            }
+            catch (ex) {
+                console.log(ex);
+                res.status(500).send({
+                    status: 'bad'
+                });
+            }
+        });
+
+        privateapp.delete('/api/park/:park/?', async (req, res) => {
+            try {
+                let parkentry = db.GetPark(parseInt(req.params.park));
+                await (fsp.rm || fsp.rmdir)(path.join(this._archive, parkentry.dir), {
+                    force: true,
+                    maxRetries: 4,
+                    recursive: true
+                });
+                db.DeletePark(parseInt(parkentry.id));
+
+                res.send({
+                    status: 'ok'
+                });
             }
             catch (ex) {
                 console.log(ex);
