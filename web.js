@@ -1,4 +1,5 @@
 const express = require('express');
+const fileUpload = require('express-fileupload');
 const Helmet = require('helmet');
 const bodyParser = require('body-parser');
 const TOTP = require('otpauth').TOTP;
@@ -66,8 +67,6 @@ class Web {
         app.use(Helmet());
         app.use(bodyParser.urlencoded({ extended: true }));
         app.use(bodyParser.json());
-        app.use('/assets/', express.static('assets'));
-        app.use('/archive/', express.static(this._archive));
 
         privateapp.set('trust proxy', 1);
         privateapp.set('view engine', 'ejs');
@@ -75,7 +74,13 @@ class Web {
         privateapp.use(Helmet());
         privateapp.use(bodyParser.urlencoded({ extended: true }));
         privateapp.use(bodyParser.json());
-        privateapp.use('/assets/', express.static('assets'));
+        privateapp.use(fileUpload({
+            createParentPath: true,
+            abortOnLimit: true,
+            limits: {
+                fileSize: 100 * 1024 * 1024
+            }
+        }));
 
         //#region web endpoints
 
@@ -166,7 +171,7 @@ class Web {
         });
 
         privateapp.get('/', async (req, res) => {
-            await Promise.all(this._servers.map(s => s.GetDetails()));
+            await Promise.all(this._servers.map(s => s.GetDetails(true)));
             res.render('admin/template',
                 {
                     page: {
@@ -213,20 +218,50 @@ class Web {
             }
         });
 
-        privateapp.get('/archive', (req, res) => {
+        privateapp.get('/archive/:page?', (req, res) => {
+            let page = Math.max(parseInt(req.params.page) || 1, 1);
+            let order = {
+                orderby: req.query.sort || req.query.orderby,
+                order: (req.query.asc || req.query.order) === 'ASC'
+            };
+            let nonce = genNonceForCSP();
             res.render('admin/template',
                 {
                     page: {
                         view: 'archive',
-                        title: 'Home'
+                        title: 'Previous Parks'
+                    },
+                    order,
+                    pagenum: page,
+                    nonce
+                },
+                function (err, html) {
+                    if (!err) {
+                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${nonce}'`)
+                        res.send(html);
                     }
+                    else {
+                        res.send(err);
+                    }
+                });
+        });
+
+        privateapp.get('/park/:park', (req, res) => {
+            let park = db.GetPark(parseInt(req.params.park));
+            res.render('admin/template',
+                {
+                    page: {
+                        view: 'park',
+                        title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+                    },
+                    park
                 },
                 function (err, html) {
                     if (!err) {
                         res.send(html);
                     }
                     else {
-                        res.status(500).send(err);
+                        res.send(err);
                     }
                 });
         });
@@ -268,8 +303,8 @@ class Web {
             });
         });
 
-        app.get('/api/park/:id', (req, res) => {
-            res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.id) || 0), 'good'));
+        app.get('/api/park/:park', (req, res) => {
+            res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.park) || 0), 'good'));
         });
 
         let getMissingImage = async (fullsize) => {
@@ -312,27 +347,12 @@ class Web {
                             status = 500;
                         }
                         else {
-
-                            let thumbnail, largeimg;
-                            try {
-                                let values = await Promise.all([
-                                    FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=3`, parksave, archivepath, 'thumbnail'),
-                                    FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=0`, parksave, archivepath, 'fullsize'),
-                                ]);
-                                thumbnail = values[0];
-                                largeimg = values[1];
-                            }
-                            catch (ex) {
-                                console.log('Problem downloading thumbnail', ex);
-                            }
                             this._db.AddPark({
                                 name: server._name,
                                 group: server._group,
                                 gamemode: server._mode,
                                 scenario: (await server.GetDetails()).park.name,
-                                dir: dirname,
-                                thumbnail,
-                                largeimg
+                                dir: dirname
                             });
                         }
                     }
@@ -504,10 +524,45 @@ class Web {
             res.status(status).send(result);
         });
 
+        privateapp.put('/api/park/:park/?', async (req, res) => {
+            try {
+                let parkentry = db.GetPark(parseInt(req.params.park));
+
+                if (!parkentry || !req.files || !req.files.park) {
+                    res.status(400).send({
+                        status: 'bad'
+                    });
+                }
+                else {
+                    let park = req.files.park;
+                    let filename = path.join(this._archive, parkentry.dir, 'park.sv6');
+                    await fsp.unlink(filename);
+                    await park.mv(filename);
+
+                    db.RemoveImages(parkentry.id);
+
+                    res.send({
+                        status: 'ok'
+                    });
+                }
+            }
+            catch (ex) {
+                console.log(ex);
+                res.status(500).send({
+                    status: 'bad'
+                });
+            }
+        });
+
         let imagetype = true;
         setInterval(() => {
             getMissingImage(imagetype = !imagetype);
         }, 5 * 60 * 1000);
+
+        app.use('/assets/', express.static('assets'));
+        app.use('/archive/', express.static(this._archive));
+
+        privateapp.use('/', app);
 
         app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
         privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));

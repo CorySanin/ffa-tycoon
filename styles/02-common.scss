@@ -33,10 +33,10 @@ footer > .box {
     display: block;
 
     a {
-        padding: .5rem 1.25rem;
+        padding: 0.5rem 1.25rem;
         border-radius: 6px;
 
-        &:hover{
+        &:hover {
             text-decoration: underline;
         }
     }
@@ -66,4 +66,20 @@ footer > .box {
 
 .align-center.align-center.align-center {
     text-align: center;
+}
+
+.fileupload {
+    padding: 1.25em 0 1.25em 0;
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    column-gap: .5em;
+
+    label{
+        overflow: hidden;
+    }
+
+    input[type="file"] {
+        position: fixed;
+        top: -100em;
+    }
 }

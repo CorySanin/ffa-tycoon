@@ -1,0 +1,33 @@
+<div class="content">
+    <div class="columns is-desktop">
+        <div class="column">
+            <h1>
+                <%= park.name %> <span id="parkdate">(<%= (new Date(park.date)).toLocaleDateString() %>)</span>
+            </h1>
+            <span id="rawdate" class="is-hidden">
+                <%= park.date %>
+            </span>
+            <p>
+                <%= park.scenario %> - <%= park.groupname %> - <%= park.gamemode %>
+            </p>
+            <a href="/archive/<%= park.dir %>/park.sv6" class="button is-primary">Download</a>
+            <form action="/api/park/<%= park.id %>/">
+                <div class="fileupload">
+                    <label for="parkfile" class="input">No file selected</label>
+                    <label for="parkfile" class="button is-primary is-light">Select File</label>
+                    <input class="fileinput" type="file" name="parkfile" id="parkfile" />
+                    <button class="button is-primary" disabled type="button">Upload</button>
+                </div>
+            </form>
+        </div>
+        <% if (park.thumbnail || park.largeimg) { %>
+            <div class="column is-two-thirds-widescreen">
+                <a href="/archive/<%= park.dir %>/<%= park.largeimg || park.thumbnail %>">
+                    <img src="/archive/<%= park.dir %>/<%= park.thumbnail || park.largeimg %>" />
+                </a>
+            </div>
+            <% } %>
+    </div>
+</div>
+<script src="/assets/js/park.js?v1"></script>
+<script src="/assets/js/park-upload.js?v1"></script>

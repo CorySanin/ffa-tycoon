@@ -25,6 +25,7 @@ class DB {
                 GETMISSINGIMAGE: db.prepare(`SELECT * FROM ${TABLE} WHERE largeimg IS NULL LIMIT 1;`),
                 REPLACETHUMBNAIL: db.prepare(`UPDATE ${TABLE} SET thumbnail = @thumbnail WHERE id = @id;`),
                 REPLACEIMAGE: db.prepare(`UPDATE ${TABLE} SET largeimg = @largeimg WHERE id = @id;`),
+                REMOVEIMAGES: db.prepare(`UPDATE ${TABLE} SET (largeimg, thumbnail) = (NULL, NULL) WHERE id = @id;`)
             }
         };
 
@@ -72,6 +73,10 @@ class DB {
             thumbnail: filename,
             largeimg: filename
         });
+    }
+
+    RemoveImages(id) {
+        return this._queries.IMAGES.REMOVEIMAGES.run({id});
     }
 }
 

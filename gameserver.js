@@ -51,11 +51,16 @@ class GameServer {
     }
 
     GetDetails = async (force = false) => {
-        let d = moment();
-        if (force || !this._details || d.isAfter(this._details.expiration)) {
-            if (this._details = await this.Execute('park')) {
-                this._details.expiration = d.add(3, 'minutes');
+        try{
+            let d = moment();
+            if (force || !this._details || d.isAfter(this._details.expiration)) {
+                if (this._details = await this.Execute('park')) {
+                    this._details.expiration = d.add(2, 'minutes');
+                }
             }
+        }
+        catch(ex){
+            console.log(`Error getting server details: ${ex}`);
         }
         return this._details;
     }
