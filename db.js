@@ -43,6 +43,8 @@ class DB {
         params.group = params.group || 'default';
         params.gamemode = params.gamemode || 'multiplayer';
         params.date = params.date || (new Date()).getTime();
+        params.thumbnail = params.thumbnail || null;
+        params.largeimg = params.largeimg || null;
         return this._queries.ADDPARK.run(params);
     }
 
