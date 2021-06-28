@@ -69,7 +69,6 @@ class GameServer {
         return new Promise((resolve, reject) => {
             try {
                 var client = new net.Socket();
-                resolve(null);
                 client.connect(this._port, this._hostname, function () {
                     client.write(typeof command === 'object' ? JSON.stringify(command) : command);
                 });
