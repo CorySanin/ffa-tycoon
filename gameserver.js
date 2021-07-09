@@ -65,6 +65,10 @@ class GameServer {
         return this._details;
     }
 
+    GetDetailsSync = () => {
+        return this._details;
+    }
+
     Execute = (command) => {
         return new Promise((resolve, reject) => {
             try {

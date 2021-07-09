@@ -2,6 +2,7 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const Helmet = require('helmet');
 const bodyParser = require('body-parser');
+const prom = require('prom-client');
 const TOTP = require('otpauth').TOTP;
 const moment = require('moment');
 const crypto = require('crypto');
@@ -38,6 +39,7 @@ const genNonceForCSP = (length = 16) => {
 
 class Web {
     constructor(options = {}) {
+        const that = this;
         const app = express();
         const privateapp = express();
         const db = this._db = new DB(options.db);
@@ -48,6 +50,7 @@ class Web {
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
         this._parktypes = [];
+        this._prom = prom.register;
 
         (options.servers || []).forEach(serverinfo => {
             this._servers.push(new GameServer(serverinfo));
@@ -585,6 +588,69 @@ class Web {
                 });
             }
         });
+
+        privateapp.get('/metrics', async (req, res) => {
+            try {
+                await Promise.all(this._servers.map(s => s.GetDetails(true)));
+                res.set('Content-Type', this._prom.contentType);
+                res.end(await this._prom.metrics());
+            }
+            catch (ex) {
+                res.status(500).send(ex);
+            }
+        });
+
+        prom.collectDefaultMetrics({
+            prefix: 'ffatycoon_'
+        });
+
+        this._metrics = {
+            guests: new prom.Gauge({
+                name: 'ffatycoon_park_guests_count',
+                help: 'Number of park guests',
+                labelNames: ['server'],
+                collect() {
+                    that._servers.forEach(s => {
+                        let details = s.GetDetailsSync();
+                        if (details && details.park) {
+                            this.set({ server: s._name }, details.park.guests);
+                        }
+                    });
+                }
+            })
+        };
+
+        this._metrics = {
+            guests: new prom.Gauge({
+                name: 'ffatycoon_park_rating',
+                help: 'The park rating',
+                labelNames: ['server'],
+                collect() {
+                    that._servers.forEach(s => {
+                        let details = s.GetDetailsSync();
+                        if (details && details.park) {
+                            this.set({ server: s._name }, details.park.rating);
+                        }
+                    });
+                }
+            })
+        };
+
+        this._metrics = {
+            guests: new prom.Gauge({
+                name: 'ffatycoon_server_online',
+                help: 'The number of players connected',
+                labelNames: ['server'],
+                collect() {
+                    that._servers.forEach(s => {
+                        let details = s.GetDetailsSync();
+                        if (details && details.network && details.network.players) {
+                            this.set({ server: s._name }, details.network.players.length - 1);
+                        }
+                    });
+                }
+            })
+        };
 
         let imagetype = true;
         setInterval(() => {
