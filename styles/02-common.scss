@@ -42,6 +42,10 @@ footer > .box {
     }
 }
 
+.displaynone{
+    display: none;
+}
+
 .parkstats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 15fr));

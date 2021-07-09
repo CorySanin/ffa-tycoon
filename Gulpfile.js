@@ -14,7 +14,7 @@ gulp.task('styles', function(){
 
 gulp.task('scripts', function(){
     return gulp.src('scripts/*.js')
-        .pipe(uglify())
+        //.pipe(uglify())
         .pipe(gulp.dest('./assets/js/'));
 })
 

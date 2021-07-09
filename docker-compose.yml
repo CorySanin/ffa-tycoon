@@ -23,6 +23,8 @@ services:
          - 35711:35711
          - 11753:11753
          - 11754:11754/udp
+      expose:
+         - 35711
       volumes:
          - ./storage/server-01:/home/openrct2/.config/OpenRCT2
       command:
@@ -35,6 +37,8 @@ services:
       ports:
          - 35712:35711
          - 11754:11753
+      expose:
+         - 35711
       volumes:
          - ./storage/server-02:/home/openrct2/.config/OpenRCT2
       command:

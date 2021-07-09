@@ -617,11 +617,8 @@ class Web {
                         }
                     });
                 }
-            })
-        };
-
-        this._metrics = {
-            guests: new prom.Gauge({
+            }),
+            rating: new prom.Gauge({
                 name: 'ffatycoon_park_rating',
                 help: 'The park rating',
                 labelNames: ['server'],
@@ -633,11 +630,8 @@ class Web {
                         }
                     });
                 }
-            })
-        };
-
-        this._metrics = {
-            guests: new prom.Gauge({
+            }),
+            online: new prom.Gauge({
                 name: 'ffatycoon_server_online',
                 help: 'The number of players connected',
                 labelNames: ['server'],
