@@ -279,6 +279,10 @@ class Web {
             }
         });
 
+        app.get('/discord/?', (req, res) => {
+            res.redirect('https://discord.gg/QpztpR5QSH');
+        });
+
         //#endregion
 
         app.get('/parks/:type/?', async (req, res) => {
