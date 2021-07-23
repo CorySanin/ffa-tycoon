@@ -126,7 +126,7 @@ class Web {
                 },
                 function (err, html) {
                     if (!err) {
-                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${nonce}'`)
+                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${nonce}'`);
                         res.send(html);
                     }
                     else {
@@ -148,6 +148,31 @@ class Web {
                     },
                     function (err, html) {
                         if (!err) {
+                            res.send(html);
+                        }
+                        else {
+                            res.send(err);
+                        }
+                    });
+            }
+            else {
+                res.status(404).send('404');
+            }
+        });
+
+        app.get('/park/:park/viewer', (req, res) => {
+            let park = db.GetPark(parseInt(req.params.park));
+            if (park) {
+                res.render('viewer',
+                    {
+                        page: {
+                            title: `View Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+                        },
+                        park
+                    },
+                    function (err, html) {
+                        if (!err) {
+                            res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self'`);
                             res.send(html);
                         }
                         else {
