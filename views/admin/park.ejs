@@ -23,7 +23,7 @@
         </div>
         <% if (park.thumbnail || park.largeimg) { %>
             <div class="column is-two-thirds-widescreen">
-                <a href="/archive/<%= park.dir %>/<%= park.largeimg || park.thumbnail %>">
+                <a href="/park/<%= park.id %>/viewer">
                     <img src="/archive/<%= park.dir %>/<%= park.thumbnail || park.largeimg %>" />
                 </a>
             </div>
