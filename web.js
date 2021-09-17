@@ -420,6 +420,23 @@ class Web {
             await saveServers(req, res, this._servers.filter(server => server._group == req.params.group), false);
         });
 
+        app.get('/api/server/?', async (req, res) => {
+            await Promise.all(this._servers.map(s => s.GetDetails()));
+            res.status(200).send({servers: this._servers.map(s => {
+                return {
+                    server: {
+                        name: s._name,
+                        group: s._group,
+                        mode: s._mode
+                    },
+                    park: s._details.park,
+                    network: {
+                        players: s._details.network.players.map(p => p.id)
+                    }
+                };
+            })});
+        });
+
         privateapp.get('/api/server/:server/save', async (req, res) => {
             let servernum = parseInt(req.params.server);
             if (servernum >= 0 && servernum < this._servers.length) {

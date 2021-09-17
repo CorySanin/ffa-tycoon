@@ -2,32 +2,35 @@
     <div class="box">
         <h1>FFA Tycoon Admin</h1>
         <h2>Servers</h2>
-        <% if (servers) {
-            servers.forEach(function(server, i){ %>
-            <div class="block">
-                <span class="subtitle"><a href="/server/<%= i %>"><%= server._name %></a></span>
-                
-                <div class="parkstats">
-                    <div><span class="property">Group:</span> <%= server._group %></div>
-                    <div><span class="property">Mode:</span> <%= server._mode %></div>
-                    <% if (server._details) { %>
-                    <div><span class="property">Scenario:</span> <%= server._details.park.name %></div>
-                    <div><span class="property">Guests:</span> <%= server._details.park.guests %></div>
-                    <div><span class="property">Rating:</span> <span class="<%
-                        if(server._details.park.rating >= 550){
-                            echo('is-success');
-                        }
-                        else if (server._details.park.rating > 350){
-                            echo('is-warning');
-                        }
-                        else{
-                            echo('is-danger');
-                        }
-                        %>"><%= server._details.park.rating %></span></div>
-                    <div><span class="property">Online:</span> <%= server._details.network.players.length - 1 %></div>
-                    <% } %>
+        <div id="serverlistings">
+            <% if (servers) {
+                servers.forEach(function(server, i){ %>
+                <div class="block">
+                    <span class="subtitle"><a href="/server/<%= i %>"><%= server._name %></a></span>
+                    
+                    <div class="parkstats">
+                        <div><span class="property">Group:</span> <span><%= server._group %></span></div>
+                        <div><span class="property">Mode:</span> <span><%= server._mode %></span></div>
+                        <% if (server._details) { %>
+                        <div><span class="property">Scenario:</span> <span><%= server._details.park.name %></span></div>
+                        <div><span class="property">Guests:</span> <span><%= server._details.park.guests %></span></div>
+                        <div><span class="property">Rating:</span> <span class="<%
+                            if(server._details.park.rating >= 550){
+                                echo('is-success');
+                            }
+                            else if (server._details.park.rating > 350){
+                                echo('is-warning');
+                            }
+                            else{
+                                echo('is-danger');
+                            }
+                            %>"><%= server._details.park.rating %></span></div>
+                        <div><span class="property">Online:</span> <span><%= server._details.network.players.length - 1 %></span></div>
+                        <% } %>
+                    </div>
                 </div>
-            </div>
-        <% }); } %>
+            <% }); } %>
+        </div>
     </div>
 </div>
+<script src="/assets/js/dashboard.js?v1"></script>

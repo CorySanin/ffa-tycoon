@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", function () {
         orderby: window.archivequeryparams.orderby || 'date',
         order: window.archivequeryparams.order
     }
-    let page = window.archivequeryparams.page || 1, orderby = window.archivequeryparams.orderby || 'date', order = window.archivequeryparams.order;
     const headers = document.querySelectorAll('#parkTableHeader > th');
     const tableBody = document.getElementById('parkTableBody');
     const pagination = document.getElementById('pagination');
@@ -17,9 +16,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         history.pushState(state, '', getUrl());
 
-        headers.forEach(th => {
-
-        });
+        // headers.forEach(th => {
+        // });
     }
     function getUrl(s = state) {
         return `/archive/${s.page}?${new URLSearchParams({ orderby: s.orderby, order: s.order ? 'ASC' : 'DESC' }).toString()}`;
