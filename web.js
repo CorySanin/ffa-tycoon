@@ -518,7 +518,7 @@ class Web {
                 for (const serverindx in servers) {
                     const server = servers[serverindx];
                     try {
-                        if (!(await this._servers[server].Execute(`say ${message}`)).result) {
+                        if (!(await server.Execute(`say ${message}`)).result) {
                             result.status = 'bad';
                             status = 500;
                         }
