@@ -10,7 +10,7 @@
             <p>
                 <%= park.scenario %> - <%= park.groupname %> - <%= park.gamemode %>
             </p>
-            <a href="/archive/<%= park.dir %>/park.sv6" class="button is-primary">Download</a>
+            <a href="/archive/<%= park.dir %>/<%= park.filename %>" class="button is-primary">Download</a>
         </div>
         <% if (park.thumbnail || park.largeimg) { %>
         <div class="column is-two-thirds-widescreen">

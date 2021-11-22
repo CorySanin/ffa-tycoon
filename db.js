@@ -12,15 +12,16 @@ class DB {
         const db = this._db;
 
         if (!db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='${TABLE}';`).get()) {
-            db.prepare(`CREATE TABLE ${TABLE} (id INTEGER PRIMARY KEY, name VARCHAR(128), groupname VARCHAR(128), gamemode VARCHAR(128), date DATETIME, scenario VARCHAR(64), dir VARCHAR(64), thumbnail VARCHAR(16), largeimg VARCHAR(16));`).run();
+            db.prepare(`CREATE TABLE ${TABLE} (id INTEGER PRIMARY KEY, name VARCHAR(128), groupname VARCHAR(128), gamemode VARCHAR(128), date DATETIME, scenario VARCHAR(64), dir VARCHAR(64), thumbnail VARCHAR(16), largeimg VARCHAR(16), filename VARCHAR(32));`).run();
         }
 
         this._queries = {
-            ADDPARK: db.prepare(`INSERT INTO ${TABLE} (name,groupname,gamemode,date,scenario,dir,thumbnail,largeimg) VALUES (@name, @group, @gamemode, @date, @scenario, @dir, @thumbnail, @largeimg);`),
+            ADDPARK: db.prepare(`INSERT INTO ${TABLE} (name,groupname,gamemode,date,scenario,dir,thumbnail,largeimg,filename) VALUES (@name, @group, @gamemode, @date, @scenario, @dir, @thumbnail, @largeimg, @filename);`),
             GETPARKS: {},
             GETPARKCount: db.prepare(`SELECT COUNT(*) as count FROM ${TABLE}`),
             GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`),
             DELETEPARK: db.prepare(`DELETE FROM ${TABLE} WHERE id = @id;`),
+            CHANGEFILENAME: db.prepare(`UPDATE ${TABLE} SET filename = @filename WHERE id = @id;`),
             IMAGES: {
                 GETMISSINGTHUMBNAIL: db.prepare(`SELECT * FROM ${TABLE} WHERE thumbnail IS NULL LIMIT 1;`),
                 GETMISSINGIMAGE: db.prepare(`SELECT * FROM ${TABLE} WHERE largeimg IS NULL LIMIT 1;`),
@@ -63,6 +64,13 @@ class DB {
     GetPark(id = -1) {
         return this._queries.GETPARK.get({
             id
+        });
+    }
+
+    ChangeFileName(id, filename) {
+        return this._queries.CHANGEFILENAME.run({
+            id,
+            filename
         });
     }
 

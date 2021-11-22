@@ -1,8 +1,8 @@
-FROM node:12-alpine
+FROM node:16-alpine3.13
 
 WORKDIR /usr/src/ffa-tycoon
 
-RUN apk add --no-cache python make gcc g++; mkdir -p storage/archive storage/config storage/db
+RUN apk add --no-cache python3 make gcc g++; mkdir -p storage/archive storage/config storage/db
 
 COPY ./package*json ./
 

@@ -35,13 +35,23 @@ class GameServer {
         if (!this._dir) {
             return false;
         }
-        let filename = 'park';
-        let fullName = path.join(this._dir, 'save', `${filename}.sv6`);
+        let more = '';
+        if(this._details){
+            more = `_${this._details.park.name}`;
+        }
+        let filename = `${this._name}${more}_${this._mode}_${moment().format('YYYY-MM-DD')}`.replace(/\s/g, '-');
+        let fullNamesv6 = path.join(this._dir, 'save', `${filename}.sv6`);
+        let fullNamepark = path.join(this._dir, 'save', `${filename}.park`);
         await this.Execute(`save ${filename}`);
         try {
-            if (await FileMan.WaitForFile(fullName)) {
-                await mvPromise(fullName, destination);
-                return true;
+            let res = await Promise.any([
+                FileMan.WaitForFile(fullNamesv6),
+                FileMan.WaitForFile(fullNamepark)
+            ]);
+            if (res) {
+                let basename = path.basename(res);
+                await mvPromise(res, path.join(destination, basename));
+                return basename;
             }
         }
         catch (ex) {

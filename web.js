@@ -357,7 +357,7 @@ class Web {
             if (park) {
                 let dirname = park.dir;
                 let archivepath = path.join(this._archive, dirname);
-                let parksave = path.join(archivepath, 'park.sv6');
+                let parksave = path.join(archivepath, park.filename);
                 let image = await FileMan.DownloadPark(`http://${this._screenshotter}/upload?zoom=${zoom}`, parksave, archivepath, filename);
                 if (image) {
                     db.ReplaceImage(fullsize, park.id, image);
@@ -380,11 +380,11 @@ class Web {
                     try {
                         let dirname = `${datestring}_${server._name}`;
                         let archivepath = path.join(this._archive, dirname);
-                        let parksave = path.join(archivepath, 'park.sv6');
+                        let filename = 'park.sv6';
 
                         if ((await exists(archivepath))
                             || !!(await fsp.mkdir(archivepath))
-                            || !(await server.SavePark(parksave))) {
+                            || !(filename = await server.SavePark(archivepath))) {
                             result.status = 'bad';
                             status = 500;
                         }
@@ -394,7 +394,8 @@ class Web {
                                 group: server._group,
                                 gamemode: server._mode,
                                 scenario: (await server.GetDetails()).park.name,
-                                dir: dirname
+                                dir: dirname,
+                                filename
                             });
                         }
                     }
@@ -594,10 +595,14 @@ class Web {
                 }
                 else {
                     let park = req.files.park;
-                    let filename = path.join(this._archive, parkentry.dir, 'park.sv6');
-                    await fsp.unlink(filename);
-                    await park.mv(filename);
+                    let fext = req.files.park.name.split('.');
+                    fext = fext[fext.length - 1];
+                    let filename = `park.${fext}`;
+                    let fullpath = path.join(this._archive, parkentry.dir, filename);
+                    await fsp.unlink(fullpath);
+                    await park.mv(fullpath);
 
+                    db.ChangeFileName(parkentry.id, filename)
                     db.RemoveImages(parkentry.id);
 
                     res.send({

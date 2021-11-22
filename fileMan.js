@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
-const fetch = require('node-fetch');
 const FormData = require('form-data');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 
 let FileExists = (filename) => {
@@ -23,7 +23,7 @@ let WaitForFile = (filename, timeout = 3000) => {
         let watcher = fs.watch(dirname);
         if (await FileExists(filename)) {
             watcher.close();
-            resolve(true);
+            resolve(filename);
         }
         else {
             let t = setTimeout(() => {
@@ -35,7 +35,7 @@ let WaitForFile = (filename, timeout = 3000) => {
                 if (match) {
                     clearTimeout(t);
                     watcher.close();
-                    resolve(true);
+                    resolve(filename);
                 }
             });
         }
