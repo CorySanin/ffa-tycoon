@@ -39,7 +39,7 @@ class GameServer {
         if(this._details){
             more = `_${this._details.park.name}`;
         }
-        let filename = `${this._name}${more}_${this._mode}_${moment().format('YYYY-MM-DD')}`.replace(/\s/g, '-');
+        let filename = `${this._name}${more}_${this._mode}`.substring(0,25).trim().replace(/\s/g, '-');
         let fullNamesv6 = path.join(this._dir, 'save', `${filename}.sv6`);
         let fullNamepark = path.join(this._dir, 'save', `${filename}.park`);
         await this.Execute(`save ${filename}`);
