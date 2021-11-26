@@ -595,14 +595,16 @@ class Web {
                 }
                 else {
                     let park = req.files.park;
-                    let fext = req.files.park.name.split('.');
-                    fext = fext[fext.length - 1];
-                    let filename = `park.${fext}`;
-                    let fullpath = path.join(this._archive, parkentry.dir, filename);
-                    await fsp.unlink(fullpath);
-                    await park.mv(fullpath);
+                    let filenameold = parkentry.filename;
+                    let fullpathold = path.join(this._archive, parkentry.dir, filenameold);
+                    let fextsep = park.name.lastIndexOf('.');
+                    let fext = park.name.substring(fextsep, park.name.length);
+                    let filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
+                    let fullpathnew = path.join(this._archive, parkentry.dir, filenamenew);
+                    await fsp.unlink(fullpathold);
+                    await park.mv(fullpathnew);
 
-                    db.ChangeFileName(parkentry.id, filename)
+                    db.ChangeFileName(parkentry.id, filenamenew);
                     db.RemoveImages(parkentry.id);
 
                     res.send({
@@ -700,7 +702,7 @@ class Web {
         let imagetype = true;
         setInterval(() => {
             getMissingImage(imagetype = !imagetype);
-        }, 5 * 60 * 1000);
+        }, 1 * 60 * 1000);
 
         app.use('/assets/', express.static('assets'));
         app.use('/archive/', express.static(this._archive));

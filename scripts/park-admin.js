@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).then(data => {
                     if (data.ok) {
                         resetForm();
+                        location.reload(true);
                     }
                 }).catch(err => {
                     console.log(err);
@@ -71,6 +72,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (data.ok) {
                         deletebtn.classList.add('is-success');
                         deletebtn.appendChild(document.createTextNode("Deleted"));
+                        setTimeout(() => {
+                            location.href = '/archive';
+                        }, 1500);
                     }
                     else {
                         deletebtn.classList.add('is-danger');
