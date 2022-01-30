@@ -3,8 +3,7 @@ const fileUpload = require('express-fileupload');
 const Helmet = require('helmet');
 const bodyParser = require('body-parser');
 const prom = require('prom-client');
-const TOTP = require('otpauth').TOTP;
-const moment = require('moment');
+const moment = require('moment'); //TODO: replace moment
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -45,7 +44,6 @@ class Web {
         const db = this._db = new DB(options.db);
         const port = process.env.PORT || options.port || 8080;
         const privateport = process.env.PRIVATEPORT || options.privateport || 8081;
-        this._totp = process.env.TOTP || options.totp || '';
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
@@ -370,7 +368,7 @@ class Web {
                 status: 'bad'
             };
             let status = 400;
-            if (!ispublic || this.CheckTotp(req)) {
+            if (!ispublic) {
                 let datestring = moment().format('YYYY-MM-DD_HH-mm-ss');
                 result.status = 'ok';
                 status = 200;
@@ -423,19 +421,21 @@ class Web {
 
         app.get('/api/server/?', async (req, res) => {
             await Promise.all(this._servers.map(s => s.GetDetails()));
-            res.status(200).send({servers: this._servers.map(s => {
-                return {
-                    server: {
-                        name: s._name,
-                        group: s._group,
-                        mode: s._mode
-                    },
-                    park: s._details.park,
-                    network: {
-                        players: s._details.network.players.map(p => p.id)
-                    }
-                };
-            })});
+            res.status(200).send({
+                servers: this._servers.map(s => {
+                    return {
+                        server: {
+                            name: s._name,
+                            group: s._group,
+                            mode: s._mode
+                        },
+                        park: s._details.park,
+                        network: {
+                            players: s._details.network.players.map(p => p.id)
+                        }
+                    };
+                })
+            });
         });
 
         privateapp.get('/api/server/:server/save', async (req, res) => {
@@ -700,9 +700,11 @@ class Web {
         };
 
         let imagetype = true;
-        setInterval(() => {
-            getMissingImage(imagetype = !imagetype);
-        }, 1 * 60 * 1000);
+        if (this._screenshotter) {
+            setInterval(() => {
+                getMissingImage(imagetype = !imagetype);
+            }, 1 * 60 * 1000);
+        }
 
         app.use('/assets/', express.static('assets'));
         app.use('/archive/', express.static(this._archive));
@@ -723,10 +725,6 @@ class Web {
                 status: 'bad'
             };
         }
-    }
-
-    CheckTotp = (req) => {
-        return 'body' in req && 'totp' in req.body && (new TOTP({ secret: this._totp })).validate({ token: req.body.totp, window: 2 }) !== null;
     }
 }
 

@@ -20,7 +20,6 @@ services:
       container_name: openrct2-for-ffatycoon-dev
       image: corysanin/openrct2-cli:develop-ubuntu
       ports:
-         - 35711:35711
          - 11753:11753
          - 11754:11754/udp
       expose:
@@ -35,8 +34,7 @@ services:
       container_name: openrct2-for-ffatycoon-release
       image: corysanin/openrct2-cli:latest-ubuntu
       ports:
-         - 35712:35711
-         - 11754:11753
+         - 11754:11754
       expose:
          - 35711
       volumes:

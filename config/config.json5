@@ -1,7 +1,6 @@
 {
     "port": 8080,
     "privateport": 8081,
-    "totp": "JBSWY3DPEHPK3PXP",
     "archivedir": "storage/archive",
     "screenshotter": "screenshotter:8080",
     "db": {
