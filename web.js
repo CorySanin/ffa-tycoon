@@ -423,15 +423,16 @@ class Web {
             await Promise.all(this._servers.map(s => s.GetDetails()));
             res.status(200).send({
                 servers: this._servers.map(s => {
+                    let details = s._details || {};
                     return {
                         server: {
                             name: s._name,
                             group: s._group,
                             mode: s._mode
                         },
-                        park: s._details.park,
+                        park: details.park,
                         network: {
-                            players: s._details.network.players.map(p => p.id)
+                            players: ((details.network || {}).players || []).map(p => p.id)
                         }
                     };
                 })

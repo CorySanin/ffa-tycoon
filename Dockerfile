@@ -10,7 +10,7 @@ RUN npm install
 
 COPY . .
 
-RUN npx gulp
+RUN npm run build && npm install --production
 
 USER node
 
