@@ -6,7 +6,7 @@ html {
 
 html,
 body {
-    padding: 0px;
+    padding: 0 0 1px 0;
     box-sizing: border-box;
     min-height: 100%;
 
@@ -70,6 +70,16 @@ footer > .box {
 
 .align-center.align-center.align-center {
     text-align: center;
+}
+
+.table{
+    th, td {
+        word-break: keep-all;
+    }
+}
+
+.horizontal-sb {
+    overflow-x: auto;
 }
 
 .fileupload {
