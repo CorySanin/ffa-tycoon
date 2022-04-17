@@ -9,5 +9,6 @@ fs.readFile(process.env.CONFIG || path.join(__dirname, 'config', 'config.json5')
     }
     else {
         let w = new web(json5.parse(data));
+        process.on('SIGTERM', w.close);
     }
 });

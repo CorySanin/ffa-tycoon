@@ -7,7 +7,7 @@ const FileMan = require('./fileMan');
 const REMOTEPORT = 35711;
 const mv = require('mv');
 
-async function mvPromise(src, dest) {
+function mvPromise(src, dest) {
     return new Promise((resolve, reject) => {
         mv(src, dest, err => {
             if (err) {
@@ -18,6 +18,10 @@ async function mvPromise(src, dest) {
             }
         });
     });
+}
+
+function sleep(timeout) {
+    return new Promise((resolve, reject) => setTimeout(resolve, timeout));
 }
 
 class GameServer {
@@ -49,6 +53,18 @@ class GameServer {
                 FileMan.WaitForFile(fullNamepark)
             ]);
             if (res) {
+                let fstat = await fsp.stat(res);
+                for(let i = 0; i < 5; i++){
+                    if(fstat.size > 0){
+                        break;
+                    }
+                    await sleep(2000);
+                    fstat = await fsp.stat(res);
+                }
+                if(fstat.size === 0){
+                    await fsp.rm(res);
+                    throw 'File is 0 bytes';
+                }
                 let basename = path.basename(res);
                 await mvPromise(res, path.join(destination, basename));
                 return basename;

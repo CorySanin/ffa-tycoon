@@ -375,32 +375,40 @@ class Web {
 
                 for (const serverindx in servers) {
                     const server = servers[serverindx];
+                    let filename = false;
+                    let dirname = `${datestring}_${server._name}`;
+                    let archivepath = path.join(this._archive, dirname);
                     try {
-                        let dirname = `${datestring}_${server._name}`;
-                        let archivepath = path.join(this._archive, dirname);
-                        let filename = 'park.sv6';
-
-                        if ((await exists(archivepath))
-                            || !!(await fsp.mkdir(archivepath))
-                            || !(filename = await server.SavePark(archivepath))) {
-                            result.status = 'bad';
-                            status = 500;
-                        }
-                        else {
-                            this._db.AddPark({
-                                name: server._name,
-                                group: server._group,
-                                gamemode: server._mode,
-                                scenario: (await server.GetDetails()).park.name,
-                                dir: dirname,
-                                filename
-                            });
+                        if (!(await exists(archivepath))
+                            && !(await fsp.mkdir(archivepath))) {
+                            for (let i = 0; i < 2; i++) {
+                                filename = await server.SavePark(archivepath);
+                                if (filename) {
+                                    break;
+                                }
+                            }
+                            if(!filename){
+                                await fsp.rm(archivepath, {recursive: true, force: true});
+                            }
                         }
                     }
                     catch (ex) {
                         console.log(`Error saving ${server.name}`, ex);
+                        filename = false;
+                    }
+                    if (!filename) {
                         result.status = 'bad';
                         status = 500;
+                    }
+                    else {
+                        this._db.AddPark({
+                            name: server._name,
+                            group: server._group,
+                            gamemode: server._mode,
+                            scenario: (await server.GetDetails()).park.name,
+                            dir: dirname,
+                            filename
+                        });
                     }
                 }
             }
@@ -712,8 +720,8 @@ class Web {
 
         privateapp.use('/', app);
 
-        app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
-        privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
+        this._webserver = app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
+        this._privwebserver = privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
     }
 
     InjectStatus = (obj, status) => {
@@ -726,6 +734,11 @@ class Web {
                 status: 'bad'
             };
         }
+    }
+
+    close() {
+        this._webserver.close();
+        this._privwebserver.close();
     }
 }
 
