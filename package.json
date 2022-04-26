@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@gitlab.com/CorySanin/ffa-tycoon.git"
+    "url": "git+https://github.com/CorySanin/ffa-tycoon.git"
   },
   "keywords": [
     "website",
@@ -40,7 +40,7 @@
   "author": "Cory Sanin",
   "license": "ISC",
   "bugs": {
-    "url": "https://gitlab.com/CorySanin/ffa-tycoon/issues"
+    "url": "https://github.com/CorySanin/ffa-tycoon/issues"
   },
-  "homepage": "https://gitlab.com/CorySanin/ffa-tycoon#readme"
+  "homepage": "https://github.com/CorySanin/ffa-tycoon#readme"
 }
