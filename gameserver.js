@@ -54,10 +54,12 @@ class GameServer {
             ]);
             if (res) {
                 let fstat = await fsp.stat(res);
-                for(let i = 0; i < 5; i++){
-                    if(fstat.size > 0){
+                let prsize = 0;
+                for(let i = 0; i < 8; i++){
+                    if(fstat.size == prsize && prsize > 0){
                         break;
                     }
+                    prsize = fstat.size;
                     await sleep(2000);
                     fstat = await fsp.stat(res);
                 }

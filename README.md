@@ -1,5 +1,13 @@
 # ffa-tycoon
 
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/CorySanin/ffa-tycoon/Docker%20Image%20CI)](https://github.com/CorySanin/ffa-tycoon/actions/workflows/docker-image.yml)
+[![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/CorySanin/ffa-tycoon)](https://libraries.io/github/CorySanin/ffa-tycoon)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/corysanin/ffa-tycoon/latest)](https://hub.docker.com/r/corysanin/ffa-tycoon)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/CorySanin/ffa-tycoon)](https://github.com/CorySanin/ffa-tycoon/pulls)
+[![License](https://img.shields.io/github/license/CorySanin/ffa-tycoon)](LICENSE)
+[![Uptime Robot ratio (30 days)](https://img.shields.io/uptimerobot/ratio/m788089905-b569a9e9814f03cf016513d1)](https://status.ffa-tycoon.com/)
+[![Discord](https://img.shields.io/discord/225989349949308928?label=Discord)](https://ffa-tycoon.com/discord)
+
 Website for browsing and managing multiple OpenRCT2 servers
 
 ## Setup
