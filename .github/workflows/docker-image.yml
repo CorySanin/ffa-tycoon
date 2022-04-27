@@ -24,6 +24,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Provide default tag username
+      if: ${{ env.DOCKER_USERNAME == '' }}
+      run: export DOCKER_USERNAME=guest
+
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag "$DOCKER_USERNAME/$REPOSITORY:latest"
 
