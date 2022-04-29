@@ -26,7 +26,8 @@ jobs:
 
     - name: Provide default tag username
       if: ${{ env.DOCKER_USERNAME == '' }}
-      run: export DOCKER_USERNAME=guest
+      run: |
+          echo "DOCKER_USERNAME=remote" >> $GITHUB_ENV
 
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag "$DOCKER_USERNAME/$REPOSITORY:latest"
