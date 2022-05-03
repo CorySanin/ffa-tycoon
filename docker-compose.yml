@@ -12,6 +12,7 @@ services:
       volumes:
          - ./storage:/usr/src/ffa-tycoon/storage
          - ./config:/usr/src/ffa-tycoon/config
+         - ../ffa-tycoon-parks/parks:/usr/src/ffa-tycoon/parks
       environment:
          TZ: America/Chicago
          TESTING: "yes"

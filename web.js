@@ -183,6 +183,24 @@ class Web {
             }
         });
 
+        app.get('/rules', (req, res) => {
+            res.render('template',
+                {
+                    page: {
+                        view: 'rules-faq',
+                        title: 'Server Rules & FAQ'
+                    }
+                },
+                function (err, html) {
+                    if (!err) {
+                        res.send(html);
+                    }
+                    else {
+                        res.send(err);
+                    }
+                });
+        });
+
         app.get('/guide', (req, res) => {
             res.render('template',
                 {
@@ -300,6 +318,14 @@ class Web {
             else {
                 res.status(404).send('404');
             }
+        });
+
+        app.get('/faq', (req, res) => {
+            res.redirect('/rules#faq');
+        });
+
+        app.get('/submit-map', (req, res) => {
+            res.redirect('https://github.com/CorySanin/ffa-tycoon-parks#park-submission-guide');
         });
 
         app.get('/discord/?', (req, res) => {
