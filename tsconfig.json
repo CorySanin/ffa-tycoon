@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "lib": ["es5"],
+        "target": "ES5",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
+        "typeRoots": ["types"],
+        "removeComments": true,
+        "outDir": "plugin/lib"
+    },
+    "files": ["plugin/src/ffa-tycoon.ts"]
+}

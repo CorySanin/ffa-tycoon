@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
+const net = require('net');
 const DB = require('./db');
 const GameServer = require('./gameserver');
 const FileMan = require('./fileMan');
@@ -44,6 +45,7 @@ class Web {
         const db = this._db = new DB(options.db);
         const port = process.env.PORT || options.port || 8080;
         const privateport = process.env.PRIVATEPORT || options.privateport || 8081;
+        const pluginport = process.env.PLUGINPORT || options.pluginport || 35712;
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
@@ -403,18 +405,21 @@ class Web {
                     const server = servers[serverindx];
                     let filename = false;
                     let dirname = `${datestring}_${server._name}`;
+                    if (server._id) {
+                        dirname = (await db.GetPark(server._id)).dir;
+                    }
                     let archivepath = path.join(this._archive, dirname);
                     try {
-                        if (!(await exists(archivepath))
-                            && !(await fsp.mkdir(archivepath))) {
+                        if (server._id || (!(await exists(archivepath))
+                            && !(await fsp.mkdir(archivepath)))) {
                             for (let i = 0; i < 2; i++) {
                                 filename = await server.SavePark(archivepath);
                                 if (filename) {
                                     break;
                                 }
                             }
-                            if(!filename){
-                                await fsp.rm(archivepath, {recursive: true, force: true});
+                            if (!filename && !server._id) {
+                                await fsp.rm(archivepath, { recursive: true, force: true });
                             }
                         }
                     }
@@ -426,8 +431,12 @@ class Web {
                         result.status = 'bad';
                         status = 500;
                     }
+                    else if (server._id) {
+                        db.ChangeFileName(server._id, filename);
+                        db.RemoveImages(server._id);
+                    }
                     else {
-                        this._db.AddPark({
+                        let result = this._db.AddPark({
                             name: server._name,
                             group: server._group,
                             gamemode: server._mode,
@@ -435,10 +444,13 @@ class Web {
                             dir: dirname,
                             filename
                         });
+                        server._id = result.lastInsertRowid;
                     }
                 }
             }
-            res.status(status).send(result);
+            if (res) {
+                res.status(status).send(result);
+            }
         };
 
         app.get('/api/group/save/:group', async (req, res) => {
@@ -637,6 +649,7 @@ class Web {
                     let filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
                     let fullpathnew = path.join(this._archive, parkentry.dir, filenamenew);
                     await fsp.unlink(fullpathold);
+                    // TODO: remove all parks in directory
                     await park.mv(fullpathnew);
 
                     db.ChangeFileName(parkentry.id, filenamenew);
@@ -746,8 +759,39 @@ class Web {
 
         privateapp.use('/', app);
 
+        let pluginserver = new net.Server();
+        pluginserver.on('connection', async sock => {
+            let addr = sock.remoteAddress;
+            let server = null;
+            for (let s in this._servers) {
+                let srv = this._servers[s];
+                if (addr.includes(await srv.GetIP())) {
+                    server = srv;
+                    break;
+                }
+            }
+            if (server) {
+                sock.on('data', async data => {
+                    let payload = JSON.parse(data);
+                    if (payload.type === 'newpark') {
+                        server._id = null;
+                        sock.write('done');
+                    }
+                    if (payload.type === 'archive') {
+                        await saveServers(null, null, [server], false);
+                        sock.write('done');
+                    }
+                });
+            }
+            else {
+                console.error(`Got a plugin connection from unknown IP ${addr}`);
+                sock.close();
+            }
+        });
+
         this._webserver = app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
         this._privwebserver = privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
+        this._pluginsocket = pluginserver.listen(pluginport, () => console.log(`plugin server listening on port ${pluginport}`));
     }
 
     InjectStatus = (obj, status) => {
@@ -765,6 +809,7 @@ class Web {
     close() {
         this._webserver.close();
         this._privwebserver.close();
+        this._pluginsocket.close();
     }
 }
 

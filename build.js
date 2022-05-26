@@ -5,7 +5,7 @@
 const fsp = require('fs').promises;
 const path = require('path');
 const spawn = require('child_process').spawn;
-const sass = require('node-sass');
+const sass = require('sass');
 const csso = require('csso');
 const uglifyjs = require("uglify-js");
 const { resolve } = require('path');
@@ -43,11 +43,9 @@ async function styles() {
     let files = await fsp.readdir(STYLESDIR);
     await Promise.all(files.map(f => new Promise(async (res, reject) => {
         let p = path.join(STYLESDIR, f);
-        console.log(`Processing style ${p}`);
-        let style = sass.renderSync({
-            file: p
-        }).css;
         if (f.charAt(0) !== '_') {
+            console.log(`Processing style ${p}`);
+            let style = sass.compile(p).css;
             if (SQUASH.test(f)) {
                 styles.push(style);
             }

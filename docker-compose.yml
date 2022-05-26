@@ -20,6 +20,8 @@ services:
    openrct2-dev:
       container_name: openrct2-for-ffatycoon-dev
       image: corysanin/openrct2-cli:develop-ubuntu
+      depends_on:
+         - ffa-tycoon
       ports:
          - 11753:11753
          - 11754:11754/udp
@@ -34,6 +36,8 @@ services:
    openrct2-release:
       container_name: openrct2-for-ffatycoon-release
       image: corysanin/openrct2-cli:latest-ubuntu
+      depends_on:
+         - ffa-tycoon
       ports:
          - 11754:11754
       expose:
