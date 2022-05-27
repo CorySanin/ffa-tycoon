@@ -101,23 +101,29 @@ footer>.box {
     }
 }
 
-.parkfile {
-    clear: both;
-    padding: 0em 1em;
-    line-height: 3em;
-    height: 3em;
-
-    border-radius: .25em;
-
-    .button {
-        margin-top: .25em;
+.parkfiles {
+    #rm-all {
+        margin-bottom: .5em;
     }
 
-    &.selected {
-        background-color: #B2EBF2;
+    .parkfile {
+        clear: both;
+        padding: 0em 1em;
+        line-height: 3em;
+        height: 3em;
+
+        border-radius: .25em;
 
         .button {
-            display: none;
+            margin-top: .25em;
+        }
+
+        &.selected {
+            background-color: #B2EBF2;
+
+            .button {
+                display: none;
+            }
         }
     }
 }

@@ -300,7 +300,7 @@ class Web {
         privateapp.get('/park/:park', async (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
             let files = await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true });
-            files = files.filter(f => (f.isFile() && f.name.toLowerCase().endsWith('.park'))).map(f => f.name);
+            files = files.filter(f => (f.isFile() && f.name.toLowerCase().endsWith('.park'))).map(f => f.name).reverse();
             if (park) {
                 res.render('admin/template',
                     {
@@ -695,7 +695,18 @@ class Web {
                     let filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
                     let fullpathnew = path.join(this._archive, parkentry.dir, filenamenew);
                     await fsp.unlink(fullpathold);
-                    // TODO: remove all parks in directory
+
+                    let files = await fsp.readdir(path.join(this._archive, parkentry.dir), { withFileTypes: true });
+                    files = files.filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park'));
+                    let promises = [];
+                    files.forEach(f => promises.push(fsp.unlink(path.join(this._archive, parkentry.dir, f.name))));
+                    try {
+                        await Promise.all(promises);
+                    }
+                    catch (ex) {
+                        console.error(`Failed to remove all saves while uploading: ${ex}`);
+                    }
+
                     await park.mv(fullpathnew);
 
                     db.ChangeFileName(parkentry.id, filenamenew);
