@@ -297,8 +297,10 @@ class Web {
                 });
         });
 
-        privateapp.get('/park/:park', (req, res) => {
+        privateapp.get('/park/:park', async (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
+            let files = await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true });
+            files = files.filter(f => (f.isFile() && f.name.toLowerCase().endsWith('.park'))).map(f => f.name);
             if (park) {
                 res.render('admin/template',
                     {
@@ -306,7 +308,8 @@ class Web {
                             view: 'park',
                             title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
                         },
-                        park
+                        park,
+                        files
                     },
                     function (err, html) {
                         if (!err) {
@@ -371,7 +374,7 @@ class Web {
             });
         });
 
-        app.get('/api/park/:park', (req, res) => {
+        app.get('/api/park/:park/?', (req, res) => {
             res.send(this.InjectStatus(this._db.GetPark(parseInt(req.params.park) || 0), 'good'));
         });
 
@@ -551,6 +554,49 @@ class Web {
                     status: 'bad'
                 };
                 status = 400;
+            }
+            res.status(status).send(result);
+        });
+
+        privateapp.post('/api/park/:park/save', async (req, res) => {
+            let park = db.GetPark(parseInt(req.params.park));
+            let message = req.body;
+            let result = {
+                status: 'bad'
+            };
+            let status = 400;
+
+            if (park) {
+                if (req.body.action === 'select' && 'file' in message) {
+                    db.ChangeFileName(park.id, message.file);
+                    db.RemoveImages(park.id);
+                    result.status = 'ok';
+                    status = 200;
+                }
+                else if (req.body.action === 'rm' && 'file' in message && message.file !== park.filename) {
+                    try {
+                        await fsp.unlink(path.join(this._archive, park.dir, message.file));
+                        result.status = 'ok';
+                        status = 200;
+                    }
+                    catch (ex) {
+                        console.error(`Failed to remove save: ${ex}`);
+                    }
+                }
+                else if (req.body.action === 'rm-all') {
+                    let files = await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true });
+                    files = files.filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park') && f.name !== park.filename);
+                    let promises = [];
+                    files.forEach(f => promises.push(fsp.unlink(path.join(this._archive, park.dir, f.name))));
+                    try {
+                        await Promise.all(promises);
+                        result.status = 'ok';
+                        status = 200;
+                    }
+                    catch (ex) {
+                        console.error(`Failed to remove all non-selected saves: ${ex}`);
+                    }
+                }
             }
             res.status(status).send(result);
         });
