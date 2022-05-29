@@ -4,6 +4,8 @@ var TIMEOUT = 20000;
 (function () {
     var port = 35712;
     var hostname = 'ffa-tycoon';
+    var autoArchive = false;
+    var changeMade = false;
     function doCommand(command, callback) {
         var args;
         if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
@@ -81,6 +83,7 @@ var TIMEOUT = 20000;
         if (network.mode === 'server') {
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
+            autoArchive = context.sharedStorage.get('ffa-tycoon.autoArchive', autoArchive);
             context.subscribe('network.chat', function (e) {
                 var msg = e.message;
                 var command = getCommand(msg);
@@ -92,6 +95,23 @@ var TIMEOUT = 20000;
                     });
                 }
             });
+            if (autoArchive) {
+                context.subscribe('action.execute', function (e) {
+                    changeMade = changeMade || e.player > 0;
+                });
+                context.subscribe('network.leave', function (_) {
+                    if (network.players.length <= 2 && changeMade) {
+                        context.setTimeout(function () {
+                            if (network.players.length === 1 && changeMade) {
+                                changeMade = false;
+                                sendToWeb({
+                                    type: 'archive'
+                                }, function () { return 0; });
+                            }
+                        }, 3000);
+                    }
+                });
+            }
         }
     }
     context.setTimeout(function () { return sendToWeb({

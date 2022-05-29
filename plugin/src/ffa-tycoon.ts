@@ -6,6 +6,8 @@ const TIMEOUT = 20000;
 (function () {
     let port = 35712;
     let hostname = 'ffa-tycoon';
+    let autoArchive = false;
+    let changeMade = false;
 
     function doCommand(command, callback) {
         let args: any;
@@ -65,27 +67,6 @@ const TIMEOUT = 20000;
         return false;
     }
 
-    // function getPlayerByHash(hash: string): Player {
-    //     let player = null;
-    //     network.players.every(p => {
-    //         if (p.publicKeyHash === hash) {
-    //             player = p;
-    //             return false;
-    //         }
-    //         return true;
-    //     });
-    //     return player;
-    // }
-
-    // function getPlayerIndexByHash(hash: string): number {
-    //     for (let i = 0; i < network.players.length; i++) {
-    //         if (hash === network.players[i].publicKeyHash) {
-    //             return i;
-    //         }
-    //     }
-    //     return -1;
-    // }
-
     function isPlayerAdmin(player: Player) {
         var perms: string[] = network.getGroup(player.group).permissions;
         return perms.indexOf('kick_player') >= 0;
@@ -107,8 +88,10 @@ const TIMEOUT = 20000;
 
     function main() {
         if (network.mode === 'server') {
+
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
+            autoArchive = context.sharedStorage.get('ffa-tycoon.autoArchive', autoArchive);
             context.subscribe('network.chat', (e) => {
                 let msg = e.message;
                 let command = getCommand(msg);
@@ -120,6 +103,25 @@ const TIMEOUT = 20000;
                     });
                 }
             });
+
+            if (autoArchive) {
+                context.subscribe('action.execute', e => {
+                    changeMade = changeMade || e.player > 0;
+                });
+
+                context.subscribe('network.leave', _ => {
+                    if (network.players.length <= 2 && changeMade) {
+                        context.setTimeout(() => {
+                            if (network.players.length === 1 && changeMade) {
+                                changeMade = false;
+                                sendToWeb({
+                                    type: 'archive'
+                                }, () => 0);
+                            }
+                        }, 3000);
+                    }
+                });
+            }
         }
     }
 
