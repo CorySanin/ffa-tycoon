@@ -511,6 +511,7 @@ class Web {
                     const server = servers[serverindx];
                     try {
                         server.Execute('stop');
+                        server._id = null
                     }
                     catch (ex) {
                         console.log(`Error stopping server: ${ex}`);
@@ -540,6 +541,7 @@ class Web {
                 const server = this._servers[servernum];
                 try {
                     server.Execute('stop');
+                    server._id = null;
                 }
                 catch (ex) {
                     console.log(`Error stopping server: ${ex}`);
