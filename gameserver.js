@@ -1,10 +1,13 @@
 const net = require('net');
+const util = require('util');
 const path = require('path');
+const dns = require('dns')
 const fs = require('fs');
 const fsp = fs.promises;
 const moment = require('moment');
 const FileMan = require('./fileMan');
 const REMOTEPORT = 35711;
+const TIMEOUT = 5000;
 const mv = require('mv');
 
 function mvPromise(src, dest) {
@@ -33,17 +36,15 @@ class GameServer {
         this._port = server.port || REMOTEPORT;
         this._dir = server.dir || false;
         this._details = null;
+        this._ip = null;
+        this._id = null;
     }
 
     SavePark = async (destination) => {
         if (!this._dir) {
             return false;
         }
-        let more = '';
-        if(this._details){
-            more = `_${this._details.park.name}`;
-        }
-        let filename = `${this._name}${more}_${this._mode}`.substring(0,25).trim().replace(/\s/g, '-');
+        let filename = `${moment().format('YYYY-MM-DD_HH-mm-ss')}_${this._name}`.substring(0, 25).trim().replace(/\s/g, '-');
         let fullNamesv6 = path.join(this._dir, 'save', `${filename}.sv6`);
         let fullNamepark = path.join(this._dir, 'save', `${filename}.park`);
         await this.Execute(`save ${filename}`);
@@ -55,15 +56,15 @@ class GameServer {
             if (res) {
                 let fstat = await fsp.stat(res);
                 let prsize = 0;
-                for(let i = 0; i < 8; i++){
-                    if(fstat.size == prsize && prsize > 0){
+                for (let i = 0; i < 8; i++) {
+                    if (fstat.size == prsize && prsize > 0) {
                         break;
                     }
                     prsize = fstat.size;
                     await sleep(2000);
                     fstat = await fsp.stat(res);
                 }
-                if(fstat.size === 0){
+                if (fstat.size === 0) {
                     await fsp.rm(res);
                     throw 'File is 0 bytes';
                 }
@@ -97,24 +98,44 @@ class GameServer {
         return this._details;
     }
 
+    GetIP = async () => {
+        if (!this._ip) {
+            try {
+                this._ip = (await (util.promisify(dns.lookup)(this._hostname))).address;
+            }
+            catch(ex){
+                console.error(`Error while resolving hostname ${this._hostname}: ${ex}`);
+            }
+        }
+        return this._ip;
+    }
+
     Execute = (command) => {
         return new Promise((resolve, reject) => {
             try {
-                var client = new net.Socket();
+                let client = new net.Socket();
+                let timeout = setTimeout(() => {
+                    client.destroy();
+                    reject('timeout');
+                }, TIMEOUT);
                 client.connect(this._port, this._hostname, function () {
                     client.write(typeof command === 'object' ? JSON.stringify(command) : command);
                 });
 
                 client.on('data', function (data) {
+                    clearTimeout(timeout);
                     resolve(JSON.parse(data));
                     client.destroy();
                 });
 
                 client.on('close', function () {
+                    clearTimeout(timeout);
                     resolve(null);
                 });
 
                 client.on('error', function (ex) {
+                    clearTimeout(timeout);
+                    client.destroy();
                     reject(ex);
                 });
             }

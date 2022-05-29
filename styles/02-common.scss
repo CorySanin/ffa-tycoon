@@ -10,11 +10,11 @@ body {
     box-sizing: border-box;
     min-height: 100%;
 
-    > #index {
+    >#index {
         background-image: url(/assets/images/grass.png);
     }
 
-    > #admin-index {
+    >#admin-index {
         background-image: url(/assets/images/adminbg.png);
     }
 }
@@ -28,7 +28,7 @@ body {
     font-size: 1.25em;
 }
 
-footer > .box {
+footer>.box {
     padding: 0;
     display: block;
 
@@ -42,7 +42,7 @@ footer > .box {
     }
 }
 
-.displaynone{
+.displaynone {
     display: none;
 }
 
@@ -53,7 +53,7 @@ footer > .box {
     row-gap: 0.5em;
     align-items: center;
 
-    > div span.property {
+    >div span.property {
         font-weight: bold;
     }
 }
@@ -72,8 +72,10 @@ footer > .box {
     text-align: center;
 }
 
-.table{
-    th, td {
+.table {
+
+    th,
+    td {
         word-break: keep-all;
     }
 }
@@ -89,12 +91,39 @@ footer > .box {
     grid-template-columns: 1fr auto auto auto;
     column-gap: .5em;
 
-    label{
+    label {
         overflow: hidden;
     }
 
     input[type="file"] {
         position: fixed;
         top: -100em;
+    }
+}
+
+.parkfiles {
+    #rm-all {
+        margin-bottom: .5em;
+    }
+
+    .parkfile {
+        clear: both;
+        padding: 0em 1em;
+        line-height: 3em;
+        height: 3em;
+
+        border-radius: .25em;
+
+        .button {
+            margin-top: .25em;
+        }
+
+        &.selected {
+            background-color: #B2EBF2;
+
+            .button {
+                display: none;
+            }
+        }
     }
 }

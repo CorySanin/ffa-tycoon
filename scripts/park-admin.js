@@ -95,3 +95,117 @@ document.addEventListener('DOMContentLoaded', function () {
         confirm++;
     });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const flattenBtn = document.getElementById('rm-all');
+
+    if (flattenBtn) {
+        const parkfilesdiv = document.querySelector('.parkfiles');
+        const acceptBtns = document.querySelectorAll('.parkfiles .select-save');
+        const rmBtns = document.querySelectorAll('.parkfiles .rm-save');
+
+        flattenBtn.addEventListener('click', () => {
+            flattenBtn.disabled = true;
+            flattenBtn.classList.add('is-loading');
+            fetch(`/api${window.location.pathname}/save`.replace('//', '/'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'rm-all'
+                })
+            })
+                .then(data => {
+                    flattenBtn.classList.remove('is-loading');
+                    if (data.ok) {
+                        removeChildren(parkfilesdiv);
+                    }
+                    else {
+                        removeChildren(flattenBtn);
+                        flattenBtn.classList.add('is-danger');
+                        flattenBtn.appendChild(document.createTextNode("Failure"));
+                    }
+                }).catch(err => {
+                    flattenBtn.classList.remove('is-loading');
+                    removeChildren(flattenBtn);
+                    flattenBtn.classList.add('is-danger');
+                    flattenBtn.appendChild(document.createTextNode("Failure"));
+                });
+        });
+
+        for (const btn of acceptBtns) {
+            btn.addEventListener('click', () => {
+                const row = btn.parentElement.parentElement;
+                const rowBtns = btn.parentElement.querySelectorAll('.button');
+                const file = row.querySelector('a').innerText;
+                for (const b of rowBtns) {
+                    b.disabled = true;
+                }
+                btn.classList.add('is-loading');
+                fetch(`/api${window.location.pathname}/save`.replace('//', '/'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'select',
+                        file
+                    })
+                })
+                    .then(data => {
+                        btn.classList.remove('is-loading');
+                        if (data.ok) {
+                            for (const b of rowBtns) {
+                                b.disabled = false;
+                            }
+                            for (const r of document.querySelectorAll('.parkfile.selected')) {
+                                r.classList.remove('selected');
+                            }
+                            row.classList.add('selected');
+                        }
+                        else {
+                            btn.classList.add('is-danger');
+                        }
+                    }).catch(err => {
+                        btn.classList.remove('is-loading');
+                        btn.classList.add('is-danger');
+                    });
+            });
+        }
+
+        for (const btn of rmBtns) {
+            btn.addEventListener('click', () => {
+                const row = btn.parentElement.parentElement;
+                const rowBtns = btn.parentElement.querySelectorAll('.button');
+                const file = row.querySelector('a').innerText;
+                for (const b of rowBtns) {
+                    b.disabled = true;
+                }
+                btn.classList.add('is-loading');
+                fetch(`/api${window.location.pathname}/save`.replace('//', '/'), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'rm',
+                        file
+                    })
+                })
+                    .then(data => {
+                        btn.classList.remove('is-loading');
+                        if (data.ok) {
+                            row.style.display = 'none';
+                        }
+                        else {
+                            btn.classList.add('is-danger');
+                        }
+                    }).catch(err => {
+                        btn.classList.remove('is-loading');
+                        btn.classList.add('is-danger');
+                    });
+            });
+        }
+    }
+});

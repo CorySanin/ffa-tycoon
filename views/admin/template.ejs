@@ -10,10 +10,10 @@
 </head>
 
 <body id="admin-<%= page.view %>">
-    <%- include('header') %>
+    <%- include('header', locals) %>
     
     <div id="body">
-        <%- include(page.view) %>
+        <%- include(page.view, locals) %>
     </div>
 </body>
 
