@@ -99,13 +99,11 @@ class GameServer {
     }
 
     GetIP = async () => {
-        if (!this._ip) {
-            try {
-                this._ip = (await (util.promisify(dns.lookup)(this._hostname))).address;
-            }
-            catch(ex){
-                console.error(`Error while resolving hostname ${this._hostname}: ${ex}`);
-            }
+        try {
+            this._ip = (await (util.promisify(dns.lookup)(this._hostname))).address;
+        }
+        catch(ex){
+            console.error(`Error while resolving hostname ${this._hostname}: ${ex}`);
         }
         return this._ip;
     }
