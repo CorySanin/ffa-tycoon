@@ -299,8 +299,14 @@ class Web {
 
         privateapp.get('/park/:park', async (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
-            let files = await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true });
-            files = files.filter(f => (f.isFile() && f.name.toLowerCase().endsWith('.park'))).map(f => f.name).reverse();
+            let files = [];
+            try{
+                files = await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true });
+                files = files.filter(f => (f.isFile() && f.name.toLowerCase().endsWith('.park'))).map(f => f.name).reverse();
+            }
+            catch(ex){
+                console.error(ex);
+            }
             if (park) {
                 res.render('admin/template',
                     {
