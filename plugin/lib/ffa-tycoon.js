@@ -6,11 +6,13 @@ var TIMEOUT = 20000;
     var hostname = 'ffa-tycoon';
     var autoArchive = false;
     var changeMade = false;
+    var id = -1;
     function doCommand(command, callback) {
         var args;
         if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             sendToWeb({
-                type: 'archive'
+                type: 'archive',
+                id: id
             }, function (resp) {
                 callback(resp);
             });
@@ -89,8 +91,10 @@ var TIMEOUT = 20000;
                 var command = getCommand(msg);
                 if (command !== false && isPlayerAdmin(getPlayer(e.player))) {
                     doCommand(command, function (result) {
-                        if (typeof result === 'string') {
-                            context.setTimeout(function () { return network.sendMessage(result, [e.player]); }, 300);
+                        var payload = JSON.parse(result);
+                        context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 300);
+                        if ('id' in payload) {
+                            id = payload.id;
                         }
                     });
                 }
@@ -121,7 +125,7 @@ var TIMEOUT = 20000;
     }); }, 5000);
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.0.0',
+        version: '1.1.0',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

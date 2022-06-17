@@ -8,12 +8,14 @@ const TIMEOUT = 20000;
     let hostname = 'ffa-tycoon';
     let autoArchive = false;
     let changeMade = false;
+    let id = -1;
 
     function doCommand(command, callback) {
         let args: any;
         if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             sendToWeb({
-                type: 'archive'
+                type: 'archive',
+                id
             }, resp => {
                 callback(resp);
             });
@@ -97,8 +99,10 @@ const TIMEOUT = 20000;
                 let command = getCommand(msg);
                 if (command !== false && isPlayerAdmin(getPlayer(e.player))) {
                     doCommand(command, result => {
-                        if (typeof result === 'string') {
-                            context.setTimeout(() => network.sendMessage(result, [e.player]), 300);
+                        let payload = JSON.parse(result);
+                        context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 300);
+                        if('id' in payload){
+                            id = payload.id;
                         }
                     });
                 }
@@ -133,7 +137,7 @@ const TIMEOUT = 20000;
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.0.0',
+        version: '1.1.0',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

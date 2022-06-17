@@ -442,6 +442,7 @@ class Web {
                     }
                     else if (server._id) {
                         db.ChangeFileName(server._id, filename);
+                        db.UpdateDate(server._id);
                         db.RemoveImages(server._id);
                     }
                     else {
@@ -840,11 +841,19 @@ class Web {
                     let payload = JSON.parse(data);
                     if (payload.type === 'newpark') {
                         server._id = null;
-                        sock.write('done');
+                        sock.write(JSON.stringify({
+                            msg: 'done'
+                        }));
                     }
-                    if (payload.type === 'archive') {
+                    else if (payload.type === 'archive') {
+                        if('id' in payload && payload.id >= 0){
+                            server._id = payload.id;
+                        }
                         await saveServers(null, null, [server], false);
-                        sock.write('done');
+                        sock.write(JSON.stringify({
+                            id: server._id,
+                            msg: 'done'
+                        }));
                     }
                 });
             }

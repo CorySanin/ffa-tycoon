@@ -22,6 +22,7 @@ class DB {
             GETPARK: db.prepare(`SELECT * FROM ${TABLE} WHERE id = @id;`),
             DELETEPARK: db.prepare(`DELETE FROM ${TABLE} WHERE id = @id;`),
             CHANGEFILENAME: db.prepare(`UPDATE ${TABLE} SET filename = @filename WHERE id = @id;`),
+            CHANGEDATE: db.prepare(`UPDATE ${TABLE} SET date = @date WHERE id = @id;`),
             IMAGES: {
                 GETMISSINGTHUMBNAIL: db.prepare(`SELECT * FROM ${TABLE} WHERE thumbnail IS NULL LIMIT 1;`),
                 GETMISSINGIMAGE: db.prepare(`SELECT * FROM ${TABLE} WHERE largeimg IS NULL LIMIT 1;`),
@@ -71,6 +72,13 @@ class DB {
         return this._queries.CHANGEFILENAME.run({
             id,
             filename
+        });
+    }
+
+    UpdateDate(id, date = null) {
+        return this._queries.CHANGEDATE.run({
+            id,
+            date: date || (new Date()).getTime()
         });
     }
 
