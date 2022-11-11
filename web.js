@@ -69,7 +69,13 @@ class Web {
                     this._parklists[file.name] = [];
                 }
             }
-        }).catch(err => console.log(err)).then(this.UpdateAllParkLists);
+        }).catch(err => console.log(err)).then(this.UpdateAllParkLists).then(() => {
+            this._parktypes.forEach(type => {
+                app.get(`/${type}`, (req, res) => {
+                    res.redirect(`https://github.com/CorySanin/ffa-tycoon-parks/tree/master/parks/${type}`);
+                });
+            });
+        });
         setInterval(this.UpdateAllParkLists, 21600000);
 
         app.set('trust proxy', 1);

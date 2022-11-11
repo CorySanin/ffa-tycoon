@@ -23,8 +23,9 @@ const TIMEOUT = 20000;
         }
         else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
+                let type = park.getFlag('noMoney') ? 'sandbox' : 'economy';
                 callback(JSON.stringify({
-                    msg: 'Vote for the next map with "!vote mapname" where mapname is a map from this list: ffa-tycoon.com/parklist' //todo: url for different types, and create redirect
+                    msg: `Vote for the next map with "!vote mapname" where mapname is a map from this list: ffa-tycoon.com/${type}`
                 }));
             }
             else {
@@ -117,7 +118,7 @@ const TIMEOUT = 20000;
                 if (typeof command == 'string' && isPlayerAdmin(getPlayer(e.player))) {
                     doCommand(command, network.getPlayer(e.player), (result: string) => {
                         let payload = JSON.parse(result);
-                        context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 300);
+                        context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
                         if ('id' in payload) {
                             id = payload.id;
                         }
