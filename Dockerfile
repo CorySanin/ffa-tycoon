@@ -1,4 +1,4 @@
-FROM node:16-alpine3.15 as build
+FROM node:16-alpine3.16 as build
 
 WORKDIR /usr/src/ffa-tycoon
 
@@ -6,7 +6,7 @@ COPY ./package*json ./
 
 RUN npm install
 
-FROM node:16-alpine3.15
+FROM node:16-alpine3.16
 
 WORKDIR /usr/src/ffa-tycoon
 
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build && npm install --production && \
  mkdir -p storage/archive storage/config storage/db
 
- USER node
+USER node
 
 EXPOSE 8080
 EXPOSE 8081

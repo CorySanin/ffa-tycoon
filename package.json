@@ -9,26 +9,26 @@
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
-    "better-sqlite3": "7.5.3",
+    "better-sqlite3": "7.6.2",
     "body-parser": "1.19.2",
     "ejs": "3.1.8",
-    "express": "4.18.1",
+    "express": "4.18.2",
     "express-fileupload": "1.4.0",
     "form-data": "4.0.0",
-    "helmet": "5.1.0",
+    "helmet": "6.0.0",
     "json5": "2.2.1",
     "log": "6.3.1",
-    "moment": "2.29.3",
+    "moment": "2.29.4",
     "mv": "2.1.1",
-    "node-fetch": "3.2.4",
-    "prom-client": "14.0.1"
+    "node-fetch": "3.3.0",
+    "prom-client": "14.1.0"
   },
   "devDependencies": {
     "bulma": "0.9.4",
-    "csso": "5.0.3",
-    "sass": "1.52.1",
-    "uglify-js": "3.15.5",
-    "typescript": "4.7.2"
+    "csso": "5.0.5",
+    "sass": "1.56.1",
+    "uglify-js": "3.17.4",
+    "typescript": "4.8.4"
   },
   "repository": {
     "type": "git",

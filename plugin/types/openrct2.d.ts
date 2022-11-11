@@ -107,7 +107,7 @@ declare global {
      * The direction is between 0 and 3.
      */
     interface CoordsXYZD extends CoordsXYZ {
-        direction: number;
+        direction: Direction;
     }
 
     /**
@@ -223,6 +223,12 @@ declare global {
 
         getAllObjects(type: ObjectType): LoadedObject[];
         getAllObjects(type: "ride"): RideObject[];
+
+        /**
+         * Gets the {@link TrackSegment} for the given type.
+         * @param type The track segment type.
+         */
+        getTrackSegment(type: number): TrackSegment | null;
 
         /**
          * Gets a random integer within the specified range using the game's pseudo-
@@ -629,12 +635,21 @@ declare global {
         getAllEntitiesOnTile(type: "car", tilePos: CoordsXY): Car[];
         getAllEntitiesOnTile(type: "litter", tilePos: CoordsXY): Litter[];
         createEntity(type: EntityType, initializer: object): Entity;
+
+        /**
+         * Gets a {@link TrackIterator} for the given track element. This can be used to
+         * iterate through a ride's circuit, segment by segment.
+         * @param location The tile coordinates.
+         * @param elementIndex The index of the track element on the tile.
+         */
+        getTrackIterator(location: CoordsXY, elementIndex: number): TrackIterator | null;
     }
 
     type TileElementType =
         "surface" | "footpath" | "track" | "small_scenery" | "wall" | "entrance" | "large_scenery" | "banner";
 
     type Direction = 0 | 1 | 2 | 3;
+    type Direction8 = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
     type TileElement =
         SurfaceElement | FootpathElement | TrackElement | SmallSceneryElement | WallElement | EntranceElement
@@ -709,6 +724,7 @@ declare global {
         hasChainLift: boolean;
         isInverted: boolean;
         hasCableLift: boolean;
+        isHighlighted: boolean;
     }
 
     interface SmallSceneryElement extends BaseTileElement {
@@ -753,6 +769,7 @@ declare global {
         object: number;
         primaryColour: number;
         secondaryColour: number;
+        tertiaryColour: number;
         bannerIndex: number | null;
         sequence: number;
     }
@@ -861,12 +878,49 @@ declare global {
     }
 
     /**
+     * Represents a VehicleSpriteGroup
+     */
+    interface SpriteGroup {
+        readonly imageId: number;
+        readonly spriteNumImages: number;
+    }
+
+    /**
+     * Represents the sprite groups of a vehicle
+     */
+    interface SpriteGroups {
+        readonly slopeFlat?: SpriteGroup;
+        readonly slopes12?: SpriteGroup;
+        readonly slopes25?: SpriteGroup;
+        readonly slopes42?: SpriteGroup;
+        readonly slopes60?: SpriteGroup;
+        readonly slopes75?: SpriteGroup;
+        readonly slopes90?: SpriteGroup;
+        readonly slopesLoop?: SpriteGroup;
+        readonly slopeInverted?: SpriteGroup;
+        readonly slopes8?: SpriteGroup;
+        readonly slopes16?: SpriteGroup;
+        readonly slopes50?: SpriteGroup;
+        readonly flatBanked22?: SpriteGroup;
+        readonly flatBanked45?: SpriteGroup;
+        readonly flatBanked67?: SpriteGroup;
+        readonly flatBanked90?: SpriteGroup;
+        readonly inlineTwists?: SpriteGroup;
+        readonly slopes12Banked22?: SpriteGroup;
+        readonly slopes8Banked22?: SpriteGroup;
+        readonly slopes25Banked22?: SpriteGroup;
+        readonly slopes25Banked45?: SpriteGroup;
+        readonly slopes12Banked45?: SpriteGroup;
+        readonly corkscrews?: SpriteGroup;
+        readonly restraintAnimation?: SpriteGroup;
+        readonly curvedLiftHill?: SpriteGroup;
+    }
+
+    /**
      * Represents a defined vehicle within a Ride object definition.
      */
     interface RideObjectVehicle {
         readonly rotationFrameMask: number;
-        readonly numVerticalFrames: number;
-        readonly numHorizontalFrames: number;
         readonly spacing: number;
         readonly carMass: number;
         readonly tabHeight: number;
@@ -879,20 +933,7 @@ declare global {
         readonly flags: number;
         readonly baseNumFrames: number;
         readonly baseImageId: number;
-        readonly restraintImageId: number;
-        readonly gentleSlopeImageId: number;
-        readonly steepSlopeImageId: number;
-        readonly verticalSlopeImageId: number;
-        readonly diagonalSlopeImageId: number;
-        readonly bankedImageId: number;
-        readonly inlineTwistImageId: number;
-        readonly flatToGentleBankImageId: number;
-        readonly diagonalToGentleSlopeBankImageId: number;
-        readonly gentleSlopeToBankImageId: number;
-        readonly gentleSlopeBankTurnImageId: number;
-        readonly flatBankToGentleSlopeImageId: number;
-        readonly curvedLiftHillImageId: number;
-        readonly corkscrewImageId: number;
+        readonly spriteGroups: SpriteGroups;
         readonly noVehicleImages: number;
         readonly noSeatingRows: number;
         readonly spinningInertia: number;
@@ -1128,6 +1169,159 @@ declare global {
         exit: CoordsXYZD;
     }
 
+    interface TrackSegment {
+        /**
+         * The track segment type.
+         */
+        readonly type: number;
+
+        /**
+         * Gets the localised description of the track segment.
+         */
+        readonly description: string;
+
+        /**
+         * The relative starting Z position.
+         */
+        readonly beginZ: number;
+
+        /**
+        * The relative starting direction. Usually 0, but will be 4
+        * for diagonal segments.
+        */
+        readonly beginDirection: Direction8;
+
+        /**
+         * The slope angle the segment starts with.
+         */
+        readonly beginAngle: TrackSlope;
+
+        /**
+         * The kind of banking the segment starts with.
+         */
+        readonly beginBank: TrackBanking;
+
+        /**
+         * The relative ending X position.
+         */
+        readonly endX: number;
+
+        /**
+         * The relative ending Y position.
+         */
+        readonly endY: number;
+
+        /**
+         * The relative ending Z position. Negative numbers indicate
+         * that the track ends upside down.
+         */
+        readonly endZ: number;
+
+        /**
+         * The relative ending direction.
+         */
+        readonly endDirection: Direction8;
+
+
+        /**
+         * The slope angle the segment ends with.
+         */
+        readonly endAngle: TrackSlope;
+
+        /**
+         * The kind of banking the segment ends with.
+         */
+        readonly endBank: TrackBanking;
+
+        /**
+         * The length of the segment in RCT track length units.
+         *
+         * *1 metre = 1 / (2 ^ 16)*
+         */
+        readonly length: number;
+
+        /**
+         * Gets a list of the elements that make up the track segment.
+         */
+        readonly elements: TrackSegmentElement[];
+
+        /**
+         * Gets a length of the subpositions list for this track segment.
+         */
+        getSubpositionLength(subpositionType: number, direction: Direction): number;
+
+        /**
+         * Gets all of the subpositions for this track segment. These subpositions are used for the
+         * pathing of vehicles when moving along the track.
+         */
+        getSubpositions(subpositionType: number, direction: Direction): TrackSubposition[];
+    }
+
+    enum TrackSlope {
+        None = 0,
+        Up25 = 2,
+        Up60 = 4,
+        Down25 = 6,
+        Down60 = 8,
+        Up90 = 10,
+        Down90 = 18
+    }
+
+    enum TrackBanking {
+        None = 0,
+        Left = 2,
+        Right = 4,
+        UpsideDown = 15
+    }
+
+    interface TrackSegmentElement extends Readonly<CoordsXYZ> {
+    }
+
+    /**
+     * A single subposition on a track piece. These subpositions are used for the pathing of vehicles
+     * when moving along the track.
+     */
+    interface TrackSubposition extends Readonly<CoordsXYZ> {
+        readonly yaw: number;
+        readonly pitch: TrackSlope;
+        readonly roll: TrackBanking;
+    }
+
+    interface TrackIterator {
+        /**
+         * The position and direction of the current track segment. Usually this is the position of the
+         * first element of the segment, however for some segments, it may be offset.
+         */
+        readonly position: CoordsXYZD;
+
+        /**
+         * The current track segment.
+         */
+        readonly segment: TrackSegment | null;
+
+        /**
+         * Gets the position of where the previous track element should start.
+         */
+        readonly previousPosition: CoordsXYZD | null;
+
+        /**
+         * Gets the position of where the next track element should start.
+         */
+        readonly nextPosition: CoordsXYZD | null;
+
+        /**
+         * Moves the iterator to the previous track segment.
+         * @returns true if there is a previous segment, otherwise false.
+         */
+        previous(): boolean;
+
+        /**
+         * Moves the iterator to the next track segment.
+         * @returns true if there is a next segment, otherwise false.
+         */
+        next(): boolean;
+    }
+
     type EntityType =
         "balloon" |
         "car" |
@@ -1293,6 +1487,12 @@ declare global {
          * The currently projected remaining distance the car will travel.
          */
         readonly remainingDistance: number;
+
+        /**
+         * The type of subposition coordinates that this vehicle is using to find its
+         * position on the track.
+         */
+        readonly subposition: number;
 
         /**
          * List of guest IDs ordered by seat.
@@ -2207,8 +2407,8 @@ declare global {
      */
     interface ScenarioFile {
         id: number;
-        category: "beginner" | "challenging" | "expert" | "real" | "other" | "dlc" | "build_your_own";
-        sourceGame: "rct1" | "rct1_aa" | "rct1_ll" | "rct2" | "rct2_ww" | "rct2_tt" | "real" | "other";
+        category: "beginner" | "challenging" | "expert" | "real" | "other" | "dlc" | "build_your_own" | "competitions";
+        sourceGame: "rct1" | "rct1_aa" | "rct1_ll" | "rct2" | "rct2_ww" | "rct2_tt" | "real" | "extras" | "other";
         path: string;
         internalName: string;
         name: string;
@@ -2339,7 +2539,150 @@ declare global {
         LabelWidget | ListViewWidget | SpinnerWidget | TextBoxWidget | ViewportWidget;
 
     interface WidgetBase {
-        readonly window?: Window;
+        readonly window: Window;
+        readonly type: WidgetType;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+        name: string;
+        tooltip: string;
+        isDisabled: boolean;
+        isVisible: boolean;
+    }
+
+    interface ButtonWidget extends WidgetBase {
+        type: "button";
+        /**
+         * Whether the button has a 3D border.
+         * By default, text buttons have borders and image buttons do not but it can be overridden.
+         */
+        border: boolean;
+        image: number;
+        isPressed: boolean;
+        text: string;
+    }
+
+    interface CheckboxWidget extends WidgetBase {
+        type: "checkbox";
+        text: string;
+        isChecked: boolean;
+    }
+
+    interface ColourPickerWidget extends WidgetBase {
+        type: "colourpicker";
+        colour: number;
+    }
+
+    interface CustomWidget extends WidgetBase {
+        type: "custom";
+    }
+
+    interface DropdownWidget extends WidgetBase {
+        type: "dropdown";
+        items: string[];
+        selectedIndex: number;
+        text: string;
+    }
+
+    interface GroupBoxWidget extends WidgetBase {
+        type: "groupbox";
+        text: string;
+    }
+
+    type TextAlignment = "left" | "centred";
+
+    interface LabelWidget extends WidgetBase {
+        type: "label";
+        text: string;
+        textAlign: TextAlignment;
+    }
+
+
+    type SortOrder = "none" | "ascending" | "descending";
+
+    type ScrollbarType = "none" | "horizontal" | "vertical" | "both";
+
+    interface ListViewColumn {
+        canSort: boolean;
+        sortOrder: SortOrder;
+        header: string;
+        headerTooltip: string;
+        width: number;
+        ratioWidth: number;
+        minWidth: number;
+        maxWidth: number;
+    }
+
+    interface RowColumn {
+        row: number;
+        column: number;
+    }
+
+    interface ListViewWidget extends WidgetBase {
+        type: "listview";
+        scrollbars: ScrollbarType;
+        isStriped: boolean;
+        showColumnHeaders: boolean;
+        columns: ListViewColumn[];
+        items: string[];
+        selectedCell: RowColumn;
+        readonly highlightedCell: RowColumn;
+        canSelect: boolean;
+    }
+
+    interface SpinnerWidget extends WidgetBase {
+        type: "spinner";
+        text: string;
+    }
+
+    interface TextBoxWidget extends WidgetBase {
+        type: "textbox";
+        text: string;
+        maxLength: number;
+    }
+
+    interface ViewportWidget extends WidgetBase {
+        type: "viewport";
+        readonly viewport: Viewport;
+    }
+
+    interface Window {
+        readonly classification: number;
+        readonly number: number;
+        x: number;
+        y: number;
+        /**
+         * The window is resizable (by the user) if and only if minWidth !== maxWidth or minHeight !== maxHeight.
+         * In that case, the window displays a small widget in the lower right corner that the user can use to resize the window by clicking and dragging.
+         *
+         * When writing to width (or height), if the window is resizable, the new value will be clamped to fit the corresponding min/max values.
+         * Otherwise, if the window is not resizable, both the width (or height) and the corresponding min/max values are set to the new value.
+         *
+         * For the default min/max values, see {@link WindowDesc}.
+         */
+        width: number;
+        height: number;
+        minWidth: number;
+        maxWidth: number;
+        minHeight: number;
+        maxHeight: number;
+        readonly isSticky: boolean;
+        colours: number[];
+        title: string;
+        readonly widgets: Widget[];
+        tabIndex: number;
+
+        close(): void;
+        bringToFront(): void;
+        findWidget<T extends Widget>(name: string): T;
+    }
+
+    type WidgetDesc =
+        ButtonDesc | CheckboxDesc | ColourPickerDesc | CustomDesc | DropdownDesc | GroupBoxDesc |
+        LabelDesc | ListViewDesc | SpinnerDesc | TextBoxDesc | ViewportDesc;
+
+    interface WidgetBaseDesc {
         type: WidgetType;
         x: number;
         y: number;
@@ -2351,7 +2694,7 @@ declare global {
         isVisible?: boolean;
     }
 
-    interface ButtonWidget extends WidgetBase {
+    interface ButtonDesc extends WidgetBaseDesc {
         type: "button";
         /**
          * Whether the button has a 3D border.
@@ -2364,57 +2707,40 @@ declare global {
         onClick?: () => void;
     }
 
-    interface CheckboxWidget extends WidgetBase {
+    interface CheckboxDesc extends WidgetBaseDesc {
         type: "checkbox";
         text?: string;
         isChecked?: boolean;
         onChange?: (isChecked: boolean) => void;
     }
 
-    interface ColourPickerWidget extends WidgetBase {
+    interface ColourPickerDesc extends WidgetBaseDesc {
         type: "colourpicker";
         colour?: number;
         onChange?: (colour: number) => void;
     }
 
-    interface CustomWidget extends WidgetBase {
+    interface CustomDesc extends WidgetBaseDesc {
         type: "custom";
         onDraw?: (this: CustomWidget, g: GraphicsContext) => void;
     }
 
-    interface DropdownWidget extends WidgetBase {
+    interface DropdownDesc extends WidgetBaseDesc {
         type: "dropdown";
         items?: string[];
         selectedIndex?: number;
         onChange?: (index: number) => void;
     }
 
-    interface GroupBoxWidget extends WidgetBase {
+    interface GroupBoxDesc extends WidgetBaseDesc {
         type: "groupbox";
         text?: string;
     }
 
-    interface LabelWidget extends WidgetBase {
+    interface LabelDesc extends WidgetBaseDesc {
         type: "label";
         text?: string;
         textAlign?: TextAlignment;
-    }
-
-    type TextAlignment = "left" | "centred";
-
-    type SortOrder = "none" | "ascending" | "descending";
-
-    type ScrollbarType = "none" | "horizontal" | "vertical" | "both";
-
-    interface ListViewColumn {
-        canSort?: boolean;
-        sortOrder?: SortOrder;
-        header?: string;
-        headerTooltip?: string;
-        width?: number;
-        ratioWidth?: number;
-        minWidth?: number;
-        maxWidth?: number;
     }
 
     interface ListViewItemSeperator {
@@ -2429,62 +2755,36 @@ declare global {
         column: number;
     }
 
-    interface ListViewWidget extends WidgetBase {
+    interface ListViewDesc extends WidgetBaseDesc {
         type: "listview";
         scrollbars?: ScrollbarType;
         isStriped?: boolean;
         showColumnHeaders?: boolean;
-        columns?: ListViewColumn[];
+        columns?: Partial<ListViewColumn>[];
         items?: string[] | ListViewItem[];
         selectedCell?: RowColumn;
-        readonly highlightedCell?: RowColumn;
         canSelect?: boolean;
-
         onHighlight?: (item: number, column: number) => void;
         onClick?: (item: number, column: number) => void;
     }
 
-    interface SpinnerWidget extends WidgetBase {
+    interface SpinnerDesc extends WidgetBaseDesc {
         type: "spinner";
         text?: string;
-
         onDecrement?: () => void;
         onIncrement?: () => void;
         onClick?: () => void;
     }
 
-    interface TextBoxWidget extends WidgetBase {
+    interface TextBoxDesc extends WidgetBaseDesc {
         type: "textbox";
         text?: string;
         maxLength?: number;
         onChange?: (text: string) => void;
     }
 
-    interface ViewportWidget extends WidgetBase {
+    interface ViewportDesc extends WidgetBaseDesc {
         type: "viewport";
-        viewport?: Viewport;
-    }
-
-    interface Window {
-        classification: number;
-        number: number;
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-        minWidth: number;
-        maxWidth: number;
-        minHeight: number;
-        maxHeight: number;
-        isSticky: boolean;
-        colours: number[];
-        title: string;
-        widgets: Widget[];
-        tabIndex: number;
-
-        close(): void;
-        bringToFront(): void;
-        findWidget<T extends Widget>(name: string): T;
     }
 
     interface WindowDesc {
@@ -2495,11 +2795,19 @@ declare global {
         height: number;
         title: string;
         id?: number;
+        /**
+         * See {@link Window} for information about the behaviour of min/max width/height after window creation.
+         *
+         * Behaviour during window creation:
+         * If at least one of the parameters min/max width/height is present, the window is considered to be resizable.
+         * In that case, the min values default to zero (if unspecified) and the max values default to 0xFFFF (if unspecified).
+         * Otherwise, the min/max width values default to width and the min/max height values default to height.
+         */
         minWidth?: number;
         minHeight?: number;
         maxWidth?: number;
         maxHeight?: number;
-        widgets?: Widget[];
+        widgets?: WidgetDesc[];
         colours?: number[];
         tabs?: WindowTabDesc[];
         tabIndex?: number;
@@ -2518,7 +2826,7 @@ declare global {
 
     interface WindowTabDesc {
         image: number | ImageAnimation;
-        widgets?: Widget[];
+        widgets?: WidgetDesc[];
     }
 
     interface Viewport {
@@ -2870,7 +3178,7 @@ declare global {
          * - An array of bytes
          * - A {@link Uint8Array} of bytes
          */
-        data: string | number | Uint8Array;
+        data: string | number[] | Uint8Array;
     }
 
     /**
@@ -2887,7 +3195,7 @@ declare global {
          * - An array of bytes
          * - A {@link Uint8Array} of bytes
          */
-        data: string | number | Uint8Array;
+        data: string | number[] | Uint8Array;
     }
 
     /**
@@ -2912,7 +3220,7 @@ declare global {
          * - An array of bytes
          * - A {@link Uint8Array} of bytes
          */
-        data: string | number | Uint8Array;
+        data: string | number[] | Uint8Array;
     }
 
     interface ImageIndexRange {

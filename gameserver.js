@@ -38,6 +38,7 @@ class GameServer {
         this._details = null;
         this._ip = null;
         this._id = null;
+        this._votes = {};
     }
 
     SavePark = async (destination) => {
@@ -79,6 +80,42 @@ class GameServer {
         return false;
     }
 
+    TallyVotes = (allMaps) => {
+        let mapVotes = {};
+        let mostVotes = null;
+        for (let identifier in this._votes) {
+            let map = this._votes[identifier];
+            if (!(map in mapVotes)) {
+                mapVotes[map] = 0;
+            }
+            mapVotes[map]++;
+        }
+        this._votes = {};
+        for (let map in mapVotes) {
+            if (!mostVotes) {
+                mostVotes = [map];
+            }
+            else {
+                let votes = mapVotes[map];
+                let maxVotes = mapVotes[mostVotes[0]];
+                if (votes > maxVotes) {
+                    mostVotes = [map];
+                }
+                else if (votes === maxVotes) {
+                    mostVotes.push(map);
+                }
+            }
+        }
+        if (!mostVotes) {
+            mostVotes = allMaps || [null];
+        }
+        return mostVotes[Math.floor(Math.random() * mostVotes.length)];
+    }
+
+    CastVote = (identifier, map) => {
+        this._votes[identifier] = map;
+    }
+
     GetDetails = async (force = false) => {
         try {
             let d = moment();
@@ -102,7 +139,7 @@ class GameServer {
         try {
             this._ip = (await (util.promisify(dns.lookup)(this._hostname))).address;
         }
-        catch(ex){
+        catch (ex) {
             console.error(`Error while resolving hostname ${this._hostname}: ${ex}`);
         }
         return this._ip;

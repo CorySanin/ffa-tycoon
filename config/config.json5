@@ -1,6 +1,7 @@
 {
     "port": 8080,
     "privateport": 8081,
+    "publicurl": "http://localhost:8080",
     "archivedir": "storage/archive",
     "screenshotter": "screenshotter:8080",
     "db": {

@@ -1,5 +1,6 @@
 var PREFIX = new RegExp('^(!|/)');
 var ARCHIVE = new RegExp('^archive($| )', 'i');
+var VOTE = new RegExp('^(vote|map)($| )', 'i');
 var TIMEOUT = 20000;
 (function () {
     var port = 35712;
@@ -7,7 +8,7 @@ var TIMEOUT = 20000;
     var autoArchive = false;
     var changeMade = false;
     var id = -1;
-    function doCommand(command, callback) {
+    function doCommand(command, caller, callback) {
         var args;
         if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             sendToWeb({
@@ -16,6 +17,22 @@ var TIMEOUT = 20000;
             }, function (resp) {
                 callback(resp);
             });
+        }
+        else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
+            if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
+                callback(JSON.stringify({
+                    msg: 'Vote for the next map with "!vote mapname" where mapname is a map from this list: ffa-tycoon.com/parklist'
+                }));
+            }
+            else {
+                sendToWeb({
+                    type: 'vote',
+                    identifier: caller.ipAddress,
+                    map: args
+                }, function (resp) {
+                    callback(resp);
+                });
+            }
         }
         else {
             return false;
@@ -89,8 +106,8 @@ var TIMEOUT = 20000;
             context.subscribe('network.chat', function (e) {
                 var msg = e.message;
                 var command = getCommand(msg);
-                if (command !== false && isPlayerAdmin(getPlayer(e.player))) {
-                    doCommand(command, function (result) {
+                if (typeof command == 'string' && isPlayerAdmin(getPlayer(e.player))) {
+                    doCommand(command, network.getPlayer(e.player), function (result) {
                         var payload = JSON.parse(result);
                         context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 300);
                         if ('id' in payload) {
@@ -125,7 +142,7 @@ var TIMEOUT = 20000;
     }); }, 5000);
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.1.0',
+        version: '1.2.0',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
