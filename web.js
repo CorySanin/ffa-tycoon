@@ -379,7 +379,7 @@ class Web {
             }
         });
 
-        privateapp.get('/load/:index/?', async (req, res) => {
+        app.get('/load/:index/?', async (req, res) => {
             let serverindex = parseInt(req.params.index);
             if (serverindex < this._servers.length && serverindex >= 0) {
                 let server = this._servers[serverindex];
@@ -875,7 +875,7 @@ class Web {
                 sock.on('data', async data => {
                     let payload = JSON.parse(data);
                     if (payload.type === 'newpark') {
-                        server._id = null;
+                        server.NewPark();
                         sock.write(JSON.stringify({
                             msg: 'done'
                         }));

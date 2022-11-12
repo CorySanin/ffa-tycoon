@@ -90,7 +90,6 @@ class GameServer {
             }
             mapVotes[map]++;
         }
-        this._votes = {};
         for (let map in mapVotes) {
             if (!mostVotes) {
                 mostVotes = [map];
@@ -114,6 +113,11 @@ class GameServer {
 
     CastVote = (identifier, map) => {
         this._votes[identifier] = map;
+    }
+
+    NewPark = () => {
+        this._id = null;
+        this._votes = {};
     }
 
     GetDetails = async (force = false) => {
