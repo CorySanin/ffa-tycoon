@@ -159,6 +159,7 @@ const TIMEOUT = 20000;
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
+        targetApiVersion: 65,
         main
     });
 }());

@@ -22,7 +22,7 @@ var TIMEOUT = 20000;
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
                 var type = park.getFlag('noMoney') ? 'sandbox' : 'economy';
                 callback(JSON.stringify({
-                    msg: "Vote for the next map with \"!vote mapname\" where mapname is a map from this list: ffa-tycoon.com/".concat(type)
+                    msg: "Vote for the next map with \"!vote mapname\" where mapname is a map from this list: ffa-tycoon.com/" + type
                 }));
             }
             else {
@@ -139,7 +139,7 @@ var TIMEOUT = 20000;
     context.setTimeout(function () { return sendToWeb({
         type: 'newpark'
     }, function (resp) {
-        console.log("reset park id: ".concat(resp));
+        console.log("reset park id: " + resp);
     }); }, 5000);
     registerPlugin({
         name: 'ffa-tycoon',
@@ -147,6 +147,7 @@ var TIMEOUT = 20000;
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
+        targetApiVersion: 65,
         main: main
     });
 }());
