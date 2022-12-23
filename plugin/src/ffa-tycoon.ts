@@ -1,6 +1,7 @@
 /// <reference path="../types/openrct2.d.ts" />
 const PREFIX = new RegExp('^(!|/)');
 const ARCHIVE = new RegExp('^archive($| )', 'i');
+const VOTE = new RegExp('^(vote|map)($| )', 'i');
 const TIMEOUT = 20000;
 
 (function () {
@@ -10,15 +11,32 @@ const TIMEOUT = 20000;
     let changeMade = false;
     let id = -1;
 
-    function doCommand(command, callback) {
+    function doCommand(command: string, caller: Player, callback) {
         let args: any;
         if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             sendToWeb({
                 type: 'archive',
                 id
-            }, resp => {
+            }, (resp: string) => {
                 callback(resp);
             });
+        }
+        else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
+            if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
+                let type = park.getFlag('noMoney') ? 'sandbox' : 'economy';
+                callback(JSON.stringify({
+                    msg: `Vote for the next map with "!vote mapname" where mapname is a map from this list: ffa-tycoon.com/${type}`
+                }));
+            }
+            else {
+                sendToWeb({
+                    type: 'vote',
+                    identifier: caller.ipAddress,
+                    map: args
+                }, (resp: string) => {
+                    callback(resp);
+                });
+            }
         }
         else {
             return false;
@@ -97,11 +115,11 @@ const TIMEOUT = 20000;
             context.subscribe('network.chat', (e) => {
                 let msg = e.message;
                 let command = getCommand(msg);
-                if (command !== false && isPlayerAdmin(getPlayer(e.player))) {
-                    doCommand(command, result => {
+                if (typeof command == 'string' && isPlayerAdmin(getPlayer(e.player))) {
+                    doCommand(command, network.getPlayer(e.player), (result: string) => {
                         let payload = JSON.parse(result);
-                        context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 300);
-                        if('id' in payload){
+                        context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
+                        if ('id' in payload) {
                             id = payload.id;
                         }
                     });
@@ -137,10 +155,11 @@ const TIMEOUT = 20000;
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.1.0',
+        version: '1.2.0',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
+        targetApiVersion: 65,
         main
     });
 }());

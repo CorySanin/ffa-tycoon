@@ -37,6 +37,10 @@ const genNonceForCSP = (length = 16) => {
     return chars.join('');
 }
 
+const standardizeMapName = (name) => {
+    return name.split('.')[0].split('-')[0].toLowerCase();
+}
+
 class Web {
     constructor(options = {}) {
         const that = this;
@@ -46,10 +50,12 @@ class Web {
         const port = process.env.PORT || options.port || 8080;
         const privateport = process.env.PRIVATEPORT || options.privateport || 8081;
         const pluginport = process.env.PLUGINPORT || options.pluginport || 35712;
+        const publicurl = process.env.PUBLICURL || options.publicurl || '';
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
         this._parktypes = [];
+        this._parklists = {};
         this._prom = prom.register;
 
         (options.servers || []).forEach(serverinfo => {
@@ -60,9 +66,17 @@ class Web {
             for (const file of files) {
                 if (file.isDirectory()) {
                     this._parktypes.push(file.name);
+                    this._parklists[file.name] = [];
                 }
             }
-        }).catch(err => console.log(err));
+        }).catch(err => console.log(err)).then(this.UpdateAllParkLists).then(() => {
+            this._parktypes.forEach(type => {
+                app.get(`/${type}`, (req, res) => {
+                    res.redirect(`https://github.com/CorySanin/ffa-tycoon-parks/tree/master/parks/${type}`);
+                });
+            });
+        });
+        setInterval(this.UpdateAllParkLists, 21600000);
 
         app.set('trust proxy', 1);
         app.set('view engine', 'ejs');
@@ -300,11 +314,11 @@ class Web {
         privateapp.get('/park/:park', async (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
             let files = [];
-            try{
+            try {
                 files = await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true });
                 files = files.filter(f => (f.isFile() && f.name.toLowerCase().endsWith('.park'))).map(f => f.name).reverse();
             }
-            catch(ex){
+            catch (ex) {
                 console.error(ex);
             }
             if (park) {
@@ -315,7 +329,8 @@ class Web {
                             title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
                         },
                         park,
-                        files
+                        files,
+                        publicurl
                     },
                     function (err, html) {
                         if (!err) {
@@ -353,6 +368,26 @@ class Web {
                 let file = files[Math.floor(Math.random() * files.length)];
                 res.set('Content-Disposition', `attachment; filename="${file}"`);
                 res.sendFile(path.join(dir, file), (err) => {
+                    if (err) {
+                        res.status(500).send('500 server error');
+                        console.log(`Error sending park file: ${err}`);
+                    }
+                });
+            }
+            else {
+                res.status(404).send('404');
+            }
+        });
+
+        app.get('/load/:index/?', async (req, res) => {
+            let serverindex = parseInt(req.params.index);
+            if (serverindex < this._servers.length && serverindex >= 0) {
+                let server = this._servers[serverindex];
+                let type = server._mode === 'free for all economy' ? 'economy' : 'sandbox';
+                let park = server.TallyVotes(that._parklists[type]);
+                let filename = `${park}-${type}.park`;
+                res.set('Content-Disposition', `attachment; filename="${filename}"`);
+                res.sendFile(path.join(__dirname, 'parks', type, filename), (err) => {
                     if (err) {
                         res.status(500).send('500 server error');
                         console.log(`Error sending park file: ${err}`);
@@ -840,13 +875,13 @@ class Web {
                 sock.on('data', async data => {
                     let payload = JSON.parse(data);
                     if (payload.type === 'newpark') {
-                        server._id = null;
+                        server.NewPark();
                         sock.write(JSON.stringify({
                             msg: 'done'
                         }));
                     }
                     else if (payload.type === 'archive') {
-                        if('id' in payload && payload.id >= 0){
+                        if ('id' in payload && payload.id >= 0) {
                             server._id = payload.id;
                         }
                         await saveServers(null, null, [server], false);
@@ -854,6 +889,34 @@ class Web {
                             id: server._id,
                             msg: 'done'
                         }));
+                    }
+                    else if (payload.type === 'vote') {
+                        let type = server._mode === 'free for all economy' ? 'economy' : 'sandbox';
+                        let map = standardizeMapName(payload.map || '').replaceAll(' ', '_');
+                        if (map && map.length > 0) {
+                            let possibleMatches = that._parklists[type].filter(p => p.startsWith(map));
+                            if (possibleMatches.length == 1) {
+                                server.CastVote(payload.identifier || 'null', possibleMatches[0]);
+                                sock.write(JSON.stringify({
+                                    msg: `vote for ${possibleMatches[0]} cast`
+                                }));
+                            }
+                            else if (possibleMatches.length == 0) {
+                                sock.write(JSON.stringify({
+                                    msg: `${map} is not a valid map. Go to ffa-tycoon.com/${type} for the map list.`
+                                }));
+                            }
+                            else {
+                                sock.write(JSON.stringify({
+                                    msg: `Multiple maps found: ${possibleMatches.join(', ')}`
+                                }));
+                            }
+                        }
+                        else {
+                            sock.write(JSON.stringify({
+                                msg: `That is not a valid map. Go to ffa-tycoon.com/${type} for the map list.`
+                            }));
+                        }
                     }
                 });
             }
@@ -878,6 +941,17 @@ class Web {
                 status: 'bad'
             };
         }
+    }
+
+    UpdateAllParkLists = async () => {
+        let prom = [];
+        this._parktypes.forEach(parktype => {
+            prom.push((async () => {
+                let dir = path.join(__dirname, 'parks', parktype);
+                this._parklists[parktype] = (await fsp.readdir(dir)).map(standardizeMapName);
+            })());
+        });
+        await Promise.all(prom);
     }
 
     close() {

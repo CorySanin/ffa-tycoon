@@ -20,6 +20,7 @@ services:
    openrct2-dev:
       container_name: openrct2-for-ffatycoon-dev
       image: corysanin/openrct2-cli:develop-ubuntu
+      restart: unless-stopped
       depends_on:
          - ffa-tycoon
       ports:
@@ -29,13 +30,16 @@ services:
          - 35711
       volumes:
          - ./storage/server-01:/home/openrct2/.config/OpenRCT2
+         - ./plugin/lib:/home/openrct2/.config/OpenRCT2/plugin/ffatycoon
+         - ../ffa-tycoon-parks/object:/ffa-objects
       command:
          - "host"
-         - "https://ffa-tycoon.com/parks/sandbox"
+         - "http://ffa-tycoon:8080/load/0"
    
    openrct2-release:
       container_name: openrct2-for-ffatycoon-release
       image: corysanin/openrct2-cli:latest-ubuntu
+      restart: unless-stopped
       depends_on:
          - ffa-tycoon
       ports:
@@ -44,9 +48,11 @@ services:
          - 35711
       volumes:
          - ./storage/server-02:/home/openrct2/.config/OpenRCT2
+         - ./plugin/lib:/home/openrct2/.config/OpenRCT2/plugin/ffatycoon
+         - ../ffa-tycoon-parks/object:/ffa-objects
       command:
          - "host"
-         - "https://ffa-tycoon.com/parks/sandbox"
+         - "http://ffa-tycoon:8080/load/1"
    
    screenshotter:
       container_name: screenshotter-for-ffatycoon
