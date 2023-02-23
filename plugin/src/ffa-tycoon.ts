@@ -58,7 +58,7 @@ const TIMEOUT = 20000;
             sock.destroy(new Error('no error'));
             callback(data);
         });
-        let s = sock.connect(port, hostname, () => {
+        sock.connect(port, hostname, () => {
             sock.write(msg as string);
         });
     }
@@ -144,14 +144,14 @@ const TIMEOUT = 20000;
                     }
                 });
             }
+
+            context.setTimeout(() => sendToWeb({
+                type: 'newpark'
+            }, resp => {
+                console.log(`reset park id: ${resp}`);
+            }), 5000);
         }
     }
-
-    context.setTimeout(() => sendToWeb({
-        type: 'newpark'
-    }, resp => {
-        console.log(`reset park id: ${resp}`);
-    }), 5000);
 
     registerPlugin({
         name: 'ffa-tycoon',

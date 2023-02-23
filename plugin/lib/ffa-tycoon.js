@@ -22,7 +22,7 @@ var TIMEOUT = 20000;
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
                 var type = park.getFlag('noMoney') ? 'sandbox' : 'economy';
                 callback(JSON.stringify({
-                    msg: "Vote for the next map with \"!vote mapname\" where mapname is a map from this list: ffa-tycoon.com/" + type
+                    msg: "Vote for the next map with \"!vote mapname\" where mapname is a map from this list: ffa-tycoon.com/".concat(type)
                 }));
             }
             else {
@@ -54,7 +54,7 @@ var TIMEOUT = 20000;
             sock.destroy(new Error('no error'));
             callback(data);
         });
-        var s = sock.connect(port, hostname, function () {
+        sock.connect(port, hostname, function () {
             sock.write(msg);
         });
     }
@@ -134,13 +134,13 @@ var TIMEOUT = 20000;
                     }
                 });
             }
+            context.setTimeout(function () { return sendToWeb({
+                type: 'newpark'
+            }, function (resp) {
+                console.log("reset park id: ".concat(resp));
+            }); }, 5000);
         }
     }
-    context.setTimeout(function () { return sendToWeb({
-        type: 'newpark'
-    }, function (resp) {
-        console.log("reset park id: " + resp);
-    }); }, 5000);
     registerPlugin({
         name: 'ffa-tycoon',
         version: '1.2.0',
