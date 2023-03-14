@@ -1,6 +1,7 @@
 var PREFIX = new RegExp('^(!|/)');
 var ARCHIVE = new RegExp('^archive($| )', 'i');
 var VOTE = new RegExp('^(vote|map)($| )', 'i');
+var RULES = new RegExp('^(rules|faq)($| )', 'i');
 var TIMEOUT = 20000;
 (function () {
     var port = 35712;
@@ -10,13 +11,16 @@ var TIMEOUT = 20000;
     var id = -1;
     function doCommand(command, caller, callback) {
         var args;
-        if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
+        if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             sendToWeb({
                 type: 'archive',
                 id: id
             }, function (resp) {
                 callback(resp);
             });
+        }
+        else if ((args = doesCommandMatch(command, [RULES])) !== false) {
+            context.setTimeout(function () { return network.sendMessage('https://ffa-tycoon.com/rules'); }, 200);
         }
         else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
@@ -107,7 +111,7 @@ var TIMEOUT = 20000;
             context.subscribe('network.chat', function (e) {
                 var msg = e.message;
                 var command = getCommand(msg);
-                if (typeof command == 'string' && isPlayerAdmin(getPlayer(e.player))) {
+                if (typeof command == 'string') {
                     doCommand(command, network.getPlayer(e.player), function (result) {
                         var payload = JSON.parse(result);
                         context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 200);
@@ -143,7 +147,7 @@ var TIMEOUT = 20000;
     }
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.0',
+        version: '1.2.1',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

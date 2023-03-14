@@ -2,6 +2,7 @@
 const PREFIX = new RegExp('^(!|/)');
 const ARCHIVE = new RegExp('^archive($| )', 'i');
 const VOTE = new RegExp('^(vote|map)($| )', 'i');
+const RULES = new RegExp('^(rules|faq)($| )', 'i');
 const TIMEOUT = 20000;
 
 (function () {
@@ -13,13 +14,16 @@ const TIMEOUT = 20000;
 
     function doCommand(command: string, caller: Player, callback) {
         let args: any;
-        if ((args = doesCommandMatch(command, [ARCHIVE])) !== false) {
+        if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             sendToWeb({
                 type: 'archive',
                 id
             }, (resp: string) => {
                 callback(resp);
             });
+        }
+        else if ((args = doesCommandMatch(command, [RULES])) !== false) {
+            context.setTimeout(() => network.sendMessage('https://ffa-tycoon.com/rules'), 200);
         }
         else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
@@ -115,7 +119,7 @@ const TIMEOUT = 20000;
             context.subscribe('network.chat', (e) => {
                 let msg = e.message;
                 let command = getCommand(msg);
-                if (typeof command == 'string' && isPlayerAdmin(getPlayer(e.player))) {
+                if (typeof command == 'string') {
                     doCommand(command, network.getPlayer(e.player), (result: string) => {
                         let payload = JSON.parse(result);
                         context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
@@ -155,7 +159,7 @@ const TIMEOUT = 20000;
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.0',
+        version: '1.2.1',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
