@@ -1,16 +1,23 @@
 /// <reference path="../types/openrct2.d.ts" />
-const PREFIX = new RegExp('^(!|/)');
-const ARCHIVE = new RegExp('^archive($| )', 'i');
-const VOTE = new RegExp('^(vote|map)($| )', 'i');
-const RULES = new RegExp('^(rules|faq)($| )', 'i');
-const TIMEOUT = 20000;
+interface MotdArgs {
+    motd: string
+}
 
 (function () {
+    const PREFIX = new RegExp('^(!|/)');
+    const ARCHIVE = new RegExp('^archive($| )', 'i');
+    const VOTE = new RegExp('^(vote|map)($| )', 'i');
+    const RULES = new RegExp('^(rules|faq)($| )', 'i');
+    const TIMEOUT = 20000;
+    const ACTION_NAME = 'motdget';
+    const result: GameActionResult = { error: 0 };
+
     let port = 35712;
     let hostname = 'ffa-tycoon';
     let autoArchive = false;
     let changeMade = false;
     let id = -1;
+    let motd = null;
 
     function doCommand(command: string, caller: Player, callback) {
         let args: any;
@@ -48,7 +55,7 @@ const TIMEOUT = 20000;
         return true;
     }
 
-    function sendToWeb(msg: string | object, callback) {
+    function sendToWeb(msg: string | object, callback: (value: string | false) => void) {
         if (typeof msg !== 'string') {
             msg = JSON.stringify(msg);
         }
@@ -154,12 +161,94 @@ const TIMEOUT = 20000;
             }, resp => {
                 console.log(`reset park id: ${resp}`);
             }), 5000);
+
+            context.registerAction<MotdArgs>(ACTION_NAME,
+                () => result,
+                () => result);
+
+            context.subscribe('network.join', e => {
+                sendToWeb({
+                    type: 'motd'
+                }, msg => {
+                    if (msg && msg.length) {
+                        motd = JSON.parse(msg).msg;
+                        if (motd && motd.length) {
+                            context.executeAction(ACTION_NAME, {
+                                motd
+                            } as MotdArgs);
+                        }
+                    }
+                });
+            });
+        }
+        else {
+            context.registerAction<MotdArgs>(ACTION_NAME,
+                () => result,
+                (args) => {
+                    // args.motd is for api version 65
+                    // @ts-ignore
+                    const README = args.motd || args.args.motd;
+                    if (motd === null && README && README.length) {
+                        const LINEHEIGHT = 14;
+                        const CHARWIDTH = 5;
+                        const BUTTONHEIGHT = LINEHEIGHT * 3;
+                        const LABELNAME = 'labelNo';
+                        let windowInitialSize: CoordsXY = { x: 0, y: 0 };
+                        let widgets: WidgetDesc[] = [];
+                        let lines = 0;
+                        let width = 42;
+                        function getBtnPosition(windowDimensions: CoordsXY): CoordsXY {
+                            return {
+                                y: windowDimensions.y - BUTTONHEIGHT - (LINEHEIGHT / 2),
+                                x: windowDimensions.x / 2 - 100
+                            }
+                        }
+                        README.split('\n').forEach((text, index) => {
+                            width = Math.max(width, text.length);
+                            widgets.push({
+                                type: 'label',
+                                name: LABELNAME + index,
+                                x: 8,
+                                y: 20 + (LINEHEIGHT * index),
+                                width: width * CHARWIDTH + 20,
+                                height: LINEHEIGHT,
+                                text
+                            });
+                            lines++;
+                        });
+                        windowInitialSize.y = lines * (LINEHEIGHT) + (LINEHEIGHT * 4) + 20;
+                        windowInitialSize.x = width * CHARWIDTH + 32;
+                        widgets.push({
+                            type: 'button',
+                            name: 'closebtn',
+                            width: 200,
+                            height: BUTTONHEIGHT,
+                            text: 'Close',
+                            x: getBtnPosition(windowInitialSize).x,
+                            y: getBtnPosition(windowInitialSize).y,
+                            onClick: () => ui.getWindow(welcomeWindow.classification).close()
+                        });
+                        let welcomeWindow: WindowDesc = {
+                            classification: 'ffatycoonwelcome',
+                            title: 'Welcome!',
+                            x: 400,
+                            y: 200,
+                            width: windowInitialSize.x,
+                            height: windowInitialSize.y,
+                            colours: [7, 7],
+                            widgets
+                        }
+                        ui.openWindow(welcomeWindow);
+                    }
+                    motd = true;
+                    return result;
+                });
         }
     }
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.1',
+        version: '1.2.2',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

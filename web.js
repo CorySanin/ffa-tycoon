@@ -51,6 +51,7 @@ class Web {
         const privateport = process.env.PRIVATEPORT || options.privateport || 8081;
         const pluginport = process.env.PLUGINPORT || options.pluginport || 35712;
         const publicurl = process.env.PUBLICURL || options.publicurl || '';
+        const defaultMotd = process.env.MOTD || options.motd || null;
         this._screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this._archive = options.archivedir || 'storage/archive';
         this._servers = [];
@@ -59,6 +60,7 @@ class Web {
         this._prom = prom.register;
 
         (options.servers || []).forEach(serverinfo => {
+            serverinfo.motd = (serverinfo.motd === undefined) ? defaultMotd : serverinfo.motd;
             this._servers.push(new GameServer(serverinfo));
         });
 
@@ -888,6 +890,12 @@ class Web {
                         sock.write(JSON.stringify({
                             id: server._id,
                             msg: 'done'
+                        }));
+                    }
+                    else if (payload.type === 'motd') {
+                        sock.write(JSON.stringify({
+                            id: server._id,
+                            msg: await server.GetMOTD()
                         }));
                     }
                     else if (payload.type === 'vote') {

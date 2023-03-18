@@ -43,7 +43,7 @@ services:
       depends_on:
          - ffa-tycoon
       ports:
-         - 11754:11754
+         - 11752:11752
       expose:
          - 35711
       volumes:

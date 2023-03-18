@@ -32,6 +32,7 @@ class GameServer {
         this._name = server.name || 'server';
         this._group = server.group || 'default';
         this._mode = server.gamemode || 'multiplayer';
+        this._motd = server.motd || null;
         this._hostname = server.hostname || '127.0.0.1';
         this._port = server.port || REMOTEPORT;
         this._dir = server.dir || false;
@@ -147,6 +148,15 @@ class GameServer {
             console.error(`Error while resolving hostname ${this._hostname}: ${ex}`);
         }
         return this._ip;
+    }
+
+    GetMOTD = async () => {
+        if (this._motd) {
+            return fsp.readFile(this._motd, 'utf-8');
+        }
+        else {
+            return null;
+        }
     }
 
     Execute = (command) => {
