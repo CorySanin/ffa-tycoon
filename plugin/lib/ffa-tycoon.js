@@ -163,59 +163,20 @@
             });
         }
         else {
+            var LINEHEIGHT_1 = 14;
+            var BUTTONHEIGHT_1 = LINEHEIGHT_1 * 3;
+            function getBtnPosition(windowDimensions) {
+                return {
+                    y: windowDimensions.y - BUTTONHEIGHT_1 - (LINEHEIGHT_1 / 2),
+                    x: windowDimensions.x / 2 - 100
+                };
+            }
+            function createReadmeWindow(readme) {
+            }
             context.registerAction(ACTION_NAME, function () { return result; }, function (args) {
                 var README = args.motd || args.args.motd;
                 if (motd === null && README && README.length) {
-                    var LINEHEIGHT_1 = 14;
-                    var CHARWIDTH_1 = 5;
-                    var BUTTONHEIGHT_1 = LINEHEIGHT_1 * 3;
-                    var LABELNAME_1 = 'labelNo';
-                    var windowInitialSize = { x: 0, y: 0 };
-                    var widgets_1 = [];
-                    var lines_1 = 0;
-                    var width_1 = 42;
-                    function getBtnPosition(windowDimensions) {
-                        return {
-                            y: windowDimensions.y - BUTTONHEIGHT_1 - (LINEHEIGHT_1 / 2),
-                            x: windowDimensions.x / 2 - 100
-                        };
-                    }
-                    README.split('\n').forEach(function (text, index) {
-                        width_1 = Math.max(width_1, text.length);
-                        widgets_1.push({
-                            type: 'label',
-                            name: LABELNAME_1 + index,
-                            x: 8,
-                            y: 20 + (LINEHEIGHT_1 * index),
-                            width: width_1 * CHARWIDTH_1 + 20,
-                            height: LINEHEIGHT_1,
-                            text: text
-                        });
-                        lines_1++;
-                    });
-                    windowInitialSize.y = lines_1 * (LINEHEIGHT_1) + (LINEHEIGHT_1 * 4) + 20;
-                    windowInitialSize.x = width_1 * CHARWIDTH_1 + 32;
-                    widgets_1.push({
-                        type: 'button',
-                        name: 'closebtn',
-                        width: 200,
-                        height: BUTTONHEIGHT_1,
-                        text: 'Close',
-                        x: getBtnPosition(windowInitialSize).x,
-                        y: getBtnPosition(windowInitialSize).y,
-                        onClick: function () { return ui.getWindow(welcomeWindow_1.classification).close(); }
-                    });
-                    var welcomeWindow_1 = {
-                        classification: 'ffatycoonwelcome',
-                        title: 'Welcome!',
-                        x: 400,
-                        y: 200,
-                        width: windowInitialSize.x,
-                        height: windowInitialSize.y,
-                        colours: [7, 7],
-                        widgets: widgets_1
-                    };
-                    ui.openWindow(welcomeWindow_1);
+                    createReadmeWindow(README);
                 }
                 motd = true;
                 return result;
@@ -224,7 +185,7 @@
     }
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.2',
+        version: '1.2.3',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
