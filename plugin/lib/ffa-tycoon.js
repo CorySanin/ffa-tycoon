@@ -146,41 +146,6 @@
             }, function (resp) {
                 console.log("reset park id: ".concat(resp));
             }); }, 5000);
-            context.registerAction(ACTION_NAME, function () { return result; }, function () { return result; });
-            context.subscribe('network.join', function (e) {
-                sendToWeb({
-                    type: 'motd'
-                }, function (msg) {
-                    if (msg && msg.length) {
-                        motd = JSON.parse(msg).msg;
-                        if (motd && motd.length) {
-                            context.executeAction(ACTION_NAME, {
-                                motd: motd
-                            });
-                        }
-                    }
-                });
-            });
-        }
-        else {
-            var LINEHEIGHT_1 = 14;
-            var BUTTONHEIGHT_1 = LINEHEIGHT_1 * 3;
-            function getBtnPosition(windowDimensions) {
-                return {
-                    y: windowDimensions.y - BUTTONHEIGHT_1 - (LINEHEIGHT_1 / 2),
-                    x: windowDimensions.x / 2 - 100
-                };
-            }
-            function createReadmeWindow(readme) {
-            }
-            context.registerAction(ACTION_NAME, function () { return result; }, function (args) {
-                var README = args.motd || args.args.motd;
-                if (motd === null && README && README.length) {
-                    createReadmeWindow(README);
-                }
-                motd = true;
-                return result;
-            });
         }
     }
     registerPlugin({

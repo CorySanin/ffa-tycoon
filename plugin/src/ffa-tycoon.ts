@@ -161,97 +161,96 @@ interface MotdArgs {
             }, resp => {
                 console.log(`reset park id: ${resp}`);
             }), 5000);
-
-            context.registerAction<MotdArgs>(ACTION_NAME,
-                () => result,
-                () => result);
-
-            context.subscribe('network.join', e => {
-                sendToWeb({
-                    type: 'motd'
-                }, msg => {
-                    if (msg && msg.length) {
-                        motd = JSON.parse(msg).msg;
-                        if (motd && motd.length) {
-                            context.executeAction(ACTION_NAME, {
-                                motd
-                            } as MotdArgs);
-                        }
-                    }
-                });
-            });
-        }
-        else {
-            const LINEHEIGHT = 14;
-            const BUTTONHEIGHT = LINEHEIGHT * 3;
-
-
-            function getBtnPosition(windowDimensions: CoordsXY): CoordsXY {
-                return {
-                    y: windowDimensions.y - BUTTONHEIGHT - (LINEHEIGHT / 2),
-                    x: windowDimensions.x / 2 - 100
-                }
-            }
-
             // doesn't work in release yet 😡
-            function createReadmeWindow(readme: string) {
-                // const CHARWIDTH = 5;
-                // const LABELNAME = 'labelNo';
-                // const CLASS = 'ffatycoonwelcome';
-                // let windowInitialSize: CoordsXY = { x: 0, y: 0 };
-                // let widgets: WidgetDesc[] = [];
-                // let width = 42;
+            // context.registerAction<MotdArgs>(ACTION_NAME,
+            //     () => result,
+            //     () => result);
 
-                // readme.split('\n').forEach((text, index) => {
-                //     width = Math.max(width, text.length);
-                //     widgets.push({
-                //         type: 'label',
-                //         name: LABELNAME + index,
-                //         x: 8,
-                //         y: 20 + (LINEHEIGHT * index),
-                //         width: width * CHARWIDTH + 20,
-                //         height: LINEHEIGHT,
-                //         text
-                //     });
-                // });
-                // windowInitialSize.y = widgets.length * (LINEHEIGHT) + (LINEHEIGHT * 4) + 20;
-                // windowInitialSize.x = width * CHARWIDTH + 32;
-                // widgets.push({
-                //     type: 'button',
-                //     name: 'closebtn',
-                //     width: 200,
-                //     height: BUTTONHEIGHT,
-                //     text: 'Close',
-                //     x: getBtnPosition(windowInitialSize).x,
-                //     y: getBtnPosition(windowInitialSize).y,
-                //     onClick: () => ui.getWindow(CLASS).close()
-                // });
-                // let welcomeWindow: WindowDesc = {
-                //     classification: CLASS,
-                //     title: 'Welcome!',
-                //     x: 400,
-                //     y: 200,
-                //     width: windowInitialSize.x,
-                //     height: windowInitialSize.y,
-                //     colours: [7, 7],
-                //     widgets
-                // }
-                // ui.openWindow(welcomeWindow);
-            }
-
-            context.registerAction<MotdArgs>(ACTION_NAME,
-                () => result,
-                (args) => {
-                    // args.motd is for api version 65
-                    // @ts-ignore
-                    const README = args.motd || args.args.motd;
-                    if (motd === null && README && README.length) {
-                        createReadmeWindow(README);
-                    }
-                    motd = true;
-                    return result;
-                });
+            // context.subscribe('network.join', e => {
+            //     sendToWeb({
+            //         type: 'motd'
+            //     }, msg => {
+            //         if (msg && msg.length) {
+            //             motd = JSON.parse(msg).msg;
+            //             if (motd && motd.length) {
+            //                 context.executeAction(ACTION_NAME, {
+            //                     motd
+            //                 } as MotdArgs);
+            //             }
+            //         }
+            //     });
+            // });
         }
+        // else {
+        //     const LINEHEIGHT = 14;
+        //     const BUTTONHEIGHT = LINEHEIGHT * 3;
+
+
+        //     function getBtnPosition(windowDimensions: CoordsXY): CoordsXY {
+        //         return {
+        //             y: windowDimensions.y - BUTTONHEIGHT - (LINEHEIGHT / 2),
+        //             x: windowDimensions.x / 2 - 100
+        //         }
+        //     }
+
+        //     function createReadmeWindow(readme: string) {
+        //         // const CHARWIDTH = 5;
+        //         // const LABELNAME = 'labelNo';
+        //         // const CLASS = 'ffatycoonwelcome';
+        //         // let windowInitialSize: CoordsXY = { x: 0, y: 0 };
+        //         // let widgets: WidgetDesc[] = [];
+        //         // let width = 42;
+
+        //         // readme.split('\n').forEach((text, index) => {
+        //         //     width = Math.max(width, text.length);
+        //         //     widgets.push({
+        //         //         type: 'label',
+        //         //         name: LABELNAME + index,
+        //         //         x: 8,
+        //         //         y: 20 + (LINEHEIGHT * index),
+        //         //         width: width * CHARWIDTH + 20,
+        //         //         height: LINEHEIGHT,
+        //         //         text
+        //         //     });
+        //         // });
+        //         // windowInitialSize.y = widgets.length * (LINEHEIGHT) + (LINEHEIGHT * 4) + 20;
+        //         // windowInitialSize.x = width * CHARWIDTH + 32;
+        //         // widgets.push({
+        //         //     type: 'button',
+        //         //     name: 'closebtn',
+        //         //     width: 200,
+        //         //     height: BUTTONHEIGHT,
+        //         //     text: 'Close',
+        //         //     x: getBtnPosition(windowInitialSize).x,
+        //         //     y: getBtnPosition(windowInitialSize).y,
+        //         //     onClick: () => ui.getWindow(CLASS).close()
+        //         // });
+        //         // let welcomeWindow: WindowDesc = {
+        //         //     classification: CLASS,
+        //         //     title: 'Welcome!',
+        //         //     x: 400,
+        //         //     y: 200,
+        //         //     width: windowInitialSize.x,
+        //         //     height: windowInitialSize.y,
+        //         //     colours: [7, 7],
+        //         //     widgets
+        //         // }
+        //         // ui.openWindow(welcomeWindow);
+        //     }
+
+        //     context.registerAction<MotdArgs>(ACTION_NAME,
+        //         () => result,
+        //         (args) => {
+        //             // args.motd is for api version 65
+        //             // @ts-ignore
+        //             const README = args.motd || args.args.motd;
+        //             if (motd === null && README && README.length) {
+        //                 createReadmeWindow(README);
+        //             }
+        //             motd = true;
+        //             return result;
+        //         });
+        // }
     }
 
     registerPlugin({
