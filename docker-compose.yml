@@ -19,7 +19,7 @@ services:
 
    openrct2-dev:
       container_name: openrct2-for-ffatycoon-dev
-      image: corysanin/openrct2-cli:develop-ubuntu
+      image: corysanin/openrct2-cli:develop-alpine
       restart: unless-stopped
       depends_on:
          - ffa-tycoon
@@ -31,6 +31,8 @@ services:
       volumes:
          - ./storage/server-01:/home/openrct2/.config/OpenRCT2
          - ./plugin/lib:/home/openrct2/.config/OpenRCT2/plugin/ffatycoon
+         - ../openrct2-ffa-plugin-suite/lib:/home/openrct2/.config/OpenRCT2/plugin/pluginsuite
+         - ../openrct2-remote-control/lib:/home/openrct2/.config/OpenRCT2/plugin/remote
          - ../ffa-tycoon-parks/object:/ffa-objects
       command:
          - "host"
@@ -38,7 +40,7 @@ services:
    
    openrct2-release:
       container_name: openrct2-for-ffatycoon-release
-      image: corysanin/openrct2-cli:latest-ubuntu
+      image: corysanin/openrct2-cli:latest-alpine
       restart: unless-stopped
       depends_on:
          - ffa-tycoon
@@ -49,6 +51,8 @@ services:
       volumes:
          - ./storage/server-02:/home/openrct2/.config/OpenRCT2
          - ./plugin/lib:/home/openrct2/.config/OpenRCT2/plugin/ffatycoon
+         - ../openrct2-ffa-plugin-suite/lib:/home/openrct2/.config/OpenRCT2/plugin/pluginsuite
+         - ../openrct2-remote-control/lib:/home/openrct2/.config/OpenRCT2/plugin/remote
          - ../ffa-tycoon-parks/object:/ffa-objects
       command:
          - "host"

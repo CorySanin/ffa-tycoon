@@ -146,6 +146,82 @@
             }, function (resp) {
                 console.log("reset park id: ".concat(resp));
             }); }, 5000);
+            context.registerAction(ACTION_NAME, function () { return result; }, function () { return result; });
+            context.subscribe('network.join', function (e) {
+                sendToWeb({
+                    type: 'motd'
+                }, function (msg) {
+                    if (msg && msg.length) {
+                        motd = JSON.parse(msg).msg;
+                        if (motd && motd.length) {
+                            context.executeAction(ACTION_NAME, {
+                                motd: motd
+                            });
+                        }
+                    }
+                });
+            });
+        }
+        else {
+            var LINEHEIGHT_1 = 14;
+            var BUTTONHEIGHT_1 = LINEHEIGHT_1 * 3;
+            function getBtnPosition(windowDimensions) {
+                return {
+                    y: windowDimensions.y - BUTTONHEIGHT_1 - (LINEHEIGHT_1 / 2),
+                    x: windowDimensions.x / 2 - 100
+                };
+            }
+            function createReadmeWindow(readme) {
+                var CHARWIDTH = 5;
+                var LABELNAME = 'labelNo';
+                var CLASS = 'ffatycoonwelcome';
+                var windowInitialSize = { x: 0, y: 0 };
+                var widgets = [];
+                var width = 42;
+                readme.split('\n').forEach(function (text, index) {
+                    width = Math.max(width, text.length);
+                    widgets.push({
+                        type: 'label',
+                        name: LABELNAME + index,
+                        x: 8,
+                        y: 20 + (LINEHEIGHT_1 * index),
+                        width: width * CHARWIDTH + 20,
+                        height: LINEHEIGHT_1,
+                        text: text
+                    });
+                });
+                windowInitialSize.y = widgets.length * (LINEHEIGHT_1) + (LINEHEIGHT_1 * 4) + 20;
+                windowInitialSize.x = width * CHARWIDTH + 32;
+                widgets.push({
+                    type: 'button',
+                    name: 'closebtn',
+                    width: 200,
+                    height: BUTTONHEIGHT_1,
+                    text: 'Close',
+                    x: getBtnPosition(windowInitialSize).x,
+                    y: getBtnPosition(windowInitialSize).y,
+                    onClick: function () { return ui.getWindow(CLASS).close(); }
+                });
+                var welcomeWindow = {
+                    classification: CLASS,
+                    title: 'Welcome!',
+                    x: 400,
+                    y: 200,
+                    width: windowInitialSize.x,
+                    height: windowInitialSize.y,
+                    colours: [7, 7],
+                    widgets: widgets
+                };
+                ui.openWindow(welcomeWindow);
+            }
+            context.registerAction(ACTION_NAME, function () { return result; }, function (args) {
+                var README = args.args.motd;
+                if (motd === null && README && README.length) {
+                    createReadmeWindow(README);
+                }
+                motd = true;
+                return result;
+            });
         }
     }
     registerPlugin({
@@ -154,7 +230,7 @@
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
-        targetApiVersion: 65,
+        targetApiVersion: 70,
         main: main
     });
 }());
