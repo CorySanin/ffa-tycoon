@@ -20,7 +20,7 @@
     "log": "6.3.1",
     "moment": "2.29.4",
     "mv": "2.1.1",
-    "node-fetch": "3.3.0",
+    "node-fetch": "3.3.1",
     "prom-client": "14.2.0"
   },
   "devDependencies": {
