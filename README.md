@@ -1,6 +1,6 @@
 # ffa-tycoon
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/CorySanin/ffa-tycoon/Docker%20Image%20CI)](https://github.com/CorySanin/ffa-tycoon/actions/workflows/docker-image.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/CorySanin/ffa-tycoon/docker-image.yml)](https://github.com/CorySanin/ffa-tycoon/actions/workflows/docker-image.yml)
 [![Libraries.io dependency status for GitHub repo](https://img.shields.io/librariesio/github/CorySanin/ffa-tycoon)](https://libraries.io/github/CorySanin/ffa-tycoon)
 [![Docker Image Size (tag)](https://img.shields.io/docker/image-size/corysanin/ffa-tycoon/latest)](https://hub.docker.com/r/corysanin/ffa-tycoon)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/CorySanin/ffa-tycoon)](https://github.com/CorySanin/ffa-tycoon/pulls)
