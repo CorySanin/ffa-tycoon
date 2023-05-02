@@ -1,8 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const fsp = fs.promises;
-const FormData = require('form-data');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 
 
 let FileExists = (filename) => {
@@ -57,14 +55,14 @@ let DownloadImage = async (url, options, directory, name) => {
     }
     catch { }
 
-    await fsp.writeFile(filepath, await img.buffer());
+    await fsp.writeFile(filepath, Buffer.from(await img.arrayBuffer()));
 
     return filename;
 }
 
 let DownloadPark = async (url, parksave, directory, name) => {
     const body = new FormData();
-    body.append('park', fs.createReadStream(parksave));
+    body.append('park', new Blob([await fsp.readFile(parksave)]));
     return await DownloadImage(url, {
         method: 'POST',
         body
