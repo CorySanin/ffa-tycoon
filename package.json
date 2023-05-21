@@ -9,7 +9,7 @@
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
-    "better-sqlite3": "8.3.0",
+    "better-sqlite3": "8.4.0",
     "body-parser": "1.20.2",
     "ejs": "3.1.9",
     "express": "4.18.2",
