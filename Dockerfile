@@ -1,4 +1,4 @@
-FROM node:18-alpine3.17 as build
+FROM node:18-alpine3.18 as build
 
 WORKDIR /usr/src/ffa-tycoon
 
@@ -6,7 +6,7 @@ COPY ./package*json ./
 
 RUN npm install
 
-FROM node:18-alpine3.17
+FROM node:18-alpine3.18
 
 WORKDIR /usr/src/ffa-tycoon
 

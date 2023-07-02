@@ -10,6 +10,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const broadcastmsg = document.getElementById('broadcastmsg');
     const archivebtn = document.getElementById('archivebtn');
     const stopbtn = document.getElementById('stopbtn');
+    const handymantxt = document.getElementById('handymantxt');
+    const entertainertxt = document.getElementById('entertainertxt');
+    const handymanbtn = document.getElementById('handymanbtn');
+    const entertainerbtn = document.getElementById('entertainerbtn');
 
     function changePlayerGroup() {
         let hash = this.id.split('-', 2)[1];
@@ -63,6 +67,32 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     }
 
+    function hire(type, amount) {
+        amount = parseInt(amount);
+        if (isNaN(amount) || amount <= 0) {
+            return;
+        }
+        fetch(`/api/server/${serverid}/staff`, {
+            method: 'POST',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'hire',
+                type,
+                amount
+            })
+        }).then(response => response.json())
+            .then(data => {
+                if ('status' in data && data.status !== 'ok') {
+                    console.log(data);
+                }
+            }).catch(e => {
+                console.log(e);
+            });
+    }
+
     function sendMessage() {
         broadcastmsg.disabled = sendbtn.disabled = true;
         fetch(`/api/server/${serverid}/send`, {
@@ -97,6 +127,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     sendbtn.addEventListener('click', sendMessage);
+    broadcastmsg.addEventListener('keyup', (e) => {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
     archivebtn.addEventListener('click', () => {
         archivebtn.disabled = true;
         archivebtn.classList.remove('is-primary', 'is-danger');
@@ -108,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if ((archivebtn.disabled = !('status' in data && data.status === 'ok'))) {
                     archivebtn.classList.add('is-danger');
                 }
-                else{
+                else {
                     archivebtn.classList.add('is-primary');
                 }
             }).catch(e => {
@@ -127,12 +162,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 if ((stopbtn.disabled = !('status' in data && data.status === 'ok'))) {
                     stopbtn.classList.add('is-danger');
                 }
-                else{
+                else {
                     stopbtn.classList.add('is-primary');
                 }
             }).catch(e => {
                 console.log(e);
                 stopbtn.classList.add('is-danger');
             });
+    });
+    handymanbtn.addEventListener('click', () => {
+        hire('handyman', handymantxt.value);
+    });
+    entertainerbtn.addEventListener('click', () => {
+        hire('entertainer', entertainertxt.value);
     });
 });

@@ -127,3 +127,10 @@ footer>.box {
         }
     }
 }
+
+.hire-staff {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    column-gap: .75em;
+    row-gap: .75em;
+}

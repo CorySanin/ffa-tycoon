@@ -4,6 +4,8 @@
     var VOTE = new RegExp('^(vote|map)($| )', 'i');
     var RULES = new RegExp('^(rules|faq)($| )', 'i');
     var TIMEOUT = 20000;
+    var MOTD_INTERVAL = 2000;
+    var MOTD_ITERATIONS = 8;
     var ACTION_NAME = 'motdget';
     var result = { error: 0 };
     var port = 35712;
@@ -12,6 +14,7 @@
     var changeMade = false;
     var id = -1;
     var motd = null;
+    var adminPerm = null;
     function doCommand(command, caller, callback) {
         var args;
         if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
@@ -89,25 +92,28 @@
         return false;
     }
     function isPlayerAdmin(player) {
+        if (player === null) {
+            return false;
+        }
         var perms = network.getGroup(player.group).permissions;
-        return perms.indexOf('kick_player') >= 0;
+        return perms.indexOf(adminPerm) >= 0;
     }
     function getPlayer(playerID) {
         if (playerID === -1) {
             return null;
         }
-        var player = null;
-        var players = network.players;
-        for (var _i = 0, players_1 = players; _i < players_1.length; _i++) {
-            var p = players_1[_i];
-            if (p.id === playerID) {
-                player = p;
-            }
+        return network.getPlayer(playerID);
+    }
+    function sendMOTD(payload, remaining) {
+        if (remaining <= 0) {
+            return;
         }
-        return player;
+        context.executeAction(ACTION_NAME, payload);
+        context.setTimeout(function () { return sendMOTD(payload, remaining - 1); }, MOTD_INTERVAL);
     }
     function main() {
         if (network.mode === 'server') {
+            adminPerm = context.sharedStorage.get('remote-control.adminperm', context.sharedStorage.get('sanin.adminperm', 'modify_groups'));
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
             autoArchive = context.sharedStorage.get('ffa-tycoon.autoArchive', autoArchive);
@@ -154,9 +160,7 @@
                     if (msg && msg.length) {
                         motd = JSON.parse(msg).msg;
                         if (motd && motd.length) {
-                            context.executeAction(ACTION_NAME, {
-                                motd: motd
-                            });
+                            sendMOTD({ motd: motd }, MOTD_ITERATIONS);
                         }
                     }
                 });
@@ -212,21 +216,20 @@
                     colours: [7, 7],
                     widgets: widgets
                 };
-                ui.openWindow(welcomeWindow);
+                return (ui.openWindow(welcomeWindow)).widgets.length > 0;
             }
             context.registerAction(ACTION_NAME, function () { return result; }, function (args) {
                 var README = args.args.motd;
                 if (motd === null && README && README.length) {
-                    createReadmeWindow(README);
+                    motd = motd || createReadmeWindow(README);
                 }
-                motd = true;
                 return result;
             });
         }
     }
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.3',
+        version: '1.2.4',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

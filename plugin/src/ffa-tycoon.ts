@@ -9,6 +9,8 @@ interface MotdArgs {
     const VOTE = new RegExp('^(vote|map)($| )', 'i');
     const RULES = new RegExp('^(rules|faq)($| )', 'i');
     const TIMEOUT = 20000;
+    const MOTD_INTERVAL = 2000;
+    const MOTD_ITERATIONS = 8;
     const ACTION_NAME = 'motdget';
     const result: GameActionResult = { error: 0 };
 
@@ -18,6 +20,7 @@ interface MotdArgs {
     let changeMade = false;
     let id = -1;
     let motd = null;
+    let adminPerm: PermissionType = null;
 
     function doCommand(command: string, caller: Player, callback) {
         let args: any;
@@ -99,27 +102,31 @@ interface MotdArgs {
     }
 
     function isPlayerAdmin(player: Player) {
-        var perms: string[] = network.getGroup(player.group).permissions;
-        return perms.indexOf('kick_player') >= 0;
+        if (player === null) {
+            return false;
+        }
+        var perms: PermissionType[] = network.getGroup(player.group).permissions;
+        return perms.indexOf(adminPerm) >= 0;
     }
 
     function getPlayer(playerID: number): Player {
         if (playerID === -1) {
             return null;
         }
-        var player: Player = null; //network.getPlayer(playerID);
-        var players = network.players;
-        for (const p of players) {
-            if (p.id === playerID) {
-                player = p;
-            }
+        return network.getPlayer(playerID);
+    }
+
+    function sendMOTD(payload: MotdArgs, remaining: number) {
+        if (remaining <= 0) {
+            return;
         }
-        return player;
+        context.executeAction(ACTION_NAME, payload);
+        context.setTimeout(() => sendMOTD(payload, remaining - 1), MOTD_INTERVAL);
     }
 
     function main() {
         if (network.mode === 'server') {
-
+            adminPerm = context.sharedStorage.get('remote-control.adminperm', context.sharedStorage.get('sanin.adminperm', 'modify_groups'));
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
             autoArchive = context.sharedStorage.get('ffa-tycoon.autoArchive', autoArchive);
@@ -173,9 +180,7 @@ interface MotdArgs {
                     if (msg && msg.length) {
                         motd = JSON.parse(msg).msg;
                         if (motd && motd.length) {
-                            context.executeAction(ACTION_NAME, {
-                                motd
-                            } as MotdArgs);
+                            sendMOTD({motd} as MotdArgs, MOTD_ITERATIONS);
                         }
                     }
                 });
@@ -193,7 +198,7 @@ interface MotdArgs {
                 }
             }
 
-            function createReadmeWindow(readme: string) {
+            function createReadmeWindow(readme: string): boolean {
                 const CHARWIDTH = 5;
                 const LABELNAME = 'labelNo';
                 const CLASS = 'ffatycoonwelcome';
@@ -235,7 +240,7 @@ interface MotdArgs {
                     colours: [7, 7],
                     widgets
                 }
-                ui.openWindow(welcomeWindow);
+                return (ui.openWindow(welcomeWindow)).widgets.length > 0;
             }
 
             context.registerAction<MotdArgs>(ACTION_NAME,
@@ -243,9 +248,8 @@ interface MotdArgs {
                 (args) => {
                     const README = args.args.motd;
                     if (motd === null && README && README.length) {
-                        createReadmeWindow(README);
+                        motd = motd || createReadmeWindow(README);
                     }
-                    motd = true;
                     return result;
                 });
         }
@@ -253,7 +257,7 @@ interface MotdArgs {
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.3',
+        version: '1.2.4',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

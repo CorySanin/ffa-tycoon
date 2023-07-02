@@ -698,6 +698,24 @@ class Web {
             res.status(status).send(result);
         });
 
+        privateapp.post('/api/server/:server/staff', async (req, res) => {
+            let server = parseInt(req.params.server);
+            let type = req.body.type;
+            let amount = parseInt(req.body.amount || 1);
+            let result = {
+                status: 'bad'
+            };
+            let status = 400;
+
+            if (server < this._servers.length && server >= 0 && type && !isNaN(amount) && amount > 0) {
+                if ((await this._servers[server].Execute(`hire ${type} ${amount}`)).result) {
+                    result.status = 'ok';
+                    status = 200;
+                }
+            }
+            res.status(status).send(result);
+        });
+
         privateapp.post('/api/server/:server/player/:player', async (req, res) => {
             let server = parseInt(req.params.server);
             let player = req.params.player
