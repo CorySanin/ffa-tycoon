@@ -134,7 +134,7 @@ interface MotdArgs {
                 let msg = e.message;
                 let command = getCommand(msg);
                 if (typeof command == 'string') {
-                    doCommand(command, network.getPlayer(e.player), (result: string) => {
+                    doCommand(command, getPlayer(e.player), (result: string) => {
                         let payload = JSON.parse(result);
                         context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
                         if ('id' in payload) {
@@ -257,11 +257,12 @@ interface MotdArgs {
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.4',
+        version: '1.2.5',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
-        targetApiVersion: 70,
+        minApiVersion: 77,
+        targetApiVersion: 77,
         main
     });
 }());

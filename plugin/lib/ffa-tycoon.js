@@ -121,7 +121,7 @@
                 var msg = e.message;
                 var command = getCommand(msg);
                 if (typeof command == 'string') {
-                    doCommand(command, network.getPlayer(e.player), function (result) {
+                    doCommand(command, getPlayer(e.player), function (result) {
                         var payload = JSON.parse(result);
                         context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 200);
                         if ('id' in payload) {
@@ -229,11 +229,12 @@
     }
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.4',
+        version: '1.2.5',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
-        targetApiVersion: 70,
+        minApiVersion: 77,
+        targetApiVersion: 77,
         main: main
     });
 }());
