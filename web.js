@@ -716,6 +716,28 @@ class Web {
             res.status(status).send(result);
         });
 
+        privateapp.post('/api/server/:server/cheat', async (req, res) => {
+            let server = parseInt(req.params.server);
+            let payload = req.body.params;
+            let result = {
+                status: 'bad'
+            };
+            let status = 400;
+
+            if (server < this._servers.length && server >= 0 && payload) {
+                try {
+                    if ((await this._servers[server].Execute(`cheat ${payload}`)).result) {
+                        result.status = 'ok';
+                        status = 200;
+                    }
+                }
+                catch (ex) {
+                    console.error(ex);
+                }
+            }
+            res.status(status).send(result);
+        });
+
         privateapp.post('/api/server/:server/player/:player', async (req, res) => {
             let server = parseInt(req.params.server);
             let player = req.params.player

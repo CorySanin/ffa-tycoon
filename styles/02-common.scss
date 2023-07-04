@@ -128,9 +128,37 @@ footer>.box {
     }
 }
 
-.hire-staff {
-    display: inline-grid;
-    grid-template-columns: auto auto;
+.serv-control-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     column-gap: .75em;
     row-gap: .75em;
+
+    grid-template-areas: 
+        "staffnum stafftype staffbtn"
+        "message message sendbtn";
+
+    #staffnumtxt {
+        grid-area: staffnum;
+    }
+
+    .select {
+        grid-area: stafftype;
+
+        select {
+            width: 100%;
+        }
+    }
+
+    #staffhirebtn {
+        grid-area: staffbtn;
+    }
+
+    #broadcastmsg {
+        grid-area: message
+    }
+
+    #sendbtn {
+        grid-area: sendbtn;
+    }
 }

@@ -10,10 +10,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const broadcastmsg = document.getElementById('broadcastmsg');
     const archivebtn = document.getElementById('archivebtn');
     const stopbtn = document.getElementById('stopbtn');
-    const handymantxt = document.getElementById('handymantxt');
-    const entertainertxt = document.getElementById('entertainertxt');
-    const handymanbtn = document.getElementById('handymanbtn');
-    const entertainerbtn = document.getElementById('entertainerbtn');
+    const staffnumtxt = document.getElementById('staffnumtxt');
+    const stafftype = document.getElementById('stafftype');
+    const staffhirebtn = document.getElementById('staffhirebtn');
+    
+    document.querySelectorAll('#cheats > button').forEach(e => e.addEventListener('click', doCheat));
 
     function changePlayerGroup() {
         let hash = this.id.split('-', 2)[1];
@@ -82,6 +83,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 action: 'hire',
                 type,
                 amount
+            })
+        }).then(response => response.json())
+            .then(data => {
+                if ('status' in data && data.status !== 'ok') {
+                    console.log(data);
+                }
+            }).catch(e => {
+                console.log(e);
+            });
+    }
+
+    function doCheat(event) {
+        fetch(`/api/server/${serverid}/cheat`, {
+            method: 'POST',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                action: 'cheat',
+                params: event.currentTarget.value 
             })
         }).then(response => response.json())
             .then(data => {
@@ -170,10 +192,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 stopbtn.classList.add('is-danger');
             });
     });
-    handymanbtn.addEventListener('click', () => {
-        hire('handyman', handymantxt.value);
-    });
-    entertainerbtn.addEventListener('click', () => {
-        hire('entertainer', entertainertxt.value);
+    staffhirebtn.addEventListener('click', () => {
+        hire(stafftype.value, staffnumtxt.value);
     });
 });
