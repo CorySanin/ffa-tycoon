@@ -7,6 +7,7 @@
     var MOTD_INTERVAL = 2000;
     var MOTD_ITERATIONS = 8;
     var ACTION_NAME = 'motdget';
+    var ID_KEY = 'id';
     var result = { error: 0 };
     var port = 35712;
     var hostname = 'ffa-tycoon';
@@ -113,6 +114,8 @@
     }
     function main() {
         if (network.mode === 'server') {
+            var saveStorage_1 = context.getParkStorage();
+            id = saveStorage_1.get(ID_KEY, id);
             adminPerm = context.sharedStorage.get('remote-control.adminperm', context.sharedStorage.get('sanin.adminperm', 'modify_groups'));
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
@@ -126,6 +129,7 @@
                         context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 200);
                         if ('id' in payload) {
                             id = payload.id;
+                            saveStorage_1.set(ID_KEY, id);
                         }
                     });
                 }
@@ -147,11 +151,16 @@
                     }
                 });
             }
-            context.setTimeout(function () { return sendToWeb({
-                type: 'newpark'
-            }, function (resp) {
-                console.log("reset park id: ".concat(resp));
-            }); }, 5000);
+            if (id >= 0) {
+                console.log("restored park id: ".concat(id));
+            }
+            else {
+                context.setTimeout(function () { return sendToWeb({
+                    type: 'newpark'
+                }, function (resp) {
+                    console.log("reset park id: ".concat(resp));
+                }); }, 5000);
+            }
             context.registerAction(ACTION_NAME, function () { return result; }, function () { return result; });
             context.subscribe('network.join', function (e) {
                 sendToWeb({
@@ -229,7 +238,7 @@
     }
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.5',
+        version: '1.4.0',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

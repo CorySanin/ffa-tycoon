@@ -12,6 +12,7 @@ interface MotdArgs {
     const MOTD_INTERVAL = 2000;
     const MOTD_ITERATIONS = 8;
     const ACTION_NAME = 'motdget';
+    const ID_KEY = 'id';
     const result: GameActionResult = { error: 0 };
 
     let port = 35712;
@@ -126,6 +127,8 @@ interface MotdArgs {
 
     function main() {
         if (network.mode === 'server') {
+            let saveStorage = context.getParkStorage();
+            id = saveStorage.get(ID_KEY, id);
             adminPerm = context.sharedStorage.get('remote-control.adminperm', context.sharedStorage.get('sanin.adminperm', 'modify_groups'));
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
@@ -139,6 +142,7 @@ interface MotdArgs {
                         context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
                         if ('id' in payload) {
                             id = payload.id;
+                            saveStorage.set(ID_KEY, id);
                         }
                     });
                 }
@@ -163,12 +167,17 @@ interface MotdArgs {
                 });
             }
 
-            context.setTimeout(() => sendToWeb({
-                type: 'newpark'
-            }, resp => {
-                console.log(`reset park id: ${resp}`);
-            }), 5000);
-            // doesn't work in release yet 😡
+            if (id >= 0) {
+                console.log(`restored park id: ${id}`);
+            }
+            else {
+                context.setTimeout(() => sendToWeb({
+                    type: 'newpark'
+                }, resp => {
+                    console.log(`reset park id: ${resp}`);
+                }), 5000);
+            }
+
             context.registerAction<MotdArgs>(ACTION_NAME,
                 () => result,
                 () => result);
@@ -180,7 +189,7 @@ interface MotdArgs {
                     if (msg && msg.length) {
                         motd = JSON.parse(msg).msg;
                         if (motd && motd.length) {
-                            sendMOTD({motd} as MotdArgs, MOTD_ITERATIONS);
+                            sendMOTD({ motd } as MotdArgs, MOTD_ITERATIONS);
                         }
                     }
                 });
@@ -257,7 +266,7 @@ interface MotdArgs {
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.2.5',
+        version: '1.4.0',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
