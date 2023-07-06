@@ -151,16 +151,11 @@
                     }
                 });
             }
-            if (id >= 0) {
-                console.log("restored park id: ".concat(id));
-            }
-            else {
-                context.setTimeout(function () { return sendToWeb({
-                    type: 'newpark'
-                }, function (resp) {
-                    console.log("reset park id: ".concat(resp));
-                }); }, 5000);
-            }
+            context.setTimeout(function () { return sendToWeb({
+                type: id >= 0 ? 'loadpark' : 'newpark'
+            }, function (resp) {
+                console.log("".concat(id >= 0 ? 'restored' : 'reset', " park id: ").concat(resp));
+            }); }, 5000);
             context.registerAction(ACTION_NAME, function () { return result; }, function () { return result; });
             context.subscribe('network.join', function (e) {
                 sendToWeb({

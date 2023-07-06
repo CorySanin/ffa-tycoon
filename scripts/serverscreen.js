@@ -13,7 +13,10 @@ document.addEventListener("DOMContentLoaded", function () {
     const staffnumtxt = document.getElementById('staffnumtxt');
     const stafftype = document.getElementById('stafftype');
     const staffhirebtn = document.getElementById('staffhirebtn');
-    
+    const saveidtxt = document.getElementById('saveidtxt');
+    const fetchsavesbtn = document.getElementById('fetchsavesbtn');
+    const parkfilesdiv = document.getElementById('parkfiles');
+
     document.querySelectorAll('#cheats > button').forEach(e => e.addEventListener('click', doCheat));
 
     function changePlayerGroup() {
@@ -103,7 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({
                 action: 'cheat',
-                params: event.currentTarget.value 
+                params: event.currentTarget.value
             })
         }).then(response => response.json())
             .then(data => {
@@ -138,6 +141,31 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.log(e);
                 broadcastmsg.classList.add('is-danger');
             });
+    }
+
+    function load(body) {
+        return new Promise((resolve, reject) => {
+            fetch(`/api/server/${serverid}/load`, {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            }).then(response => response.json())
+                .then(data => {
+                    resolve('status' in data && data.status === 'ok');
+                }).catch(e => {
+                    console.log(e);
+                    reject(e);
+                });
+        });
+    }
+
+    function removeAllChildren(node) {
+        while (node.firstChild) {
+            node.removeChild(node.lastChild);
+        }
     }
 
     for (const select of document.getElementsByClassName('groupselect')) {
@@ -194,5 +222,60 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     staffhirebtn.addEventListener('click', () => {
         hire(stafftype.value, staffnumtxt.value);
+    });
+    fetchsavesbtn.addEventListener('click', () => {
+        fetchsavesbtn.disabled = true;
+        fetchsavesbtn.classList.remove('is-primary', 'is-danger');
+        let saveid = saveidtxt.value;
+        fetch(`/api/park/${saveid}/`, {
+            method: 'GET',
+            cache: 'no-cache'
+        }).then(response => response.json())
+            .then(data => {
+                function createLoadBtn(body) {
+                    let btn = document.createElement('button');
+                    btn.classList.add('button');
+                    btn.appendChild(document.createTextNode('Load'));
+                    btn.value
+                    btn.addEventListener('click', () => {
+                        btn.disabled = true;
+                        load(body)
+                            .then(success => {
+                                btn.disabled = !success
+                                btn.classList.add(success ? 'is-success' : 'is-danger');
+                            });
+                    });
+                    return btn;
+                }
+
+                if ((fetchsavesbtn.disabled = !('status' in data && data.status === 'ok'))) {
+                    fetchsavesbtn.classList.add('is-danger');
+                }
+                else {
+                    fetchsavesbtn.classList.add('is-primary');
+                    const publicurl = document.getElementById('publicurltxt').value;
+                    data.files.forEach(file => {
+                        file = file.name;
+                        let div = document.createElement('div');
+                        let element = document.createElement('a');
+                        div.classList.add('parkfile');
+                        element.href = `${publicurl}/archive/${data.dir}/${file}`;
+                        element.appendChild(document.createTextNode(file));
+                        div.appendChild(element);
+                        element = document.createElement('div');
+                        element.classList.add('is-pulled-right');
+                        element.appendChild(createLoadBtn({
+                            file: `${data.dir}/${file}`,
+                            id: saveid
+                        }));
+                        div.appendChild(element);
+                        parkfilesdiv.insertBefore(div, parkfilesdiv.firstChild);
+                    });
+                }
+            }).catch(e => {
+                console.log(e);
+                fetchsavesbtn.classList.add('is-danger');
+            });
+        removeAllChildren(parkfilesdiv);
     });
 });

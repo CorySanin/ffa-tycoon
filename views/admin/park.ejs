@@ -33,7 +33,8 @@
         <div class="parkfiles">
             <button id="rm-all" class="button" title="Delete extra snapshots">Flatten</button>
             <% files.forEach(function(file){ %>
-                <div class="parkfile<% if (file == park.filename) { %> selected<% } %>"><a href="<%= publicurl %>/archive/<%= park.dir %>/<%= file %>"><%= file %></a>
+                <div class="parkfile<% if (file == park.filename) { %> selected<% } %>">
+                    <a href="<%= publicurl %>/archive/<%= park.dir %>/<%= file %>"><%= file %></a>
                     <div class="is-pulled-right">
                         <button class="button rm-save" title="delete">🗙</button>
                         <button class="button select-save" title="use this park">✓</button>

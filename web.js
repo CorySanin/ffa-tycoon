@@ -269,7 +269,8 @@ class Web {
                             view: 'server',
                             title: 'Server'
                         },
-                        server
+                        server,
+                        publicurl
                     },
                     function (err, html) {
                         if (!err) {
@@ -386,10 +387,28 @@ class Web {
             if (serverindex < this._servers.length && serverindex >= 0) {
                 let server = this._servers[serverindex];
                 let type = server._mode === 'free for all economy' ? 'economy' : 'sandbox';
-                let park = server.TallyVotes(that._parklists[type]);
-                let filename = `${park}-${type}.park`;
+                let restore = server.LoadParkSave();
+                let filename;
+                let fullPath;
+                if (restore !== null) {
+                    let park = restore.file;
+                    filename = park.split('/');
+                    filename = filename.length ? filename[filename.length - 1] : 'err.park';
+                    fullPath = path.join(this._archive, park);
+
+                    // TODO: remove in later release:
+                    server._id = restore.id;
+                    server.SetLoadedPark(null);
+                }
+                else {
+                    let park = server.TallyVotes(that._parklists[type]);
+                    filename = `${park}-${type}.park`;
+                    fullPath = path.join('parks', type, filename);
+                }
                 res.set('Content-Disposition', `attachment; filename="${filename}"`);
-                res.sendFile(path.join(__dirname, 'parks', type, filename), (err) => {
+                res.sendFile(fullPath, {
+                    root: __dirname
+                }, (err) => {
                     if (err) {
                         res.status(500).send('500 server error');
                         console.log(`Error sending park file: ${err}`);
@@ -604,6 +623,93 @@ class Web {
             res.status(status).send(result);
         });
 
+        privateapp.get('/api/park/:park/?', async (req, res) => {
+            let park = db.GetPark(parseInt(req.params.park));
+            let result = {
+                status: 'bad'
+            };
+            let status = 400;
+
+            if (park) {
+                status = 200;
+                result = park;
+                result.files = (await fsp.readdir(path.join(this._archive, park.dir), { withFileTypes: true }))
+                    .filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park'));
+                result.status = 'ok';
+            }
+            res.status(status).send(result);
+        });
+
+        privateapp.put('/api/park/:park/?', async (req, res) => {
+            try {
+                let parkentry = db.GetPark(parseInt(req.params.park));
+
+                if (!parkentry || !req.files || !req.files.park) {
+                    res.status(400).send({
+                        status: 'bad'
+                    });
+                }
+                else {
+                    let park = req.files.park;
+                    let filenameold = parkentry.filename;
+                    let fullpathold = path.join(this._archive, parkentry.dir, filenameold);
+                    let fextsep = park.name.lastIndexOf('.');
+                    let fext = park.name.substring(fextsep, park.name.length);
+                    let filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
+                    let fullpathnew = path.join(this._archive, parkentry.dir, filenamenew);
+                    await fsp.unlink(fullpathold);
+
+                    let files = await fsp.readdir(path.join(this._archive, parkentry.dir), { withFileTypes: true });
+                    files = files.filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park'));
+                    let promises = [];
+                    files.forEach(f => promises.push(fsp.unlink(path.join(this._archive, parkentry.dir, f.name))));
+                    try {
+                        await Promise.all(promises);
+                    }
+                    catch (ex) {
+                        console.error(`Failed to remove all saves while uploading: ${ex}`);
+                    }
+
+                    await park.mv(fullpathnew);
+
+                    db.ChangeFileName(parkentry.id, filenamenew);
+                    db.RemoveImages(parkentry.id);
+
+                    res.send({
+                        status: 'ok'
+                    });
+                }
+            }
+            catch (ex) {
+                console.log(ex);
+                res.status(500).send({
+                    status: 'bad'
+                });
+            }
+        });
+
+        privateapp.delete('/api/park/:park/?', async (req, res) => {
+            try {
+                let parkentry = db.GetPark(parseInt(req.params.park));
+                await (fsp.rm || fsp.rmdir)(path.join(this._archive, parkentry.dir), {
+                    force: true,
+                    maxRetries: 4,
+                    recursive: true
+                });
+                db.DeletePark(parseInt(parkentry.id));
+
+                res.send({
+                    status: 'ok'
+                });
+            }
+            catch (ex) {
+                console.log(ex);
+                res.status(500).send({
+                    status: 'bad'
+                });
+            }
+        });
+
         privateapp.post('/api/park/:park/save', async (req, res) => {
             let park = db.GetPark(parseInt(req.params.park));
             let message = req.body;
@@ -763,74 +869,19 @@ class Web {
             res.status(status).send(result);
         });
 
-        privateapp.put('/api/park/:park/?', async (req, res) => {
-            try {
-                let parkentry = db.GetPark(parseInt(req.params.park));
-
-                if (!parkentry || !req.files || !req.files.park) {
-                    res.status(400).send({
-                        status: 'bad'
-                    });
-                }
-                else {
-                    let park = req.files.park;
-                    let filenameold = parkentry.filename;
-                    let fullpathold = path.join(this._archive, parkentry.dir, filenameold);
-                    let fextsep = park.name.lastIndexOf('.');
-                    let fext = park.name.substring(fextsep, park.name.length);
-                    let filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
-                    let fullpathnew = path.join(this._archive, parkentry.dir, filenamenew);
-                    await fsp.unlink(fullpathold);
-
-                    let files = await fsp.readdir(path.join(this._archive, parkentry.dir), { withFileTypes: true });
-                    files = files.filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park'));
-                    let promises = [];
-                    files.forEach(f => promises.push(fsp.unlink(path.join(this._archive, parkentry.dir, f.name))));
-                    try {
-                        await Promise.all(promises);
-                    }
-                    catch (ex) {
-                        console.error(`Failed to remove all saves while uploading: ${ex}`);
-                    }
-
-                    await park.mv(fullpathnew);
-
-                    db.ChangeFileName(parkentry.id, filenamenew);
-                    db.RemoveImages(parkentry.id);
-
-                    res.send({
-                        status: 'ok'
-                    });
-                }
+        privateapp.post('/api/server/:server/load', async (req, res) => {
+            let server = parseInt(req.params.server);
+            let body = req.body;
+            let result = {
+                status: 'bad'
+            };
+            let status = 400;
+            if (server < this._servers.length && server >= 0 && body.file) {
+                this._servers[server].SetLoadedPark(body);
+                status = 200;
+                result.status = 'ok';
             }
-            catch (ex) {
-                console.log(ex);
-                res.status(500).send({
-                    status: 'bad'
-                });
-            }
-        });
-
-        privateapp.delete('/api/park/:park/?', async (req, res) => {
-            try {
-                let parkentry = db.GetPark(parseInt(req.params.park));
-                await (fsp.rm || fsp.rmdir)(path.join(this._archive, parkentry.dir), {
-                    force: true,
-                    maxRetries: 4,
-                    recursive: true
-                });
-                db.DeletePark(parseInt(parkentry.id));
-
-                res.send({
-                    status: 'ok'
-                });
-            }
-            catch (ex) {
-                console.log(ex);
-                res.status(500).send({
-                    status: 'bad'
-                });
-            }
+            res.status(status).send(result);
         });
 
         privateapp.get('/metrics', async (req, res) => {
@@ -922,6 +973,13 @@ class Web {
                             msg: 'done'
                         }));
                     }
+                    else if (payload.type === 'loadpark') {
+                        server._id = (server.LoadParkSave() || { id: null }).id;
+                        server.SetLoadedPark(null);
+                        sock.write(JSON.stringify({
+                            msg: 'done'
+                        }));
+                    }
                     else if (payload.type === 'archive') {
                         if ('id' in payload && payload.id >= 0) {
                             server._id = payload.id;
@@ -1002,7 +1060,7 @@ class Web {
         await Promise.all(prom);
     }
 
-    close() {
+    close = () => {
         this._webserver.close();
         this._privwebserver.close();
         this._pluginsocket.close();

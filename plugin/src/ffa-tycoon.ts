@@ -167,16 +167,11 @@ interface MotdArgs {
                 });
             }
 
-            if (id >= 0) {
-                console.log(`restored park id: ${id}`);
-            }
-            else {
-                context.setTimeout(() => sendToWeb({
-                    type: 'newpark'
-                }, resp => {
-                    console.log(`reset park id: ${resp}`);
-                }), 5000);
-            }
+            context.setTimeout(() => sendToWeb({
+                type: id >= 0 ? 'loadpark' : 'newpark'
+            }, resp => {
+                console.log(`${id >= 0 ? 'restored' : 'reset'} park id: ${resp}`);
+            }), 5000);
 
             context.registerAction<MotdArgs>(ACTION_NAME,
                 () => result,

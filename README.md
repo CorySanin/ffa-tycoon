@@ -11,7 +11,7 @@ Website for browsing and managing multiple OpenRCT2 servers
 
 ## Setup
 
-As currently written, this project pretty much needs to exist in Docker. TODO: make work outside of Docker.
+As currently written, this project pretty much needs to exist in Docker.
 
 First and foremost, each server will need the [remote control](https://github.com/CorySanin/openrct2-remote-control) plugin. Follow the instruction in the [readme](https://github.com/CorySanin/openrct2-remote-control#docker-setup).
 

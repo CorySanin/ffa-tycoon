@@ -30,22 +30,24 @@
 
     <div class="block serv-control-grid" id="servercontrols">
         <input id="staffnumtxt" class="input" type="number" value="10" min="1" max="100">
-        <span class="select">
-            <select id="stafftype">
-                <option value="handyman" selected>
-                    Handymen
-                </option>
-                <option value="mechanic">
-                    Mechanics
-                </option>
-                <option value="security">
-                    Guards
-                </option>
-                <option value="entertainer">
-                    Entertainers
-                </option>
-            </select>
-        </span>
+        <div class="control is-expanded">
+            <div class="select is-fullwidth">
+                <select id="stafftype">
+                    <option value="handyman" selected>
+                        Handymen
+                    </option>
+                    <option value="mechanic">
+                        Mechanics
+                    </option>
+                    <option value="security">
+                        Guards
+                    </option>
+                    <option value="entertainer">
+                        Entertainers
+                    </option>
+                </select>
+            </div>
+        </div>
         <button id="staffhirebtn" class="button is-primary is-outlined">Hire</button>
 
         <input id="broadcastmsg" class="input" type="text" placeholder="Broadcast Message">
@@ -62,7 +64,7 @@
         <button value="32 0 0" class="button is-warning is-light">Reset crash status</button>
     </div>
 
-    <div class="block" id="users">
+    <div class="block auto-overflow" id="users">
         <table id="parkTable" class="table">
             <tbody>
                 <% if (server._details) { server._details.network.players.forEach(function(player){ if (player.id !==0)
@@ -95,7 +97,19 @@
         </table>
     </div>
 
-    <div class="block" id="newsfeed">
+    <div class="block" id="loadpark">
+        <input id="publicurltxt" class="displaynone" type="text" value="<%= publicurl %>" >
+        <div class="field has-addons has-addons-centered">
+            <p class="control">
+                <input id="saveidtxt" type="number" min="0" placeholder="Save ID" value="<%= server._id %>" class="input">
+            </p>
+            <p class="control">
+                <button id="fetchsavesbtn" class="button is-primary is-outlined">Get saves</button>
+            </p>
+        </div>
+    </div>
+
+    <div class="block parkfiles" id="parkfiles">
 
     </div>
 </div>

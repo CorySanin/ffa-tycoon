@@ -46,6 +46,10 @@ footer>.box {
     display: none;
 }
 
+.auto-overflow {
+    overflow: auto;
+}
+
 .parkstats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 15fr));
@@ -116,6 +120,10 @@ footer>.box {
 
         .button {
             margin-top: .25em;
+        }
+
+        &:focus, &:active, &:focus-within {
+            outline: #888 1px dashed;
         }
 
         &.selected {

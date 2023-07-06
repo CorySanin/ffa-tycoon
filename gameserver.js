@@ -40,6 +40,7 @@ class GameServer {
         this._ip = null;
         this._id = null;
         this._votes = {};
+        this._loaddata = null;
     }
 
     SavePark = async (destination) => {
@@ -79,6 +80,14 @@ class GameServer {
             console.log(ex);
         }
         return false;
+    }
+
+    SetLoadedPark = (loaddata) => {
+        this._loaddata = loaddata;
+    }
+
+    LoadParkSave = () => {
+        return this._loaddata
     }
 
     TallyVotes = (allMaps) => {
