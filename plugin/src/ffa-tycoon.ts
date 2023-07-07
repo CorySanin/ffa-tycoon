@@ -165,6 +165,15 @@ interface MotdArgs {
                         }, 3000);
                     }
                 });
+
+                context.subscribe('interval.day', () => {
+                    if (date.month === 0 && date.day === 1 && changeMade) {
+                        changeMade = false;
+                        sendToWeb({
+                            type: 'archive'
+                        }, () => 0);
+                    }
+                });
             }
 
             context.setTimeout(() => sendToWeb({
@@ -261,7 +270,7 @@ interface MotdArgs {
 
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.4.0',
+        version: '1.4.1',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',

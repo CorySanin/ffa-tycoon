@@ -150,6 +150,14 @@
                         }, 3000);
                     }
                 });
+                context.subscribe('interval.day', function () {
+                    if (date.month === 0 && date.day === 1 && changeMade) {
+                        changeMade = false;
+                        sendToWeb({
+                            type: 'archive'
+                        }, function () { return 0; });
+                    }
+                });
             }
             context.setTimeout(function () { return sendToWeb({
                 type: id >= 0 ? 'loadpark' : 'newpark'
@@ -233,7 +241,7 @@
     }
     registerPlugin({
         name: 'ffa-tycoon',
-        version: '1.4.0',
+        version: '1.4.1',
         authors: ['Cory Sanin'],
         type: 'remote',
         licence: 'MIT',
