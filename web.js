@@ -12,6 +12,7 @@ const net = require('net');
 const DB = require('./db');
 const GameServer = require('./gameserver');
 const FileMan = require('./fileMan');
+const Vpnapi = require('./vpnapi');
 
 const CSPNONCE = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const VIEWOPTIONS = {
@@ -46,6 +47,7 @@ class Web {
         const that = this;
         const app = express();
         const privateapp = express();
+        const vpnapi = new Vpnapi(options);
         const db = this._db = new DB(options.db);
         const port = process.env.PORT || options.port || 8080;
         const privateport = process.env.PRIVATEPORT || options.privateport || 8081;
@@ -882,6 +884,25 @@ class Web {
                 result.status = 'ok';
             }
             res.status(status).send(result);
+        });
+
+        privateapp.post('/api/ip', async (req, res) => {
+            const bad = {
+                status: 'bad'
+            };
+            if (req.body.ip) {
+                let info = await vpnapi.get(req.body.ip);
+                if (info) {
+                    info.status = 'ok';
+                    res.status(200).send(info);
+                }
+                else {
+                    res.status(500).send(bad);
+                }
+            }
+            else {
+                res.status(400).send(bad);
+            }
         });
 
         privateapp.get('/metrics', async (req, res) => {

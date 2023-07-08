@@ -1,6 +1,6 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "ffa-tycoon.com",
   "main": "index.js",
   "scripts": {
@@ -17,6 +17,7 @@
     "helmet": "7.0.0",
     "json5": "2.2.3",
     "log": "6.3.1",
+    "lru-cache": "10.0.0",
     "moment": "2.29.4",
     "mv": "2.1.1",
     "prom-client": "14.2.0"

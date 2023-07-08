@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const parkfilesdiv = document.getElementById('parkfiles');
 
     document.querySelectorAll('#cheats > button').forEach(e => e.addEventListener('click', doCheat));
+    document.querySelectorAll('.ipbtn').forEach(e => e.addEventListener('click', inspectIp));
 
     function changePlayerGroup() {
         let hash = this.id.split('-', 2)[1];
@@ -116,6 +117,62 @@ document.addEventListener("DOMContentLoaded", function () {
             }).catch(e => {
                 console.log(e);
             });
+    }
+
+    function inspectIp(event) {
+        let div = event.currentTarget.parentElement.querySelector('div');
+        if (!div.classList.toggle('displaynone') && !div.classList.contains('fetchedval')) {
+            let ip = event.currentTarget.firstChild.nodeValue.trim();
+
+            getIpInfo(ip).then((info) => {
+                if ('message' in info) {
+                    div.appendChild(createTextWrapper('div', info.message));
+                }
+                if ('security' in info) {
+                    for (const proxyType in info.security) {
+                        if (info.security[proxyType]) {
+                            div.appendChild(createTextWrapper('div', `${proxyType} detected`));
+                        }
+                    }
+                }
+                if ('location' in info) {
+                    div.appendChild(createTextWrapper('div', `Continent: ${info.location.continent}`));
+                    div.appendChild(createTextWrapper('div', `Country: ${info.location.country}`));
+                    div.appendChild(createTextWrapper('div', `Region: ${info.location.region}`));
+                    div.appendChild(createTextWrapper('div', `City: ${info.location.city}`));
+                }
+                div.classList.add('fetchedval');
+            }).catch(() => {
+                div.classList.add('displaynone');
+            });
+        }
+    }
+
+    function createTextWrapper(element, text) {
+        let e = document.createElement(element);
+        e.appendChild(document.createTextNode(text));
+        return e;
+    }
+
+    function getIpInfo(ip) {
+        return new Promise((resolve, reject) => {
+            fetch('/api/ip', {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ip })
+            }).then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        resolve(data);
+                    }
+                    else {
+                        reject(data);
+                    }
+                });
+        });
     }
 
     function sendMessage() {
