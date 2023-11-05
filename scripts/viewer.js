@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function loadTexture() {
-        console.log('LOADING RESOURCE');
         texture = PIXI.Texture.from(document.getElementById('parkimg').src);
         texture.on('error', loadTexture);
         if (texture.width) {
@@ -34,7 +33,38 @@ document.addEventListener('DOMContentLoaded', function () {
         parkmap = new PIXI.Sprite(texture);
         parkmap.anchor.set(.5);
         resetPosition();
+        setMaxVals();
         app.stage.addChild(parkmap);
+
+        app.stage.on('pointerdown', startDrag);
+        app.stage.on('pointerup', onDragEnd);
+        app.stage.on('pointerupoutside', onDragEnd);
+
+        app.view.addEventListener('wheel', event => {
+            let pos = {
+                x: (parkmap.x - (app.screen.width / 2)) / parkmap.scale.x,
+                y: (parkmap.y - (app.screen.height / 2)) / parkmap.scale.y,
+            }
+
+            if (event.wheelDeltaY > 0) {
+                parkmap.scale.set(Math.min(2, parkmap.scale.x * 2));
+            }
+            else if (event.wheelDeltaY < 0) {
+                if (parkmap.scale.x <= .125) {
+                    pos.x = 0;
+                    pos.y = 0;
+                }
+                parkmap.scale.set(Math.max(.125, parkmap.scale.x / 2));
+            }
+            parkmap.x = (pos.x * parkmap.scale.x) + (app.screen.width / 2);
+            parkmap.y = (pos.y * parkmap.scale.y) + (app.screen.height / 2);
+            setMaxVals();
+            event.preventDefault();
+        }, false);
+
+        app.view.addEventListener('contextmenu', event => {
+            event.preventDefault();
+        }, false);
     }
 
     function setMaxVals() {
@@ -84,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function limitTransform() {
-        if ((maxValues.x && maxValues.y) === null) {
+        if (!(maxValues.x && maxValues.y)) {
             setMaxVals();
         }
         parkmap.x = minMax(parkmap.x, (app.screen.width / 2) - maxValues.x, (app.screen.width / 2) + maxValues.x);
@@ -100,34 +130,4 @@ document.addEventListener('DOMContentLoaded', function () {
     loadTexture();
     app.stage.eventMode = 'static';
     app.stage.hitArea = app.screen;
-
-    app.stage.on('pointerdown', startDrag);
-    app.stage.on('pointerup', onDragEnd);
-    app.stage.on('pointerupoutside', onDragEnd);
-
-    app.view.addEventListener('wheel', event => {
-        let pos = {
-            x: (parkmap.x - (app.screen.width / 2)) / parkmap.scale.x,
-            y: (parkmap.y - (app.screen.height / 2)) / parkmap.scale.y,
-        }
-
-        if (event.wheelDeltaY > 0) {
-            parkmap.scale.set(Math.min(2, parkmap.scale.x * 2));
-        }
-        else if (event.wheelDeltaY < 0) {
-            if (parkmap.scale.x <= .125) {
-                pos.x = 0;
-                pos.y = 0;
-            }
-            parkmap.scale.set(Math.max(.125, parkmap.scale.x / 2));
-        }
-        parkmap.x = (pos.x * parkmap.scale.x) + (app.screen.width / 2);
-        parkmap.y = (pos.y * parkmap.scale.y) + (app.screen.height / 2);
-        setMaxVals();
-        event.preventDefault();
-    }, false);
-
-    app.view.addEventListener('contextmenu', event => {
-        event.preventDefault();
-    }, false);
 });
