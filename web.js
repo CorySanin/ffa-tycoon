@@ -94,7 +94,9 @@ class Web {
         privateapp.set('trust proxy', 1);
         privateapp.set('view engine', 'ejs');
         privateapp.set('view options', VIEWOPTIONS);
-        privateapp.use(Helmet());
+        privateapp.use(Helmet({
+            contentSecurityPolicy: false
+        }));
         privateapp.use(bodyParser.urlencoded({ extended: true }));
         privateapp.use(bodyParser.json());
         privateapp.use(fileUpload({
