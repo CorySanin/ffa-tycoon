@@ -6,8 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     document.getElementById('map').appendChild(app.view);
 
-    const texture = PIXI.Texture.from(document.getElementById('parkimg').src);
-    const parkmap = new PIXI.Sprite(texture);
+    let texture, parkmap;
 
     let offset = {
         x: 0,
@@ -17,6 +16,25 @@ document.addEventListener('DOMContentLoaded', function () {
     let maxValues = {
         x: null,
         y: null
+    }
+
+    function loadTexture() {
+        console.log('LOADING RESOURCE');
+        texture = PIXI.Texture.from(document.getElementById('parkimg').src);
+        texture.on('error', loadTexture);
+        if (texture.width) {
+            createSprite();
+        }
+        else {
+            texture.on('loaded', createSprite);
+        }
+    }
+
+    function createSprite() {
+        parkmap = new PIXI.Sprite(texture);
+        parkmap.anchor.set(.5);
+        resetPosition();
+        app.stage.addChild(parkmap);
     }
 
     function setMaxVals() {
@@ -79,9 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.removeEventListener('mousemove', rcpan);
     }
 
-    parkmap.anchor.set(.5);
-    resetPosition();
-    app.stage.addChild(parkmap);
+    loadTexture();
     app.stage.eventMode = 'static';
     app.stage.hitArea = app.screen;
 
