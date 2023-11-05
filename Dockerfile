@@ -14,7 +14,7 @@ COPY --from=build /usr/src/ffa-tycoon /usr/src/ffa-tycoon
 
 COPY . .
 
-RUN npm run build && npm install --production && \
+RUN npm run pixi && npm run build && npm install --production && \
  mkdir -p storage/archive storage/config storage/db
 
 USER node
