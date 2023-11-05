@@ -58,5 +58,5 @@ services:
       container_name: screenshotter-for-ffatycoon
       image: corysanin/rct-screenshotter
       volumes:
-         - "~/.steam/steam/steamapps/common/Rollercoaster Tycoon 2:/game"
+         - "~/.steam/steam/steamapps/common/Rollercoaster Tycoon 2:/rct2"
    

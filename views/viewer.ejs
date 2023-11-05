@@ -11,11 +11,12 @@
 </head>
 
 <body id="viewer">
-    <canvas id="map" draggable="false"></canvas>
+    <div id="map"></div>
     <div class="displaynone">
         <img id="parkimg" src="/archive/<%= park.dir %>/<%= park.largeimg || park.thumbnail %>" />
     </div>
-    <script src="/assets/js/viewer.js?v1"></script>
+    <script src="/assets/js/pixi.min.js" defer></script>
+    <script src="/assets/js/viewer.js?v2" defer></script>
 </body>
 
 </html>

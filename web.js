@@ -85,7 +85,9 @@ class Web {
         app.set('trust proxy', 1);
         app.set('view engine', 'ejs');
         app.set('view options', VIEWOPTIONS);
-        app.use(Helmet());
+        app.use(Helmet({
+            contentSecurityPolicy: false
+        }));
         app.use(bodyParser.urlencoded({ extended: true }));
         app.use(bodyParser.json());
 
@@ -190,7 +192,6 @@ class Web {
                     },
                     function (err, html) {
                         if (!err) {
-                            res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self'`);
                             res.send(html);
                         }
                         else {

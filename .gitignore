@@ -104,3 +104,5 @@ storage/
 assets/css/
 assets/js/
 assets/webp/
+*:Zone.Identifier
+pixi.min.js
