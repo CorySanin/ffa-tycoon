@@ -115,6 +115,9 @@ class Web {
                         view: 'index',
                         title: 'Public OpenRCT2 Multiplayer Servers'
                     },
+                    site: {
+                        description: 'Join our free-for-all OpenRCT2 servers today and start building with other players immediately! No Discord verification required.'
+                    },
                     servers: this._servers
                 },
                 function (err, html) {
@@ -140,6 +143,9 @@ class Web {
                         view: 'archive',
                         title: 'Previous Parks'
                     },
+                    site: {
+                        description: `Discover past parks here. Page ${page}.`
+                    },
                     order,
                     pagenum: page,
                     nonce
@@ -163,6 +169,10 @@ class Web {
                         page: {
                             view: 'park',
                             title: `Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
+                        },
+                        site: {
+                            description: `Archived park saved on ${(new Date(park.date)).toLocaleDateString()}. Scenario ${park.scenario} in ${park.gamemode} mode, on ${park.name}.`,
+                            socialimage: `${publicurl}/archive/${park.dir}/${park.thumbnail || park.largeimg}`
                         },
                         park
                     },
@@ -188,6 +198,10 @@ class Web {
                         page: {
                             title: `View Park #${req.params.park} - ${park.name} - ${park.groupname} ${park.gamemode} - ${(new Date(park.date)).toLocaleDateString()}`
                         },
+                        site: {
+                            description: `Preview the save for ${park.scenario} in ${park.gamemode} mode, on ${park.name}. Screenshotted on ${(new Date(park.date)).toLocaleDateString()}`,
+                            socialimage: `${publicurl}/archive/${park.dir}/${park.thumbnail || park.largeimg}`
+                        },
                         park
                     },
                     function (err, html) {
@@ -210,6 +224,9 @@ class Web {
                     page: {
                         view: 'rules-faq',
                         title: 'Server Rules & FAQ'
+                    },
+                    site: {
+                        description: `Rules and FAQ's for the FFA-Tycoon OpenRCT2 multiplayer servers.`
                     }
                 },
                 function (err, html) {
@@ -228,6 +245,9 @@ class Web {
                     page: {
                         view: 'guide',
                         title: 'OpenRCT2 Hosting Guide'
+                    },
+                    site: {
+                        description: `How to set up an OpenRCT2 server. A complete guide with troubleshooting suggestions. Easy method.`
                     }
                 },
                 function (err, html) {
