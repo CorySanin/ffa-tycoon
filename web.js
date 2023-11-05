@@ -443,6 +443,10 @@ class Web {
             }
         });
 
+        app.get('/api/healthcheck', (req, res) => {
+            res.send('Healthy');
+        });
+
         app.get('/api/parks/count', (req, res) => {
             res.send(this.InjectStatus(this._db.GetParkCount(), 'good'));
         });

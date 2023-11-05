@@ -1,6 +1,6 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "ffa-tycoon.com",
   "main": "index.js",
   "scripts": {

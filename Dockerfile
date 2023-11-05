@@ -8,6 +8,9 @@ RUN npm install
 
 FROM node:18-alpine3.18
 
+HEALTHCHECK  --timeout=3s \
+  CMD curl --fail http://localhost:8080/api/healthcheck || exit 1
+
 WORKDIR /usr/src/ffa-tycoon
 
 COPY --from=build /usr/src/ffa-tycoon /usr/src/ffa-tycoon
