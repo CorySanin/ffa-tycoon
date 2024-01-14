@@ -1022,10 +1022,11 @@ class Web {
                         }));
                     }
                     else if (payload.type === 'loadpark') {
-                        server._id = (server.LoadParkSave() || { id: null }).id;
+                        server._id = payload.id > -1 ? payload.id : (server.LoadParkSave() || { id: null }).id;
                         server.SetLoadedPark(null);
                         sock.write(JSON.stringify({
-                            msg: 'done'
+                            msg: 'done',
+                            id: server._id
                         }));
                     }
                     else if (payload.type === 'archive') {

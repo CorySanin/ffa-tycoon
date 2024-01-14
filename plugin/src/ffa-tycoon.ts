@@ -23,15 +23,10 @@ interface MotdArgs {
     let motd = null;
     let adminPerm: PermissionType = null;
 
-    function doCommand(command: string, caller: Player, callback) {
+    function doCommand(command: string, caller: Player, callback: (response: string) => void) {
         let args: any;
         if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
-            sendToWeb({
-                type: 'archive',
-                id
-            }, (resp: string) => {
-                callback(resp);
-            });
+            archivePark(callback);
         }
         else if ((args = doesCommandMatch(command, [RULES])) !== false) {
             context.setTimeout(() => network.sendMessage('https://ffa-tycoon.com/rules'), 200);
@@ -59,7 +54,7 @@ interface MotdArgs {
         return true;
     }
 
-    function sendToWeb(msg: string | object, callback: (value: string | false) => void) {
+    function sendToWeb(msg: string | object, callback?: (value: string | false) => void) {
         if (typeof msg !== 'string') {
             msg = JSON.stringify(msg);
         }
@@ -125,6 +120,27 @@ interface MotdArgs {
         context.setTimeout(() => sendMOTD(payload, remaining - 1), MOTD_INTERVAL);
     }
 
+    function updateId(payload) {
+        if ('id' in payload) {
+            id = payload.id;
+            if (id > -1) {
+                context.getParkStorage().set(ID_KEY, id);
+            }
+        }
+    }
+
+    function archivePark(callback?: (value: string | false) => void) {
+        sendToWeb({
+            type: 'archive',
+            id
+        }, (result: string) => {
+            updateId(JSON.parse(result));
+            if (callback) {
+                callback(result);
+            }
+        });
+    }
+
     function main() {
         if (network.mode === 'server') {
             let saveStorage = context.getParkStorage();
@@ -140,10 +156,7 @@ interface MotdArgs {
                     doCommand(command, getPlayer(e.player), (result: string) => {
                         let payload = JSON.parse(result);
                         context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
-                        if ('id' in payload) {
-                            id = payload.id;
-                            saveStorage.set(ID_KEY, id);
-                        }
+                        updateId(payload);
                     });
                 }
             });
@@ -158,9 +171,7 @@ interface MotdArgs {
                         context.setTimeout(() => {
                             if (network.players.length === 1 && changeMade) {
                                 changeMade = false;
-                                sendToWeb({
-                                    type: 'archive'
-                                }, () => 0);
+                                archivePark();
                             }
                         }, 3000);
                     }
@@ -169,15 +180,14 @@ interface MotdArgs {
                 context.subscribe('interval.day', () => {
                     if (date.month === 0 && date.day === 1 && changeMade) {
                         changeMade = false;
-                        sendToWeb({
-                            type: 'archive'
-                        }, () => 0);
+                        archivePark();
                     }
                 });
             }
 
             context.setTimeout(() => sendToWeb({
-                type: id >= 0 ? 'loadpark' : 'newpark'
+                type: id >= 0 ? 'loadpark' : 'newpark',
+                id
             }, resp => {
                 console.log(`${id >= 0 ? 'restored' : 'reset'} park id: ${resp}`);
             }), 5000);
@@ -191,7 +201,9 @@ interface MotdArgs {
                     type: 'motd'
                 }, msg => {
                     if (msg && msg.length) {
-                        motd = JSON.parse(msg).msg;
+                        let payload = JSON.parse(msg);
+                        updateId(payload);
+                        motd = payload.msg;
                         if (motd && motd.length) {
                             sendMOTD({ motd } as MotdArgs, MOTD_ITERATIONS);
                         }

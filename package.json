@@ -1,6 +1,6 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "ffa-tycoon.com",
   "main": "index.js",
   "scripts": {
@@ -10,25 +10,25 @@
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
-    "better-sqlite3": "9.0.0",
+    "better-sqlite3": "9.2.2",
     "body-parser": "1.20.2",
     "ejs": "3.1.9",
     "express": "4.18.2",
-    "express-fileupload": "1.4.2",
-    "helmet": "7.0.0",
+    "express-fileupload": "1.4.3",
+    "helmet": "7.1.0",
     "json5": "2.2.3",
     "log": "6.3.1",
-    "lru-cache": "10.0.1",
-    "moment": "2.29.4",
+    "lru-cache": "10.1.0",
+    "moment": "2.30.1",
     "mv": "2.1.1",
-    "prom-client": "15.0.0"
+    "prom-client": "15.1.0"
   },
   "devDependencies": {
     "bulma": "0.9.4",
     "csso": "5.0.5",
-    "sass": "1.69.5",
+    "sass": "1.69.7",
     "uglify-js": "3.17.4",
-    "typescript": "5.2.2"
+    "typescript": "5.3.3"
   },
   "repository": {
     "type": "git",
