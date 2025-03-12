@@ -19,12 +19,7 @@
     function doCommand(command, caller, callback) {
         var args;
         if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
-            sendToWeb({
-                type: 'archive',
-                id: id
-            }, function (resp) {
-                callback(resp);
-            });
+            archivePark(callback);
         }
         else if ((args = doesCommandMatch(command, [RULES])) !== false) {
             context.setTimeout(function () { return network.sendMessage('https://ffa-tycoon.com/rules'); }, 200);
@@ -112,10 +107,29 @@
         context.executeAction(ACTION_NAME, payload);
         context.setTimeout(function () { return sendMOTD(payload, remaining - 1); }, MOTD_INTERVAL);
     }
+    function updateId(payload) {
+        if ('id' in payload) {
+            id = payload.id;
+            if (id > -1) {
+                context.getParkStorage().set(ID_KEY, id);
+            }
+        }
+    }
+    function archivePark(callback) {
+        sendToWeb({
+            type: 'archive',
+            id: id
+        }, function (result) {
+            updateId(JSON.parse(result));
+            if (callback) {
+                callback(result);
+            }
+        });
+    }
     function main() {
         if (network.mode === 'server') {
-            var saveStorage_1 = context.getParkStorage();
-            id = saveStorage_1.get(ID_KEY, id);
+            var saveStorage = context.getParkStorage();
+            id = saveStorage.get(ID_KEY, id);
             adminPerm = context.sharedStorage.get('remote-control.adminperm', context.sharedStorage.get('sanin.adminperm', 'modify_groups'));
             port = context.sharedStorage.get('ffa-tycoon.port', port);
             hostname = context.sharedStorage.get('ffa-tycoon.hostname', hostname);
@@ -127,10 +141,7 @@
                     doCommand(command, getPlayer(e.player), function (result) {
                         var payload = JSON.parse(result);
                         context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 200);
-                        if ('id' in payload) {
-                            id = payload.id;
-                            saveStorage_1.set(ID_KEY, id);
-                        }
+                        updateId(payload);
                     });
                 }
             });
@@ -143,9 +154,7 @@
                         context.setTimeout(function () {
                             if (network.players.length === 1 && changeMade) {
                                 changeMade = false;
-                                sendToWeb({
-                                    type: 'archive'
-                                }, function () { return 0; });
+                                archivePark();
                             }
                         }, 3000);
                     }
@@ -153,14 +162,13 @@
                 context.subscribe('interval.day', function () {
                     if (date.month === 0 && date.day === 1 && changeMade) {
                         changeMade = false;
-                        sendToWeb({
-                            type: 'archive'
-                        }, function () { return 0; });
+                        archivePark();
                     }
                 });
             }
             context.setTimeout(function () { return sendToWeb({
-                type: id >= 0 ? 'loadpark' : 'newpark'
+                type: id >= 0 ? 'loadpark' : 'newpark',
+                id: id
             }, function (resp) {
                 console.log("".concat(id >= 0 ? 'restored' : 'reset', " park id: ").concat(resp));
             }); }, 5000);
@@ -170,7 +178,9 @@
                     type: 'motd'
                 }, function (msg) {
                     if (msg && msg.length) {
-                        motd = JSON.parse(msg).msg;
+                        var payload = JSON.parse(msg);
+                        updateId(payload);
+                        motd = payload.msg;
                         if (motd && motd.length) {
                             sendMOTD({ motd: motd }, MOTD_ITERATIONS);
                         }
