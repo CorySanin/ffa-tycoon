@@ -1,12 +1,15 @@
 {
-    "compilerOptions": {
-        "lib": ["es5"],
-        "target": "ES5",
-        "module": "CommonJS",
-        "moduleResolution": "Node",
-        "typeRoots": ["types"],
-        "removeComments": true,
-        "outDir": "plugin/lib"
-    },
-    "files": ["plugin/src/ffa-tycoon.ts"]
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "module": "NodeNext",
+    "target": "ESNext",
+
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node16",
+    "noEmit": true,
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["**/*.spec.ts"]
 }
