@@ -3,7 +3,7 @@ const fileUpload = require('express-fileupload');
 const Helmet = require('helmet');
 const bodyParser = require('body-parser');
 const prom = require('prom-client');
-const moment = require('moment'); //TODO: replace moment
+const dayjs = require('dayjs');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -491,7 +491,7 @@ class Web {
             };
             let status = 400;
             if (!ispublic) {
-                let datestring = moment().format('YYYY-MM-DD_HH-mm-ss');
+                let datestring = dayjs().format('YYYY-MM-DD_HH-mm-ss');
                 result.status = 'ok';
                 status = 200;
 
