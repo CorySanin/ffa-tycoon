@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/mv": "2.1.4",
     "@types/node": "^22.13.10",
     "bulma": "0.9.4",
     "forking-build-shit": "0.0.2",

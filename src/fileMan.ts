@@ -1,6 +1,7 @@
 import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
+import mv from 'mv';
 
 /**
  * Check if a file exists at the given path.
@@ -92,7 +93,27 @@ async function DownloadPark(url: string | URL | globalThis.Request, parksave: fs
     }, directory, name);
 }
 
+/**
+ * mv a file to a new location. This function is a wrapper around the mv library.
+ * @param src - The source file path.
+ * @param dest - The destination file path.
+ * @returns A promise that resolves when the file has been moved.
+ */
+function mvp(src: string, dest: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        mv(src, dest, err => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve();
+            }
+        });
+    });
+}
+
 export {
+    mvp,
     FileExists,
     WaitForFile,
     DownloadImage,
