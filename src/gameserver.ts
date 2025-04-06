@@ -3,8 +3,9 @@ import util from 'util';
 import path from 'path';
 import dns from 'dns';
 import fsp from 'fs/promises';
-import moment from 'moment';
+import moment, { Moment } from 'moment';
 import { WaitForFile, mvp } from './fileMan.ts';
+import type { ParkInfo } from 'openrct2-remote-control';
 const REMOTEPORT = 35711;
 const TIMEOUT = 5000;
 
@@ -27,6 +28,10 @@ type LoadData = {
     id: string;
 };
 
+interface ServerDetails extends ParkInfo {
+    expiration?: Moment;
+}
+
 class GameServer {
     private name: string;
     private group: string;
@@ -35,7 +40,7 @@ class GameServer {
     private hostname: string;
     private port: number;
     private dir: string | false;
-    private details: any;
+    private details: ServerDetails;
     private ip: string | null;
     private id: string | null;
     private votes: Record<string, string>;
@@ -54,6 +59,10 @@ class GameServer {
         this.id = null; // need to set? or LoadData.id??
         this.votes = {};
         this.loaddata = null;
+    }
+
+    GetMode() : string {
+        return this.mode;
     }
 
     async SavePark(destination: string): Promise<string | false> {
@@ -148,10 +157,10 @@ class GameServer {
         this.votes = {};
     }
 
-    async GetDetails(force: boolean = false) {
+    async GetDetails(force: boolean = false): Promise<ServerDetails | null> {
         try {
             let d = moment();
-            if (force || !this.details || d.isAfter(this.details.expiration)) {
+            if (force || !this.details?.expiration || d.isAfter(this.details.expiration)) {
                 if (this.details = await this.Execute('park')) {
                     this.details.expiration = d.add(2, 'minutes');
                 }
@@ -163,7 +172,7 @@ class GameServer {
         return this.details;
     }
 
-    GetDetailsSync() {
+    GetDetailsSync(): ServerDetails | null {
         return this.details;
     }
 
@@ -186,7 +195,7 @@ class GameServer {
         }
     }
 
-    Execute(command: string): Promise<string | null> {
+    Execute(command: string): Promise<ServerDetails | null> {
         return new Promise((resolve, reject) => {
             try {
                 let client = new net.Socket();
@@ -224,4 +233,4 @@ class GameServer {
 
 export default GameServer;
 export { GameServer };
-export type { ServerDefinition };
+export type { ServerDefinition, ServerDetails };
