@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs, { PathLike } from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import mv from 'mv';
@@ -112,10 +112,22 @@ function mvp(src: string, dest: string): Promise<void> {
     });
 }
 
+/**
+ * Make a directory and return true.
+ * Exists to satisfy TypeScript's nagging about void return types.
+ * @param dir - directory name to create
+ * @returns - true
+ */
+async function mkdir(dir: PathLike): Promise<true> {
+    await fsp.mkdir(dir);
+    return true;
+}
+
 export {
     mvp,
     FileExists,
     WaitForFile,
     DownloadImage,
-    DownloadPark
+    DownloadPark,
+    mkdir
 };

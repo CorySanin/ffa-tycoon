@@ -1,6 +1,5 @@
-import { Model, Op, Sequelize } from 'sequelize';
+import { Model, Op, Sequelize, DataTypes, ModelStatic } from 'sequelize';
 import dayjs from 'dayjs';
-import { DataTypes, ModelStatic } from 'sequelize';
 
 const TABLE = 'parks';
 
@@ -19,8 +18,22 @@ type NewParkProperties = {
     filename: string;
 }
 
+class ParkRecord extends Model {
+    id: number;
+    name: string;
+    groupname: string;
+    gamemode: string;
+    date: Date;
+    scenario: string;
+    dir: string;
+    thumbnail: string;
+    largeimg: string;
+    filename: string;
+}
+
 class DbAdapter {
-    private model: ModelStatic<Model<any, any>>
+    private model: typeof ParkRecord;
+    private oldest: null | ParkRecord = null;
 
     constructor(options: Partial<AdapterOptions> = {}) {
         const sequelize = new Sequelize({
@@ -42,11 +55,11 @@ class DbAdapter {
         this.model.sync();
     }
 
-    addPark(params: Partial<NewParkProperties>): Promise<Model<any, any>> {
+    addPark(params: Partial<NewParkProperties>): Promise<ParkRecord> {
         return this.model.create(params);
     }
 
-    getParks(page = 1): Promise<Model<any, any>[]> {
+    getParks(page = 1): Promise<ParkRecord[]> {
         const now = dayjs();
         const pageMonth = now.add(1 - page, 'month').startOf('month');
         const endOfMonth = pageMonth.endOf('month');
@@ -64,7 +77,14 @@ class DbAdapter {
         return this.model.count();
     }
 
-    getPark(id = -1): Promise<Model<any, any>> {
+    async getMonthsSinceOldest(): Promise<number> {
+        const OLDEST: ParkRecord = this.oldest = this.oldest || await this.model.findAll({
+            order: [['date', 'ASC']]
+        })[0]
+        return dayjs(OLDEST.date).diff(dayjs(), 'month');
+    }
+
+    getPark(id = -1): Promise<ParkRecord | null> {
         return this.model.findByPk(id);
     }
 
@@ -76,7 +96,7 @@ class DbAdapter {
         return this.model.update({ date: date || (new Date()).getTime() }, { where: { id: parkId } });
     }
 
-    getMissingImage(fullsize = true): Promise<Model<any, any>> {
+    getMissingImage(fullsize = true): Promise<ParkRecord | null> {
         return this.model.findOne({
             where: {
                 [fullsize ? 'largeimg' : 'thumbnail']: null
@@ -85,7 +105,7 @@ class DbAdapter {
         });
     }
 
-    replaceImage(id: number, filename: string, fullsize = true): Promise<[affectedCount: number]> {
+    replaceImage(id: number, filename: string | number, fullsize = true): Promise<[affectedCount: number]> {
         return this.model.update({ [fullsize ? 'largeimg' : 'thumbnail']: filename }, { where: { id } });
     }
 

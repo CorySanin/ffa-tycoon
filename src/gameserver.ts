@@ -61,7 +61,15 @@ class GameServer {
         this.loaddata = null;
     }
 
-    GetMode() : string {
+    GetName(): string {
+        return this.name;
+    }
+
+    GetGroup(): string {
+        return this.group;
+    }
+
+    GetMode(): string {
         return this.mode;
     }
 

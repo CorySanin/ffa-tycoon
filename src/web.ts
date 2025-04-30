@@ -165,7 +165,7 @@ class Web {
                 },
                 function (err, html) {
                     if (!err) {
-                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${nonce}'`);
+                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${res.locals.cspNonce}'`);
                         res.send(html);
                     }
                     else {
@@ -174,8 +174,8 @@ class Web {
                 });
         });
 
-        app.get('/park/:park', (req, res) => {
-            let park = db.getPark(parseInt(req.params.park));
+        app.get('/park/:park', async (req, res) => {
+            let park = await db.getPark(parseInt(req.params.park));
             if (park) {
                 res.render('template',
                     {
@@ -203,8 +203,8 @@ class Web {
             }
         });
 
-        app.get('/park/:park/viewer', (req, res) => {
-            let park = db.getPark(parseInt(req.params.park));
+        app.get('/park/:park/viewer', async (req, res) => {
+            let park = await db.getPark(parseInt(req.params.park));
             if (park) {
                 res.render('viewer',
                     {
@@ -348,7 +348,7 @@ class Web {
         });
 
         privateapp.get('/park/:park', async (req, res) => {
-            let park = db.getPark(parseInt(req.params.park));
+            let park = await db.getPark(parseInt(req.params.park));
             let files = [];
             try {
                 files = await fsp.readdir(path.join(this.archive, park.dir), { withFileTypes: true });
@@ -434,7 +434,7 @@ class Web {
                     server.SetLoadedPark(null);
                 }
                 else {
-                    let park = server.TallyVotes(that._parklists[type]);
+                    let park = server.TallyVotes(that.parklists[type]);
                     filename = `${park}-${type}.park`;
                     fullPath = path.join('parks', type, filename);
                 }
@@ -461,15 +461,16 @@ class Web {
             res.send(this.InjectStatus(this.db.getParkCount(), 'good'));
         });
 
-        app.get('/api/parks/:page?', (req, res) => {
-            let count = this.db.getParkCount();
-            let page = Math.max(Math.min(parseInt(req.params.page) || 1, count.pages), 1);
+        app.get('/api/parks/:page?', async (req, res) => {
+            const count = await this.db.getParkCount();
+            const pages = await this.db.getMonthsSinceOldest();
+            const page = Math.max(Math.min(parseInt(req.params.page) || 1, pages), 1);
             res.send({
                 status: 'good',
                 page,
-                parks: this.db.getParks(page, req.query.sort || req.query.orderby, (req.query.asc || req.query.order) === 'true'),
-                count: count.count,
-                pages: count.pages
+                parks: this.db.getParks(page),
+                count,
+                pages
             });
         });
 
@@ -480,7 +481,7 @@ class Web {
         let getMissingImage = async (fullsize) => {
             let filename = fullsize ? 'fullsize' : 'thumbnail';
             let zoom = fullsize ? 0 : 3;
-            let park = db.getMissingImage(fullsize);
+            let park = await db.getMissingImage(fullsize);
 
             if (park) {
                 let dirname = park.dir;
@@ -505,7 +506,7 @@ class Web {
 
                 for (const serverindx in servers) {
                     const server = servers[serverindx];
-                    let filename = false;
+                    let filename: string | false = false;
                     let dirname = `${datestring}_${server._name}`;
                     if (server._id) {
                         dirname = (await db.getPark(server._id)).dir;
@@ -513,7 +514,7 @@ class Web {
                     let archivepath = path.join(this.archive, dirname);
                     try {
                         if (server._id || (!(await FileMan.FileExists(archivepath))
-                            && !(await fsp.mkdir(archivepath)))) {
+                            && (await FileMan.mkdir(archivepath)))) {
                             for (let i = 0; i < 2; i++) {
                                 filename = await server.SavePark(archivepath);
                                 if (filename) {
@@ -557,11 +558,11 @@ class Web {
         };
 
         privateapp.get('/api/group/save/:group', async (req, res) => {
-            await saveServers(req, res, this.servers.filter(server => server.getGroup() == req.params.group), false);
+            await saveServers(req, res, this.servers.filter(server => server.GetGroup() == req.params.group), false);
         });
 
         privateapp.get('/api/group/:group/save', async (req, res) => {
-            await saveServers(req, res, this.servers.filter(server => server.getGroup() == req.params.group), false);
+            await saveServers(req, res, this.servers.filter(server => server.GetGroup() == req.params.group), false);
         });
 
         app.get('/api/server/?', async (req, res) => {
@@ -571,9 +572,9 @@ class Web {
                     const details = s.GetDetailsSync() || {} as ServerDetails;
                     return {
                         server: {
-                            name: s._name,
-                            group: s._group,
-                            mode: s._mode
+                            name: s.GetName(),
+                            group: s.GetGroup(),
+                            mode: s.GetMode()
                         },
                         park: details?.park,
                         network: {
@@ -597,7 +598,7 @@ class Web {
         });
 
         privateapp.get('/api/group/:group/stop', async (req, res) => {
-            const servers = this.servers.filter(server => server._group == req.params.group);
+            const servers = this.servers.filter(server => server.GetGroup() == req.params.group);
             let result = {
                 status: 'ok'
             };
@@ -657,7 +658,7 @@ class Web {
         });
 
         privateapp.get('/api/park/:park/?', async (req, res) => {
-            let park = db.getPark(parseInt(req.params.park));
+            let park = await db.getPark(parseInt(req.params.park));
             let result = {
                 status: 'bad'
             };
