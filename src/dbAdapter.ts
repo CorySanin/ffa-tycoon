@@ -9,6 +9,7 @@ type AdapterOptions = {
 
 type NewParkProperties = {
     name?: string;
+    scenario?: string;
     groupname?: string;
     gamemode?: string;
     date?: Date;
@@ -21,13 +22,13 @@ type NewParkProperties = {
 class ParkRecord extends Model {
     id: number;
     name: string;
+    scenario: string;
     groupname: string;
     gamemode: string;
     date: Date;
-    scenario: string;
-    dir: string;
     thumbnail: string;
     largeimg: string;
+    dir: string;
     filename: string;
 }
 
@@ -120,4 +121,4 @@ class DbAdapter {
 
 export default DbAdapter;
 export { DbAdapter };
-export type { AdapterOptions };
+export type { AdapterOptions, ParkRecord };

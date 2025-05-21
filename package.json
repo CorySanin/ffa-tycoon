@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
     "@types/node": "^22.13.10",
     "bulma": "0.9.4",

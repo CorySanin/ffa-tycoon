@@ -6,6 +6,7 @@ type VpnapiOptions = {
 };
 
 type VpnApiResponse = {
+    status?: 'ok' | 'bad';
     message?: string;
     security: {
         vpn: boolean;
@@ -35,6 +36,10 @@ type VpnApiResponse = {
     };
 }
 
+interface ForwardedVpnApiResponse extends VpnApiResponse {
+    status: 'ok' | 'bad';
+}
+
 class Vpnapi {
     private apikey?: string;
     private cache: LRUCache<string, any>;
@@ -46,27 +51,28 @@ class Vpnapi {
         });
     }
 
-    async get(ip: string): Promise<null | VpnApiResponse> {
+    async get(ip: string): Promise<null | ForwardedVpnApiResponse> {
         if (!this.apikey) {
             return null;
         }
-        let val = this.cache.get(ip);
+        const val = this.cache.get(ip);
         if (val) {
             return val;
         }
         else {
-            let resp = await fetch(`https://vpnapi.io/api/${ip}?key=${this.apikey}`);
+            const resp = await fetch(`https://vpnapi.io/api/${ip}?key=${this.apikey}`);
             if (!resp.ok) {
                 return null;
             }
 
-            let body = await resp.json();
+            const body = await resp.json() as VpnApiResponse;
+            body.status = 'ok';
             this.cache.set(ip, body);
-            return body as VpnApiResponse;
+            return body as ForwardedVpnApiResponse;
         }
     };
 }
 
 export default Vpnapi;
 export { Vpnapi };
-export type { VpnapiOptions };
+export type { VpnapiOptions, ForwardedVpnApiResponse };

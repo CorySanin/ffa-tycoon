@@ -28,6 +28,10 @@ type LoadData = {
     id: string;
 };
 
+type GenericCommandResponse = {
+    result?: string | object | boolean;
+}
+
 interface ServerDetails extends ParkInfo {
     expiration?: Moment;
 }
@@ -56,7 +60,7 @@ class GameServer {
         this.dir = server.dir || false;
         this.details = null;
         this.ip = null;
-        this.id = null; // need to set? or LoadData.id??
+        this.id = null; // need to set? or LoadData.id?? -- Supposed to be the park db record ID
         this.votes = {};
         this.loaddata = null;
     }
@@ -169,7 +173,7 @@ class GameServer {
         try {
             let d = moment();
             if (force || !this.details?.expiration || d.isAfter(this.details.expiration)) {
-                if (this.details = await this.Execute('park')) {
+                if (this.details = await this.GetPark()) {
                     this.details.expiration = d.add(2, 'minutes');
                 }
             }
@@ -203,7 +207,15 @@ class GameServer {
         }
     }
 
-    Execute(command: string): Promise<ServerDetails | null> {
+    async Say(message: string): Promise<GenericCommandResponse> {
+        return (await this.Execute(`say ${message}`)) as GenericCommandResponse;
+    }
+
+    async GetPark(): Promise<ServerDetails | null> {
+        return (await this.Execute(`park`)) as ServerDetails | null;
+    }
+
+    Execute(command: string): Promise<GenericCommandResponse | null> {
         return new Promise((resolve, reject) => {
             try {
                 let client = new net.Socket();

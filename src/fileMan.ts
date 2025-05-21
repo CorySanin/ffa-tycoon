@@ -84,7 +84,7 @@ async function DownloadImage(url: string | URL | globalThis.Request, options: Re
  * @param name - The name of the image (without the extension) to save.
  * @returns The filename of the saved image if it was successfully downloaded and saved, false otherwise.
  */
-async function DownloadPark(url: string | URL | globalThis.Request, parksave: fs.PathLike, directory: string, name: string) {
+async function DownloadPark(url: string | URL | globalThis.Request, parksave: fs.PathLike, directory: string, name: string): Promise<false | string> {
     const body = new FormData();
     body.append('park', new Blob([await fsp.readFile(parksave)]));
     return await DownloadImage(url, {
