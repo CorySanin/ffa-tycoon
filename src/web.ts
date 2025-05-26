@@ -25,6 +25,18 @@ function standardizeMapName(name: string) {
     return name.split('.')[0].split('-')[0].toLowerCase();
 }
 
+function cspGen(_: express.Request, res: express.Response, next: express.NextFunction) {
+    crypto.randomBytes(32, (err, randomBytes) => {
+        if (err) {
+            console.error(err);
+            next(err);
+        } else {
+            res.locals.cspNonce = randomBytes.toString("hex");
+            next();
+        }
+    });
+}
+
 interface ParkResult {
     status: 'ok' | 'bad';
     park?: ParkRecord;
@@ -102,17 +114,7 @@ class Web {
         }));
         app.use(bodyParser.urlencoded({ extended: true }));
         app.use(bodyParser.json());
-        app.use((_req, res, next) => {
-            crypto.randomBytes(32, (err, randomBytes) => {
-                if (err) {
-                    console.error(err);
-                    next(err);
-                } else {
-                    res.locals.cspNonce = randomBytes.toString("hex");
-                    next();
-                }
-            });
-        });
+        app.use(cspGen);
 
         privateapp.set('trust proxy', 1);
         privateapp.set('view engine', 'ejs');
@@ -122,6 +124,7 @@ class Web {
         }));
         privateapp.use(bodyParser.urlencoded({ extended: true }));
         privateapp.use(bodyParser.json());
+        privateapp.use(cspGen);
         privateapp.use(fileUpload({
             createParentPath: true,
             abortOnLimit: true,
@@ -349,6 +352,7 @@ class Web {
                 },
                 function (err, html) {
                     if (!err) {
+                        res.set('Content-Security-Policy', `default-src 'self'; connect-src 'self' *; script-src 'self' 'nonce-${res.locals.cspNonce}'`);
                         res.send(html);
                     }
                     else {
@@ -463,8 +467,8 @@ class Web {
             res.send('Healthy');
         });
 
-        app.get('/api/parks/count', (_, res) => {
-            res.send(this.InjectStatus(this.db.getParkCount(), 'ok'));
+        app.get('/api/parks/count', async (_, res) => {
+            res.send(this.InjectStatus(await this.db.getParkCount(), 'ok'));
         });
 
         app.get('/api/parks/:page?', async (req, res) => {
@@ -474,14 +478,14 @@ class Web {
             res.send({
                 status: 'good',
                 page,
-                parks: this.db.getParks(page),
+                parks: await this.db.getParks(page),
                 count,
                 pages
             });
         });
 
-        app.get('/api/park/:park/?', (req, res) => {
-            res.send(this.InjectStatus(this.db.getPark(parseInt(req.params.park) || 0), 'ok'));
+        app.get('/api/park/:park/?', async (req, res) => {
+            res.send(this.InjectStatus(await this.db.getPark(parseInt(req.params.park) || 0), 'ok'));
         });
 
         const getMissingImage = async (fullsize: boolean) => {
@@ -495,7 +499,7 @@ class Web {
                 const parksave = path.join(archivepath, park.filename);
                 const image = await FileMan.DownloadPark(`http://${this.screenshotter}/upload?zoom=${zoom}`, parksave, archivepath, filename);
                 if (image) {
-                    db.replaceImage(park.id, image, fullsize);
+                    await db.replaceImage(park.id, image, fullsize);
                 }
             }
         }
@@ -541,9 +545,9 @@ class Web {
                         status = 500;
                     }
                     else if (server.HasDbEntry()) {
-                        db.changeFileName(server.GetId(), filename);
-                        db.updateDate(server.GetId());
-                        db.removeImages(server.GetId());
+                        await db.changeFileName(server.GetId(), filename);
+                        await db.updateDate(server.GetId());
+                        await db.removeImages(server.GetId());
                     }
                     else {
                         const result = await this.db.addPark({
@@ -712,8 +716,8 @@ class Web {
 
                     await park.mv(fullpathnew);
 
-                    db.changeFileName(parkentry.id, filenamenew);
-                    db.removeImages(parkentry.id);
+                    await db.changeFileName(parkentry.id, filenamenew);
+                    await db.removeImages(parkentry.id);
 
                     res.send({
                         status: 'ok'
@@ -736,7 +740,7 @@ class Web {
                     maxRetries: 4,
                     recursive: true
                 });
-                db.deletePark(parkentry.id); // TODO: verify this works
+                await db.deletePark(parkentry.id); // TODO: verify this works
 
                 res.send({
                     status: 'ok'
@@ -760,8 +764,8 @@ class Web {
 
             if (park) {
                 if (req.body.action === 'select' && 'file' in message) {
-                    db.changeFileName(park.id, message.file);
-                    db.removeImages(park.id);
+                    await db.changeFileName(park.id, message.file);
+                    await db.removeImages(park.id);
                     result.status = 'ok';
                     status = 200;
                 }

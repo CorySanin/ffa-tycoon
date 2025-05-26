@@ -316,13 +316,13 @@ document.addEventListener("DOMContentLoaded", function () {
                         let div = document.createElement('div');
                         let element = document.createElement('a');
                         div.classList.add('parkfile');
-                        element.href = `${publicurl}/archive/${data.dir}/${file}`;
+                        element.href = `${publicurl}/archive/${data.park.dir}/${file}`;
                         element.appendChild(document.createTextNode(file));
                         div.appendChild(element);
                         element = document.createElement('div');
                         element.classList.add('is-pulled-right');
                         element.appendChild(createLoadBtn({
-                            file: `${data.dir}/${file}`,
+                            file: `${data.park.dir}/${file}`,
                             id: saveid
                         }));
                         div.appendChild(element);

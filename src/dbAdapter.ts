@@ -12,7 +12,7 @@ type NewParkProperties = {
     scenario?: string;
     groupname?: string;
     gamemode?: string;
-    date?: Date;
+    date?: string;
     thumbnail?: string;
     largeimg?: string;
     dir: string;
@@ -52,6 +52,8 @@ class DbAdapter {
             thumbnail: { type: DataTypes.STRING(16), defaultValue: null },
             largeimg: { type: DataTypes.STRING(16), defaultValue: null },
             filename: { type: DataTypes.STRING(32) }
+        }, {
+            timestamps: false
         });
         this.model.sync();
     }
@@ -67,10 +69,11 @@ class DbAdapter {
         return this.model.findAll({
             where: {
                 date: {
-                    [Op.gte]: pageMonth,
-                    [Op.lt]: endOfMonth
+                    [Op.gte]: pageMonth.toISOString(),
+                    [Op.lt]: endOfMonth.toISOString()
                 }
-            }
+            },
+            order: [['date', 'DESC']]
         });
     }
 
@@ -79,9 +82,12 @@ class DbAdapter {
     }
 
     async getMonthsSinceOldest(): Promise<number> {
-        const OLDEST: ParkRecord = this.oldest = this.oldest || await this.model.findAll({
+        const OLDEST: ParkRecord = this.oldest = this.oldest || (await this.model.findAll({
             order: [['date', 'ASC']]
-        })[0]
+        }))[0];
+        if (!OLDEST) {
+            return 0;
+        }
         return dayjs(OLDEST.date).diff(dayjs(), 'month');
     }
 
@@ -94,7 +100,7 @@ class DbAdapter {
     }
 
     updateDate(parkId: number, date: Date | null = null): Promise<[affectedCount: number]> {
-        return this.model.update({ date: date || (new Date()).getTime() }, { where: { id: parkId } });
+        return this.model.update({ date: date?.toISOString() || (new Date()).toISOString() }, { where: { id: parkId } });
     }
 
     getMissingImage(fullsize = true): Promise<ParkRecord | null> {

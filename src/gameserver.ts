@@ -61,7 +61,7 @@ class GameServer {
         this.dir = server.dir || false;
         this.details = null;
         this.ip = null;
-        this.id = null; // need to set? or LoadData.id?? -- Supposed to be the park db record ID
+        this.id = null;
         this.votes = {};
         this.loaddata = null;
     }
@@ -71,6 +71,9 @@ class GameServer {
     }
 
     SetId(id: number | null) {
+        if (id === undefined) {
+            throw new Error("id can't be undefined");
+        }
         this.id = id;
     }
 
@@ -178,7 +181,7 @@ class GameServer {
     }
 
     NewPark(): void {
-        this.SetId(this.loaddata?.id);
+        this.SetId(this.loaddata?.id || null);
         this.SetLoadedPark(null);
         this.votes = {};
     }
