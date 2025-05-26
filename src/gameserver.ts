@@ -3,9 +3,10 @@ import util from 'util';
 import path from 'path';
 import dns from 'dns';
 import fsp from 'fs/promises';
-import moment, { Moment } from 'moment';
+import moment from 'moment';
 import { WaitForFile, mvp } from './fileMan.ts';
 import type { ParkInfo } from 'openrct2-remote-control';
+import type { Moment } from 'moment';
 const REMOTEPORT = 35711;
 const TIMEOUT = 5000;
 

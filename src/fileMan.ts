@@ -1,7 +1,8 @@
-import fs, { PathLike } from 'fs';
+import fs from 'fs';
 import fsp from 'fs/promises';
 import path from 'path';
 import mv from 'mv';
+import type { PathLike } from 'fs';
 
 /**
  * Check if a file exists at the given path.

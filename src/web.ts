@@ -78,7 +78,7 @@ class Web {
             this.servers.push(new GameServer(serverinfo));
         });
 
-        fsp.readdir(path.join(__dirname, 'parks'), { withFileTypes: true }).then(files => {
+        fsp.readdir('parks', { withFileTypes: true }).then(files => {
             for (const file of files) {
                 if (file.isDirectory()) {
                     this.parktypes.push(file.name);
@@ -409,7 +409,7 @@ class Web {
         app.get('/parks/:type/?', async (req, res) => {
             let type = req.params.type;
             if (this.parktypes.includes(type)) {
-                let dir = path.join(__dirname, 'parks', type);
+                let dir = path.join('parks', type);
                 let files = await fsp.readdir(dir);
                 let file = files[Math.floor(Math.random() * files.length)];
                 res.set('Content-Disposition', `attachment; filename="${file}"`);
@@ -446,7 +446,7 @@ class Web {
                 }
                 res.set('Content-Disposition', `attachment; filename="${filename}"`);
                 res.sendFile(fullPath, {
-                    root: __dirname
+                    root: process.cwd()
                 }, (err) => {
                     if (err) {
                         res.status(500).send('500 server error');
@@ -1112,7 +1112,7 @@ class Web {
         let prom = [];
         this.parktypes.forEach(parktype => {
             prom.push((async () => {
-                let dir = path.join(__dirname, 'parks', parktype);
+                let dir = path.join('parks', parktype);
                 this.parklists[parktype] = (await fsp.readdir(dir)).map(standardizeMapName);
             })());
         });

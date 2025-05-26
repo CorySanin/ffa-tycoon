@@ -3,7 +3,7 @@ import fs from 'fs';
 import json5 from 'json5';
 import Web from './web.ts';
 
-fs.readFile(process.env.CONFIG || path.join(__dirname, 'config', 'config.json5'), (err, data) => {
+fs.readFile(process.env.CONFIG || path.join('config', 'config.json5'), (err, data) => {
     if (err) {
         console.log(err);
     }

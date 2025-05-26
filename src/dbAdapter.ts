@@ -1,4 +1,4 @@
-import { Model, Op, Sequelize, DataTypes, ModelStatic } from 'sequelize';
+import { Model, Op, Sequelize, DataTypes } from 'sequelize';
 import dayjs from 'dayjs';
 
 const TABLE = 'parks';
