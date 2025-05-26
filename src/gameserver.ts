@@ -25,7 +25,7 @@ type ServerDefinition = {
 
 type LoadData = {
     file: string;
-    id: string;
+    id: number;
 };
 
 type GenericCommandResponse = {
@@ -46,7 +46,7 @@ class GameServer {
     private dir: string | false;
     private details: ServerDetails;
     private ip: string | null;
-    private id: string | null;
+    private id: number | null;
     private votes: Record<string, string>;
     private loaddata: LoadData;
 
@@ -63,6 +63,18 @@ class GameServer {
         this.id = null; // need to set? or LoadData.id?? -- Supposed to be the park db record ID
         this.votes = {};
         this.loaddata = null;
+    }
+
+    GetId(): number {
+        return this.id;
+    }
+
+    SetId(id: number | null) {
+        this.id = id;
+    }
+
+    HasDbEntry(): boolean {
+        return this.GetId() !== null;
     }
 
     GetName(): string {
@@ -165,7 +177,8 @@ class GameServer {
     }
 
     NewPark(): void {
-        this.id = null;
+        this.SetId(this.loaddata?.id);
+        this.SetLoadedPark(null);
         this.votes = {};
     }
 

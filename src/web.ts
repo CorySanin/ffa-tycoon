@@ -132,7 +132,7 @@ class Web {
 
         //#region web endpoints
 
-        app.get('/', async (req, res) => {
+        app.get('/', async (_, res) => {
             await Promise.all(this.servers.map(s => s.GetDetails()));
             res.render('template',
                 {
@@ -241,7 +241,7 @@ class Web {
             }
         });
 
-        app.get('/rules', (req, res) => {
+        app.get('/rules', (_, res) => {
             res.render('template',
                 {
                     page: {
@@ -262,7 +262,7 @@ class Web {
                 });
         });
 
-        app.get('/guide', (req, res) => {
+        app.get('/guide', (_, res) => {
             res.render('template',
                 {
                     page: {
@@ -283,7 +283,7 @@ class Web {
                 });
         });
 
-        privateapp.get('/', async (req, res) => {
+        privateapp.get('/', async (_, res) => {
             await Promise.all(this.servers.map(s => s.GetDetails(true)));
             res.render('admin/template',
                 {
@@ -392,15 +392,15 @@ class Web {
             }
         });
 
-        app.get('/faq', (req, res) => {
+        app.get('/faq', (_, res) => {
             res.redirect('/rules#faq');
         });
 
-        app.get('/submit-map', (req, res) => {
+        app.get('/submit-map', (_, res) => {
             res.redirect('https://github.com/CorySanin/ffa-tycoon-parks#park-submission-guide');
         });
 
-        app.get('/discord/?', (req, res) => {
+        app.get('/discord/?', (_, res) => {
             res.redirect('https://discord.gg/QpztpR5QSH');
         });
 
@@ -428,20 +428,16 @@ class Web {
         app.get('/load/:index/?', async (req, res) => {
             let serverindex = parseInt(req.params.index);
             if (serverindex < this.servers.length && serverindex >= 0) {
-                let server = this.servers[serverindex];
-                let type = server.GetMode() === 'free for all economy' ? 'economy' : 'sandbox';
-                let restore = server.GetParkSave();
-                let filename;
-                let fullPath;
+                const server = this.servers[serverindex];
+                const type = server.GetMode() === 'free for all economy' ? 'economy' : 'sandbox';
+                const restore = server.GetParkSave();
+                let filename: string;
+                let fullPath: string;
                 if (restore !== null) {
-                    let park = restore.file;
-                    filename = park.split('/');
-                    filename = filename.length ? filename[filename.length - 1] : 'err.park';
+                    const park = restore.file;
+                    const pathSplit = park.split('/');
+                    filename = pathSplit.length ? pathSplit[pathSplit.length - 1] : 'err.park';
                     fullPath = path.join(this.archive, park);
-
-                    // TODO: remove in later release:
-                    server._id = restore.id;
-                    server.SetLoadedPark(null);
                 }
                 else {
                     let park = server.TallyVotes(that.parklists[type]);
@@ -463,11 +459,11 @@ class Web {
             }
         });
 
-        app.get('/api/healthcheck', (req, res) => {
+        app.get('/api/healthcheck', (_, res) => {
             res.send('Healthy');
         });
 
-        app.get('/api/parks/count', (req, res) => {
+        app.get('/api/parks/count', (_, res) => {
             res.send(this.InjectStatus(this.db.getParkCount(), 'ok'));
         });
 
@@ -518,12 +514,12 @@ class Web {
                     const server = servers[serverindx];
                     let filename: string | false = false;
                     let dirname = `${datestring}_${server.GetName()}`;
-                    if (server._id) {
-                        dirname = (await db.getPark(server._id)).dir;
+                    if (server.HasDbEntry()) {
+                        dirname = (await db.getPark(server.GetId())).dir;
                     }
                     let archivepath = path.join(this.archive, dirname);
                     try {
-                        if (server._id || (!(await FileMan.FileExists(archivepath))
+                        if (server.HasDbEntry() || (!(await FileMan.FileExists(archivepath))
                             && (await FileMan.mkdir(archivepath)))) {
                             for (let i = 0; i < 2; i++) {
                                 filename = await server.SavePark(archivepath);
@@ -531,7 +527,7 @@ class Web {
                                     break;
                                 }
                             }
-                            if (!filename && !server._id) {
+                            if (!filename && !server.HasDbEntry()) {
                                 await fsp.rm(archivepath, { recursive: true, force: true });
                             }
                         }
@@ -544,13 +540,13 @@ class Web {
                         result.status = 'bad';
                         status = 500;
                     }
-                    else if (server._id) {
-                        db.changeFileName(server._id, filename);
-                        db.updateDate(server._id);
-                        db.removeImages(server._id);
+                    else if (server.HasDbEntry()) {
+                        db.changeFileName(server.GetId(), filename);
+                        db.updateDate(server.GetId());
+                        db.removeImages(server.GetId());
                     }
                     else {
-                        let result = this.db.addPark({
+                        const result = await this.db.addPark({
                             name: server.GetName(),
                             groupname: server.GetGroup(),
                             gamemode: server.GetMode(),
@@ -558,8 +554,7 @@ class Web {
                             dir: dirname,
                             filename
                         });
-                        // TODO: hmm
-                        server.id = result.lastInsertRowid;
+                        server.SetId(result.id);
                     }
                 }
             }
@@ -619,7 +614,7 @@ class Web {
                     const server = servers[serverindx];
                     try {
                         server.Execute('stop');
-                        server._id = null;
+                        server.SetId(null);
                     }
                     catch (ex) {
                         console.log(`Error stopping server: ${ex}`);
@@ -649,7 +644,7 @@ class Web {
                 const server = this.servers[servernum];
                 try {
                     server.Execute('stop');
-                    server._id = null;
+                    server.SetId(null);
                 }
                 catch (ex) {
                     console.log(`Error stopping server: ${ex}`);
@@ -1037,26 +1032,26 @@ class Web {
                         }));
                     }
                     else if (payload.type === 'loadpark') {
-                        server._id = payload.id > -1 ? payload.id : (server.GetParkSave() || { id: null }).id;
+                        server.SetId(payload.id > -1 ? payload.id : server.GetParkSave()?.id);
                         server.SetLoadedPark(null);
                         sock.write(JSON.stringify({
                             msg: 'done',
-                            id: server._id
+                            id: server.GetId()
                         }));
                     }
                     else if (payload.type === 'archive') {
                         if ('id' in payload && payload.id >= 0) {
-                            server._id = payload.id;
+                            server.SetId(payload.id);
                         }
                         await saveServers(null, null, [server], false);
                         sock.write(JSON.stringify({
-                            id: server._id,
+                            id: server.GetId(),
                             msg: 'done'
                         }));
                     }
                     else if (payload.type === 'motd') {
                         sock.write(JSON.stringify({
-                            id: server._id,
+                            id: server.GetId(),
                             msg: await server.GetMOTD()
                         }));
                     }
@@ -1131,4 +1126,5 @@ class Web {
     }
 }
 
-module.exports = Web;
+export default Web;
+export { Web };
