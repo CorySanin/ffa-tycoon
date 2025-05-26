@@ -1,4 +1,5 @@
 /// <reference path="../types/openrct2.d.ts" />
+/// <reference path="../types/string-extensions.d.ts" />
 interface MotdArgs {
     motd: string
 }
