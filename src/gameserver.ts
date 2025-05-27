@@ -97,12 +97,12 @@ class GameServer {
         if (!this.dir) {
             return false;
         }
-        let filename = `${moment().format('YYYY-MM-DD_HH-mm-ss')}_${this.name}`.substring(0, 25).trim().replace(/\s/g, '-');
-        let fullNamesv6 = path.join(this.dir, 'save', `${filename}.sv6`);
-        let fullNamepark = path.join(this.dir, 'save', `${filename}.park`);
+        const filename = `${moment().format('YYYY-MM-DD_HH-mm-ss')}_${this.name}`.substring(0, 25).trim().replace(/\s/g, '-');
+        const fullNamesv6 = path.join(this.dir, 'save', `${filename}.sv6`);
+        const fullNamepark = path.join(this.dir, 'save', `${filename}.park`);
         await this.Execute(`save ${filename}`);
         try {
-            let res = await Promise.any([
+            const res = await Promise.any([
                 WaitForFile(fullNamesv6),
                 WaitForFile(fullNamepark)
             ]);
@@ -235,8 +235,8 @@ class GameServer {
     Execute(command: string): Promise<GenericCommandResponse | null> {
         return new Promise((resolve, reject) => {
             try {
-                let client = new net.Socket();
-                let timeout = setTimeout(() => {
+                const client = new net.Socket();
+                const timeout = setTimeout(() => {
                     client.destroy();
                     reject('timeout');
                 }, TIMEOUT);

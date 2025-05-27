@@ -489,7 +489,7 @@ class Web {
         });
 
         const getMissingImage = async (fullsize: boolean) => {
-            const filename = fullsize ? 'fullsize' : 'thumbnail';
+            const filename = `${fullsize ? 'fullsize' : 'thumbnail'}_${dayjs().format('YYMMDD-HHmmss')}`;
             const zoom = fullsize ? 0 : 3;
             const park = await db.getMissingImage(fullsize);
 
@@ -547,7 +547,7 @@ class Web {
                     else if (server.HasDbEntry()) {
                         await db.changeFileName(server.GetId(), filename);
                         await db.updateDate(server.GetId());
-                        await db.removeImages(server.GetId());
+                        this.RemoveImages(await db.getPark(server.GetId()));
                     }
                     else {
                         const result = await this.db.addPark({
@@ -717,7 +717,7 @@ class Web {
                     await park.mv(fullpathnew);
 
                     await db.changeFileName(parkentry.id, filenamenew);
-                    await db.removeImages(parkentry.id);
+                    await this.RemoveImages(parkentry);
 
                     res.send({
                         status: 'ok'
@@ -765,7 +765,7 @@ class Web {
             if (park) {
                 if (req.body.action === 'select' && 'file' in message) {
                     await db.changeFileName(park.id, message.file);
-                    await db.removeImages(park.id);
+                    await this.RemoveImages(park);
                     result.status = 'ok';
                     status = 200;
                 }
@@ -1110,6 +1110,19 @@ class Web {
                 status: 'bad'
             };
         }
+    }
+
+    private async RemoveImages(park: ParkRecord) {
+        const dir = path.join(this.archive, park.dir);
+        await this.db.removeImages(park.id);
+        const rmPromises: Promise<void>[] = [];
+        if (park.thumbnail && park.thumbnail.length) {
+            rmPromises.push(fsp.unlink(path.join(dir, park.thumbnail)));
+        }
+        if (park.largeimg && park.largeimg.length) {
+            rmPromises.push(fsp.unlink(path.join(dir, park.largeimg)));
+        }
+        await Promise.all(rmPromises);
     }
 
     UpdateAllParkLists = async () => {
