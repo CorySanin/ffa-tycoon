@@ -55,7 +55,10 @@ class DbAdapter {
         }, {
             timestamps: false
         });
-        this.model.sync();
+    }
+
+    sync(): Promise<unknown> {
+        return this.model.sync();
     }
 
     addPark(params: Partial<NewParkProperties>): Promise<ParkRecord> {

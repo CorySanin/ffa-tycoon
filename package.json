@@ -11,6 +11,7 @@
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
+    "better-sqlite3": "11.10.0",
     "body-parser": "1.20.3",
     "dayjs": "1.11.13",
     "ejs": "3.1.10",
@@ -26,6 +27,7 @@
     "sqlite3": "5.1.7"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
     "@types/express": "^5.0.0",
     "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
