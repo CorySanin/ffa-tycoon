@@ -468,7 +468,7 @@ class Web {
         });
 
         app.get('/api/parks/count', async (_, res) => {
-            res.send(this.InjectStatus(await this.db.getParkCount(), 'ok'));
+            res.send(this.InjectStatus({count: await this.db.getParkCount()}, 'ok'));
         });
 
         app.get('/api/parks/:page?', async (req, res) => {

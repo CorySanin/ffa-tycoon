@@ -88,7 +88,7 @@ class DbAdapter {
         if (!OLDEST) {
             return 0;
         }
-        return dayjs(OLDEST.date).diff(dayjs(), 'month');
+        return dayjs().diff(dayjs(OLDEST.date), 'month');
     }
 
     getPark(id = -1): Promise<ParkRecord | null> {
