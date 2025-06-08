@@ -1,26 +1,26 @@
 <div class="content">
     <h1>
-        <%= server._name %>
+        <%= server.GetName() %>
     </h1>
 
     <div class="parkstats block" id="parkstats">
-        <div><span class="property">Group:</span> <%= server._group %></div>
-        <div><span class="property">Mode:</span> <%= server._mode %></div>
-        <% if (server._details) { %>
-        <div><span class="property">Scenario:</span> <%= server._details.park.name %></div>
-        <div><span class="property">Guests:</span> <%= server._details.park.guests %></div>
+        <div><span class="property">Group:</span> <%= server.GetGroup() %></div>
+        <div><span class="property">Mode:</span> <%= server.GetMode() %></div>
+        <% if (server.GetDetailsSync()) { %>
+        <div><span class="property">Scenario:</span> <%= server.GetDetailsSync().park.name %></div>
+        <div><span class="property">Guests:</span> <%= server.GetDetailsSync().park.guests %></div>
         <div><span class="property">Rating:</span> <span class="<%
-            if(server._details.park.rating >= 550){
+            if(server.GetDetailsSync().park.rating >= 550){
                 echo('is-success');
             }
-            else if (server._details.park.rating > 350){
+            else if (server.GetDetailsSync().park.rating > 350){
                 echo('is-warning');
             }
             else{
                 echo('is-danger');
             }
-            %>"><%= server._details.park.rating %></span></div>
-        <div><span class="property">Online:</span> <%= server._details.network.players.length - 1 %></div>
+            %>"><%= server.GetDetailsSync().park.rating %></span></div>
+        <div><span class="property">Online:</span> <%= server.GetDetailsSync().network.players.length - 1 %></div>
         <% } %>
     </div>
 
@@ -67,7 +67,7 @@
     <div class="block auto-overflow" id="users">
         <table id="parkTable" class="table">
             <tbody>
-                <% if (server._details) { server._details.network.players.forEach(function(player){ if (player.id !==0)
+                <% if (server.GetDetailsSync()) { server.GetDetailsSync().network.players.forEach(function(player){ if (player.id !==0)
                     { 
                         let d = (new Date()).getTime(); %>
                     <tr id="row-<%= player.hash %>">
@@ -80,7 +80,7 @@
                         <td>
                             <div class="select is-small">
                                 <select name="group-<%= player.id %>-<%= d %>" class="groupselect" id="groupselect-<%= player.hash %>">
-                                    <% server._details.network.groups.forEach(function(group){ %>
+                                    <% server.GetDetailsSync().network.groups.forEach(function(group){ %>
                                         <option value="<%= group.id %>" <% if (group.id === player.group) { %>selected<% }
                                                 %>><%= group.name %>
                                         </option>
@@ -101,7 +101,7 @@
         <input id="publicurltxt" class="displaynone" type="text" value="<%= publicurl %>" >
         <div class="field has-addons has-addons-centered">
             <p class="control">
-                <input id="saveidtxt" type="number" min="0" placeholder="Save ID" value="<%= server._id %>" class="input">
+                <input id="saveidtxt" type="number" min="0" placeholder="Save ID" value="<%= server.GetId() %>" class="input">
             </p>
             <p class="control">
                 <button id="fetchsavesbtn" class="button is-primary is-outlined">Get saves</button>

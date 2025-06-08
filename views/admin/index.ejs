@@ -6,26 +6,26 @@
             <% if (servers) {
                 servers.forEach(function(server, i){ %>
                 <div class="block">
-                    <span class="subtitle"><a href="/server/<%= i %>"><%= server._name %></a></span>
+                    <span class="subtitle"><a href="/server/<%= i %>"><%= server.GetName() %></a></span>
                     
                     <div class="parkstats">
-                        <div><span class="property">Group:</span> <span><%= server._group %></span></div>
-                        <div><span class="property">Mode:</span> <span><%= server._mode %></span></div>
-                        <% if (server._details) { %>
-                        <div><span class="property">Scenario:</span> <span><%= server._details.park.name %></span></div>
-                        <div><span class="property">Guests:</span> <span><%= server._details.park.guests %></span></div>
+                        <div><span class="property">Group:</span> <span><%= server.GetGroup() %></span></div>
+                        <div><span class="property">Mode:</span> <span><%= server.GetMode() %></span></div>
+                        <% if (server.GetDetailsSync()) { %>
+                        <div><span class="property">Scenario:</span> <span><%= server.GetDetailsSync().park.name %></span></div>
+                        <div><span class="property">Guests:</span> <span><%= server.GetDetailsSync().park.guests %></span></div>
                         <div><span class="property">Rating:</span> <span class="<%
-                            if(server._details.park.rating >= 550){
+                            if(server.GetDetailsSync().park.rating >= 550){
                                 echo('is-success');
                             }
-                            else if (server._details.park.rating > 350){
+                            else if (server.GetDetailsSync().park.rating > 350){
                                 echo('is-warning');
                             }
                             else{
                                 echo('is-danger');
                             }
-                            %>"><%= server._details.park.rating %></span></div>
-                        <div><span class="property">Online:</span> <span><%= server._details.network.players.length - 1 %></span></div>
+                            %>"><%= server.GetDetailsSync().park.rating %></span></div>
+                        <div><span class="property">Online:</span> <span><%= server.GetDetailsSync().network.players.length - 1 %></span></div>
                         <% } %>
                     </div>
                 </div>

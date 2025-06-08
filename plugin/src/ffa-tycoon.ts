@@ -1,6 +1,12 @@
 /// <reference path="../types/openrct2.d.ts" />
+/// <reference path="../types/string-extensions.d.ts" />
 interface MotdArgs {
     motd: string
+}
+
+interface Payload {
+    id?: number;
+    msg: string;
 }
 
 (function () {
@@ -20,18 +26,19 @@ interface MotdArgs {
     let autoArchive = false;
     let changeMade = false;
     let id = -1;
-    let motd = null;
-    let adminPerm: PermissionType = null;
+    let motd: string | null = null;
+    let motdWindow: boolean = false;
+    let adminPerm: PermissionType | null = null;
 
-    function doCommand(command: string, caller: Player, callback: (response: string) => void) {
+    function doCommand(command: string, caller: Player | null, callback: (response: string | false) => void) {
         let args: any;
-        if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
+        if (caller && isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             archivePark(callback);
         }
         else if ((args = doesCommandMatch(command, [RULES])) !== false) {
             context.setTimeout(() => network.sendMessage('https://ffa-tycoon.com/rules'), 200);
         }
-        else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
+        else if (caller && (args = doesCommandMatch(command, [VOTE])) !== false) {
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
                 let type = park.getFlag('noMoney') ? 'sandbox' : 'economy';
                 callback(JSON.stringify({
@@ -43,7 +50,7 @@ interface MotdArgs {
                     type: 'vote',
                     identifier: caller.ipAddress,
                     map: args
-                }, (resp: string) => {
+                }, (resp: string | false) => {
                     callback(resp);
                 });
             }
@@ -54,7 +61,7 @@ interface MotdArgs {
         return true;
     }
 
-    function sendToWeb(msg: string | object, callback?: (value: string | false) => void) {
+    function sendToWeb(msg: string | object, callback: (value: string | false) => void = function(){}) {
         if (typeof msg !== 'string') {
             msg = JSON.stringify(msg);
         }
@@ -73,14 +80,14 @@ interface MotdArgs {
         });
     }
 
-    function getCommand(str): boolean | string {
+    function getCommand(str: string): boolean | string {
         if (str.match(PREFIX)) {
             return str.replace(PREFIX, '').trim();
         }
         return false;
     }
 
-    function doesCommandMatch(str, commands): boolean | string {
+    function doesCommandMatch(str: string, commands: (string | RegExp)[]): boolean | string {
         for (const command of commands) {
             if (typeof command === 'string') {
                 if (str.startsWith(command)) {
@@ -98,14 +105,14 @@ interface MotdArgs {
     }
 
     function isPlayerAdmin(player: Player) {
-        if (player === null) {
+        if (player === null || adminPerm === null) {
             return false;
         }
         var perms: PermissionType[] = network.getGroup(player.group).permissions;
         return perms.indexOf(adminPerm) >= 0;
     }
 
-    function getPlayer(playerID: number): Player {
+    function getPlayer(playerID: number): Player | null {
         if (playerID === -1) {
             return null;
         }
@@ -120,8 +127,8 @@ interface MotdArgs {
         context.setTimeout(() => sendMOTD(payload, remaining - 1), MOTD_INTERVAL);
     }
 
-    function updateId(payload) {
-        if ('id' in payload) {
+    function updateId(payload: Payload) {
+        if (typeof payload?.id === 'number') {
             id = payload.id;
             if (id > -1) {
                 context.getParkStorage().set(ID_KEY, id);
@@ -133,8 +140,10 @@ interface MotdArgs {
         sendToWeb({
             type: 'archive',
             id
-        }, (result: string) => {
-            updateId(JSON.parse(result));
+        }, (result: string | false) => {
+            if (result) {
+                updateId(JSON.parse(result));
+            }
             if (callback) {
                 callback(result);
             }
@@ -153,8 +162,11 @@ interface MotdArgs {
                 let msg = e.message;
                 let command = getCommand(msg);
                 if (typeof command == 'string') {
-                    doCommand(command, getPlayer(e.player), (result: string) => {
-                        let payload = JSON.parse(result);
+                    doCommand(command, getPlayer(e.player), (result: string | false) => {
+                        if (!result) {
+                            return;
+                        }
+                        let payload: Payload = JSON.parse(result);
                         context.setTimeout(() => network.sendMessage(payload.msg, [e.player]), 200);
                         updateId(payload);
                     });
@@ -201,7 +213,7 @@ interface MotdArgs {
                     type: 'motd'
                 }, msg => {
                     if (msg && msg.length) {
-                        let payload = JSON.parse(msg);
+                        let payload: Payload = JSON.parse(msg);
                         updateId(payload);
                         motd = payload.msg;
                         if (motd && motd.length) {
@@ -272,8 +284,8 @@ interface MotdArgs {
                 () => result,
                 (args) => {
                     const README = args.args.motd;
-                    if (motd === null && README && README.length) {
-                        motd = motd || createReadmeWindow(README);
+                    if (motdWindow === null && README && README.length) {
+                        motdWindow = motdWindow || createReadmeWindow(README);
                     }
                     return result;
                 });

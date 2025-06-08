@@ -15,16 +15,17 @@
     var changeMade = false;
     var id = -1;
     var motd = null;
+    var motdWindow = false;
     var adminPerm = null;
     function doCommand(command, caller, callback) {
         var args;
-        if (isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
+        if (caller && isPlayerAdmin(caller) && (args = doesCommandMatch(command, [ARCHIVE])) !== false) {
             archivePark(callback);
         }
         else if ((args = doesCommandMatch(command, [RULES])) !== false) {
             context.setTimeout(function () { return network.sendMessage('https://ffa-tycoon.com/rules'); }, 200);
         }
-        else if ((args = doesCommandMatch(command, [VOTE])) !== false) {
+        else if (caller && (args = doesCommandMatch(command, [VOTE])) !== false) {
             if (args.length == 0 || doesCommandMatch(args, ['help', '--help', '-h'])) {
                 var type = park.getFlag('noMoney') ? 'sandbox' : 'economy';
                 callback(JSON.stringify({
@@ -47,6 +48,7 @@
         return true;
     }
     function sendToWeb(msg, callback) {
+        if (callback === void 0) { callback = function () { }; }
         if (typeof msg !== 'string') {
             msg = JSON.stringify(msg);
         }
@@ -88,7 +90,7 @@
         return false;
     }
     function isPlayerAdmin(player) {
-        if (player === null) {
+        if (player === null || adminPerm === null) {
             return false;
         }
         var perms = network.getGroup(player.group).permissions;
@@ -108,7 +110,7 @@
         context.setTimeout(function () { return sendMOTD(payload, remaining - 1); }, MOTD_INTERVAL);
     }
     function updateId(payload) {
-        if ('id' in payload) {
+        if (typeof (payload === null || payload === void 0 ? void 0 : payload.id) === 'number') {
             id = payload.id;
             if (id > -1) {
                 context.getParkStorage().set(ID_KEY, id);
@@ -120,7 +122,9 @@
             type: 'archive',
             id: id
         }, function (result) {
-            updateId(JSON.parse(result));
+            if (result) {
+                updateId(JSON.parse(result));
+            }
             if (callback) {
                 callback(result);
             }
@@ -139,6 +143,9 @@
                 var command = getCommand(msg);
                 if (typeof command == 'string') {
                     doCommand(command, getPlayer(e.player), function (result) {
+                        if (!result) {
+                            return;
+                        }
                         var payload = JSON.parse(result);
                         context.setTimeout(function () { return network.sendMessage(payload.msg, [e.player]); }, 200);
                         updateId(payload);
@@ -242,8 +249,8 @@
             }
             context.registerAction(ACTION_NAME, function () { return result; }, function (args) {
                 var README = args.args.motd;
-                if (motd === null && README && README.length) {
-                    motd = motd || createReadmeWindow(README);
+                if (motdWindow === null && README && README.length) {
+                    motdWindow = motdWindow || createReadmeWindow(README);
                 }
                 return result;
             });
