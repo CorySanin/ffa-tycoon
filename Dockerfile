@@ -8,7 +8,7 @@ COPY ./package*json ./
 
 RUN npm install
 
-FROM base
+FROM base AS deploy
 
 HEALTHCHECK  --timeout=3s \
   CMD curl --fail http://localhost:8080/api/healthcheck || exit 1
