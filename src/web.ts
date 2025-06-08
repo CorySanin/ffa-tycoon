@@ -740,7 +740,7 @@ class Web {
                     maxRetries: 4,
                     recursive: true
                 });
-                await db.deletePark(parkentry.id); // TODO: verify this works
+                await db.deletePark(parkentry.id);
 
                 res.send({
                     status: 'ok'
