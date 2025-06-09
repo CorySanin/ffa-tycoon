@@ -14,7 +14,7 @@
     "body-parser": "1.20.3",
     "dayjs": "1.11.13",
     "ejs": "3.1.10",
-    "express": "4.21.2",
+    "express": "5.1.0",
     "express-fileupload": "1.5.1",
     "helmet": "8.0.0",
     "json5": "2.2.3",
@@ -26,7 +26,7 @@
     "sqlite3": "5.1.7"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
+    "@types/express": "5.0.3",
     "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
     "@types/node": "^22.13.10",

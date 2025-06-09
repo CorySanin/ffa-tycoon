@@ -158,9 +158,9 @@ class Web {
                 });
         });
 
-        app.get('/archive/:page?', (req, res) => {
-            let page = Math.max(parseInt(req.params.page) || 1, 1);
-            let order = {
+        app.get('/archive/{:page}', (req, res) => {
+            const page = Math.max(parseInt(req.params.page) || 1, 1);
+            const order = {
                 orderby: req.query.sort || req.query.orderby,
                 order: (req.query.asc || req.query.order) === 'ASC'
             };
@@ -188,7 +188,7 @@ class Web {
         });
 
         app.get('/park/:park', async (req, res) => {
-            let park = await db.getPark(parseInt(req.params.park));
+            const park = await db.getPark(parseInt(req.params.park));
             if (park) {
                 res.render('template',
                     {
@@ -217,7 +217,7 @@ class Web {
         });
 
         app.get('/park/:park/viewer', async (req, res) => {
-            let park = await db.getPark(parseInt(req.params.park));
+            const park = await db.getPark(parseInt(req.params.park));
             if (park) {
                 res.render('viewer',
                     {
@@ -308,9 +308,9 @@ class Web {
         });
 
         privateapp.get('/server/:index', async (req, res) => {
-            let serverindex = parseInt(req.params.index);
+            const serverindex = parseInt(req.params.index);
             if (serverindex < this.servers.length && serverindex >= 0) {
-                let server = this.servers[serverindex];
+                const server = this.servers[serverindex];
                 await server.GetDetails(true);
                 res.render('admin/template',
                     {
@@ -335,9 +335,9 @@ class Web {
             }
         });
 
-        privateapp.get('/archive/:page?', (req, res) => {
-            let page = Math.max(parseInt(req.params.page) || 1, 1);
-            let order = {
+        privateapp.get('/archive/{:page}', (req, res) => {
+            const page = Math.max(parseInt(req.params.page) || 1, 1);
+            const order = {
                 orderby: req.query.sort || req.query.orderby,
                 order: (req.query.asc || req.query.order) === 'ASC'
             };
@@ -362,7 +362,7 @@ class Web {
         });
 
         privateapp.get('/park/:park', async (req, res) => {
-            let park = await db.getPark(parseInt(req.params.park));
+            const park = await db.getPark(parseInt(req.params.park));
             let files = [];
             try {
                 files = await fsp.readdir(path.join(this.archive, park.dir), { withFileTypes: true });
@@ -404,18 +404,18 @@ class Web {
             res.redirect('https://github.com/CorySanin/ffa-tycoon-parks#park-submission-guide');
         });
 
-        app.get('/discord/?', (_, res) => {
+        app.get('/discord{/}', (_, res) => {
             res.redirect('https://discord.gg/QpztpR5QSH');
         });
 
         //#endregion
 
-        app.get('/parks/:type/?', async (req, res) => {
-            let type = req.params.type;
+        app.get('/parks/:type{/}', async (req, res) => {
+            const type = req.params.type;
             if (this.parktypes.includes(type)) {
-                let dir = path.join('parks', type);
-                let files = await fsp.readdir(dir);
-                let file = files[Math.floor(Math.random() * files.length)];
+                const dir = path.join('parks', type);
+                const files = await fsp.readdir(dir);
+                const file = files[Math.floor(Math.random() * files.length)];
                 res.set('Content-Disposition', `attachment; filename="${file}"`);
                 res.sendFile(path.join(dir, file), (err) => {
                     if (err) {
@@ -429,8 +429,8 @@ class Web {
             }
         });
 
-        app.get('/load/:index/?', async (req, res) => {
-            let serverindex = parseInt(req.params.index);
+        app.get('/load/:index{/}', async (req, res) => {
+            const serverindex = parseInt(req.params.index);
             if (serverindex < this.servers.length && serverindex >= 0) {
                 const server = this.servers[serverindex];
                 const type = server.GetMode() === 'free for all economy' ? 'economy' : 'sandbox';
@@ -444,7 +444,7 @@ class Web {
                     fullPath = path.join(this.archive, park);
                 }
                 else {
-                    let park = server.TallyVotes(that.parklists[type]);
+                    const park = server.TallyVotes(that.parklists[type]);
                     filename = `${park}-${type}.park`;
                     fullPath = path.join('parks', type, filename);
                 }
@@ -468,10 +468,10 @@ class Web {
         });
 
         app.get('/api/parks/count', async (_, res) => {
-            res.send(this.InjectStatus({count: await this.db.getParkCount()}, 'ok'));
+            res.send(this.InjectStatus({ count: await this.db.getParkCount() }, 'ok'));
         });
 
-        app.get('/api/parks/:page?', async (req, res) => {
+        app.get('/api/parks{/:page}', async (req, res) => {
             const count = await this.db.getParkCount();
             const pages = await this.db.getMonthsSinceOldest();
             const page = Math.max(Math.min(parseInt(req.params.page) || 1, pages), 1);
@@ -484,7 +484,7 @@ class Web {
             });
         });
 
-        app.get('/api/park/:park/?', async (req, res) => {
+        app.get('/api/park/:park{/}', async (req, res) => {
             res.send(this.InjectStatus(await this.db.getPark(parseInt(req.params.park) || 0), 'ok'));
         });
 
@@ -505,12 +505,12 @@ class Web {
         }
 
         const saveServers = async (_: express.Request, res: express.Response, servers: GameServer[], ispublic: boolean = true) => {
-            let result = {
+            const result = {
                 status: 'bad'
             };
             let status = 400;
             if (!ispublic) {
-                let datestring = dayjs().format('YYYY-MM-DD_HH-mm-ss');
+                const datestring = dayjs().format('YYYY-MM-DD_HH-mm-ss');
                 result.status = 'ok';
                 status = 200;
 
@@ -521,7 +521,7 @@ class Web {
                     if (server.HasDbEntry()) {
                         dirname = (await db.getPark(server.GetId())).dir;
                     }
-                    let archivepath = path.join(this.archive, dirname);
+                    const archivepath = path.join(this.archive, dirname);
                     try {
                         if (server.HasDbEntry() || (!(await FileMan.FileExists(archivepath))
                             && (await FileMan.mkdir(archivepath)))) {
@@ -550,7 +550,7 @@ class Web {
                         this.RemoveImages(await db.getPark(server.GetId()));
                     }
                     else {
-                        const result = await this.db.addPark({
+                        const dbResult = await this.db.addPark({
                             name: server.GetName(),
                             groupname: server.GetGroup(),
                             gamemode: server.GetMode(),
@@ -558,7 +558,7 @@ class Web {
                             dir: dirname,
                             filename
                         });
-                        server.SetId(result.id);
+                        server.SetId(dbResult.id);
                     }
                 }
             }
@@ -575,7 +575,7 @@ class Web {
             await saveServers(req, res, this.servers.filter(server => server.GetGroup() == req.params.group), false);
         });
 
-        app.get('/api/server/?', async (req, res) => {
+        app.get('/api/server{/}', async (req, res) => {
             await Promise.all(this.servers.map(s => s.GetDetails()));
             res.status(200).send({
                 servers: this.servers.map(s => {
@@ -596,7 +596,7 @@ class Web {
         });
 
         privateapp.get('/api/server/:server/save', async (req, res) => {
-            let servernum = parseInt(req.params.server);
+            const servernum = parseInt(req.params.server);
             if (servernum >= 0 && servernum < this.servers.length) {
                 await saveServers(req, res, [this.servers[servernum]], false);
             }
@@ -639,7 +639,7 @@ class Web {
         });
 
         privateapp.get('/api/server/:server/stop', async (req, res) => {
-            let servernum = parseInt(req.params.server);
+            const servernum = parseInt(req.params.server);
             let result = {
                 status: 'ok'
             };
@@ -667,9 +667,9 @@ class Web {
             res.status(status).send(result);
         });
 
-        privateapp.get('/api/park/:park/?', async (req, res) => {
-            let park = await db.getPark(parseInt(req.params.park));
-            let result: ParkResult = {
+        privateapp.get('/api/park/:park{/}', async (req, res) => {
+            const park = await db.getPark(parseInt(req.params.park));
+            const result: ParkResult = {
                 status: 'bad'
             };
             let status = 400;
@@ -684,9 +684,9 @@ class Web {
             res.status(status).send(result);
         });
 
-        privateapp.put('/api/park/:park/?', async (req, res) => {
+        privateapp.put('/api/park/:park{/}', async (req, res) => {
             try {
-                let parkentry = await db.getPark(parseInt(req.params.park));
+                const parkentry = await db.getPark(parseInt(req.params.park));
 
                 if (!parkentry || !req.files || !req.files.park) {
                     res.status(400).send({
@@ -694,18 +694,18 @@ class Web {
                     });
                 }
                 else {
-                    let park = req.files.park as fileUpload.UploadedFile;
-                    let filenameold = parkentry.filename;
-                    let fullpathold = path.join(this.archive, parkentry.dir, filenameold);
-                    let fextsep = park.name.lastIndexOf('.');
-                    let fext = park.name.substring(fextsep, park.name.length);
-                    let filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
-                    let fullpathnew = path.join(this.archive, parkentry.dir, filenamenew);
+                    const park = req.files.park as fileUpload.UploadedFile;
+                    const filenameold = parkentry.filename;
+                    const fullpathold = path.join(this.archive, parkentry.dir, filenameold);
+                    const fextsep = park.name.lastIndexOf('.');
+                    const fext = park.name.substring(fextsep, park.name.length);
+                    const filenamenew = park.name.substring(0, Math.min(fextsep, 25)) + fext;
+                    const fullpathnew = path.join(this.archive, parkentry.dir, filenamenew);
                     await fsp.unlink(fullpathold);
 
                     let files = await fsp.readdir(path.join(this.archive, parkentry.dir), { withFileTypes: true });
                     files = files.filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park'));
-                    let promises = [];
+                    const promises = [];
                     files.forEach(f => promises.push(fsp.unlink(path.join(this.archive, parkentry.dir, f.name))));
                     try {
                         await Promise.all(promises);
@@ -732,9 +732,9 @@ class Web {
             }
         });
 
-        privateapp.delete('/api/park/:park/?', async (req, res) => {
+        privateapp.delete('/api/park/:park{/}', async (req, res) => {
             try {
-                let parkentry = await db.getPark(parseInt(req.params.park));
+                const parkentry = await db.getPark(parseInt(req.params.park));
                 await (fsp.rm || fsp.rmdir)(path.join(this.archive, parkentry.dir), {
                     force: true,
                     maxRetries: 4,
@@ -755,9 +755,9 @@ class Web {
         });
 
         privateapp.post('/api/park/:park/save', async (req, res) => {
-            let park = await db.getPark(parseInt(req.params.park));
-            let message = req.body;
-            let result = {
+            const park = await db.getPark(parseInt(req.params.park));
+            const message = req.body;
+            const result = {
                 status: 'bad'
             };
             let status = 400;
@@ -782,7 +782,7 @@ class Web {
                 else if (req.body.action === 'rm-all') {
                     let files = await fsp.readdir(path.join(this.archive, park.dir), { withFileTypes: true });
                     files = files.filter(f => f.isFile() && f.name.toLowerCase().endsWith('.park') && f.name !== park.filename);
-                    let promises = [];
+                    const promises = [];
                     files.forEach(f => promises.push(fsp.unlink(path.join(this.archive, park.dir, f.name))));
                     try {
                         await Promise.all(promises);
@@ -832,9 +832,9 @@ class Web {
         });
 
         privateapp.post('/api/server/:server/send', async (req, res) => {
-            let server = parseInt(req.params.server);
-            let message = req.body.message;
-            let result = {
+            const server = parseInt(req.params.server);
+            const message = req.body.message;
+            const result = {
                 status: 'bad'
             };
             let status = 400;
@@ -849,10 +849,10 @@ class Web {
         });
 
         privateapp.post('/api/server/:server/staff', async (req, res) => {
-            let server = parseInt(req.params.server);
-            let type = req.body.type;
-            let amount = parseInt(req.body.amount || 1);
-            let result = {
+            const server = parseInt(req.params.server);
+            const type = req.body.type;
+            const amount = parseInt(req.body.amount || 1);
+            const result = {
                 status: 'bad'
             };
             let status = 400;
@@ -867,9 +867,9 @@ class Web {
         });
 
         privateapp.post('/api/server/:server/cheat', async (req, res) => {
-            let server = parseInt(req.params.server);
-            let payload = req.body.params;
-            let result = {
+            const server = parseInt(req.params.server);
+            const payload = req.body.params;
+            const result = {
                 status: 'bad'
             };
             let status = 400;
@@ -889,9 +889,9 @@ class Web {
         });
 
         privateapp.post('/api/server/:server/player/:player', async (req, res) => {
-            let server = parseInt(req.params.server);
-            let player = req.params.player
-            let result = {
+            const server = parseInt(req.params.server);
+            const player = req.params.player
+            const result = {
                 status: 'bad'
             };
             let status = 400;
@@ -914,9 +914,9 @@ class Web {
         });
 
         privateapp.post('/api/server/:server/load', async (req, res) => {
-            let server = parseInt(req.params.server);
-            let body = req.body;
-            let result = {
+            const server = parseInt(req.params.server);
+            const body = req.body;
+            const result = {
                 status: 'bad'
             };
             let status = 400;
@@ -967,7 +967,7 @@ class Web {
             labelNames: ['server'],
             collect() {
                 that.servers.forEach(s => {
-                    let details = s.GetDetailsSync();
+                    const details = s.GetDetailsSync();
                     if (details && details.park) {
                         this.set({ server: s.GetName() }, details.park.guests);
                     }
@@ -981,7 +981,7 @@ class Web {
             labelNames: ['server'],
             collect() {
                 that.servers.forEach(s => {
-                    let details = s.GetDetailsSync();
+                    const details = s.GetDetailsSync();
                     if (details && details.park) {
                         this.set({ server: s.GetName() }, details.park.rating);
                     }
@@ -995,7 +995,7 @@ class Web {
             labelNames: ['server'],
             collect() {
                 that.servers.forEach(s => {
-                    let details = s.GetDetailsSync();
+                    const details = s.GetDetailsSync();
                     if (details && details.network && details.network.players) {
                         this.set({ server: s.GetName() }, details.network.players.length - 1);
                     }
@@ -1015,12 +1015,12 @@ class Web {
 
         privateapp.use('/', app);
 
-        let pluginserver = new net.Server();
+        const pluginserver = new net.Server();
         pluginserver.on('connection', async sock => {
             const addr = sock.remoteAddress;
             let server: null | GameServer = null;
             for (let s in this.servers) {
-                let srv = this.servers[s];
+                const srv = this.servers[s];
                 if (addr.includes(await srv.GetIP())) {
                     server = srv;
                     break;
@@ -1060,10 +1060,10 @@ class Web {
                         }));
                     }
                     else if (payload.type === 'vote') {
-                        let type = server.GetMode() === 'free for all economy' ? 'economy' : 'sandbox';
-                        let map = standardizeMapName(payload.map || '').replaceAll(' ', '_');
+                        const type = server.GetMode() === 'free for all economy' ? 'economy' : 'sandbox';
+                        const map = standardizeMapName(payload.map || '').replaceAll(' ', '_');
                         if (map && map.length > 0) {
-                            let possibleMatches = that.parklists[type].filter(p => p.startsWith(map));
+                            const possibleMatches = that.parklists[type].filter(p => p.startsWith(map));
                             if (possibleMatches.length == 1) {
                                 server.CastVote(payload.identifier || 'null', possibleMatches[0]);
                                 sock.write(JSON.stringify({
@@ -1095,8 +1095,15 @@ class Web {
             }
         });
 
-        this.webserver = app.listen(port, () => console.log(`ffa-tycoon running on port ${port}`));
-        this.privwebserver = privateapp.listen(privateport, () => console.log(`private backend running on port ${privateport}`));
+        function logServiceRunning(error: Error, name: string, port: string|number) {
+            if (error) {
+                throw error;
+            }
+            console.log(`${name} running on port ${port}`);
+        }
+
+        this.webserver = app.listen(port, (error) => logServiceRunning(error, 'ffa-tycoon', port));
+        this.privwebserver = privateapp.listen(privateport, (error) => logServiceRunning(error, 'private backend', privateport));
         this.pluginsocket = pluginserver.listen(pluginport, () => console.log(`plugin server listening on port ${pluginport}`));
     }
 
@@ -1126,10 +1133,10 @@ class Web {
     }
 
     UpdateAllParkLists = async () => {
-        let prom = [];
+        const prom = [];
         this.parktypes.forEach(parktype => {
             prom.push((async () => {
-                let dir = path.join('parks', parktype);
+                const dir = path.join('parks', parktype);
                 this.parklists[parktype] = (await fsp.readdir(dir)).map(standardizeMapName);
             })());
         });
