@@ -11,28 +11,28 @@
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
-    "body-parser": "1.20.3",
+    "body-parser": "2.2.0",
     "dayjs": "1.11.13",
     "ejs": "3.1.10",
     "express": "5.1.0",
     "express-fileupload": "1.5.1",
-    "helmet": "8.0.0",
+    "helmet": "8.1.0",
     "json5": "2.2.3",
     "log": "6.3.2",
-    "lru-cache": "11.0.2",
+    "lru-cache": "11.1.0",
     "mv": "2.1.1",
     "prom-client": "15.1.3",
-    "sequelize": "6.37.6",
+    "sequelize": "6.37.7",
     "sqlite3": "5.1.7"
   },
   "devDependencies": {
     "@types/express": "5.0.3",
     "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
-    "@types/node": "^22.13.10",
+    "@types/node": "^22.15.30",
     "bulma": "0.9.4",
-    "forking-build-shit": "0.0.2",
-    "openrct2-remote-control": "1.1.4",
+    "forking-build-shit": "0.1.0",
+    "openrct2-remote-control": "1.1.5",
     "typescript": "5.8.2"
   },
   "repository": {
