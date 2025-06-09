@@ -22,6 +22,7 @@ type ServerDefinition = {
     hostname: string;
     port: number;
     dir: string | false;
+    index?: number;
 };
 
 type LoadData = {
@@ -50,6 +51,7 @@ class GameServer {
     private id: number | null;
     private votes: Record<string, string>;
     private loaddata: LoadData;
+    private serverIndex:number;
 
     constructor(server: Partial<ServerDefinition> = {}) {
         this.name = server.name || 'server';
@@ -64,6 +66,7 @@ class GameServer {
         this.id = null;
         this.votes = {};
         this.loaddata = null;
+        this.serverIndex = server.index;
     }
 
     GetId(): number {
@@ -169,6 +172,10 @@ class GameServer {
             mostVotes = allMaps || [null];
         }
         return mostVotes[Math.floor(Math.random() * mostVotes.length)];
+    }
+
+    GetIndex(): number {
+        return this.serverIndex;
     }
 
     /**

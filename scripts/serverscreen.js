@@ -250,11 +250,14 @@ document.addEventListener("DOMContentLoaded", function () {
             cache: 'no-cache'
         }).then(response => response.json())
             .then(data => {
-                if ((archivebtn.disabled = !('status' in data && data.status === 'ok'))) {
+                if ((archivebtn.disabled = !(data?.results?.length > 0 && data.results[0]?.status === 'ok'))) {
                     archivebtn.classList.add('is-danger', 'is-outlined');
                 }
                 else {
                     archivebtn.classList.add('is-primary', 'is-outlined');
+                    if (saveidtxt.value.length === 0) {
+                        saveidtxt.value = data.results[0]?.id || '';
+                    }
                 }
             }).catch(e => {
                 console.log(e);

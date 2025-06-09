@@ -85,8 +85,9 @@ class Web {
         this.parklists = {};
         this.prom = prom.register;
 
-        (options.servers || []).forEach(serverinfo => {
+        (options.servers || []).forEach((serverinfo, index) => {
             serverinfo.motd = (serverinfo.motd === undefined) ? defaultMotd : serverinfo.motd;
+            serverinfo.index = index;
             this.servers.push(new GameServer(serverinfo));
         });
 
@@ -506,13 +507,12 @@ class Web {
 
         const saveServers = async (_: express.Request, res: express.Response, servers: GameServer[], ispublic: boolean = true) => {
             const result = {
-                status: 'bad'
+                status: 'ok',
+                results: []
             };
-            let status = 400;
+            let status = 200;
             if (!ispublic) {
                 const datestring = dayjs().format('YYYY-MM-DD_HH-mm-ss');
-                result.status = 'ok';
-                status = 200;
 
                 for (const serverindx in servers) {
                     const server = servers[serverindx];
@@ -541,13 +541,20 @@ class Web {
                         filename = false;
                     }
                     if (!filename) {
-                        result.status = 'bad';
-                        status = 500;
+                        result.results.push({
+                            server: server.GetIndex(),
+                            status: 'bad'
+                        });
                     }
                     else if (server.HasDbEntry()) {
                         await db.changeFileName(server.GetId(), filename);
                         await db.updateDate(server.GetId());
                         this.RemoveImages(await db.getPark(server.GetId()));
+                        result.results.push({
+                            server: server.GetIndex(),
+                            status: 'ok',
+                            id: server.GetId()
+                        });
                     }
                     else {
                         const dbResult = await this.db.addPark({
@@ -559,6 +566,11 @@ class Web {
                             filename
                         });
                         server.SetId(dbResult.id);
+                        result.results.push({
+                            server: server.GetIndex(),
+                            status: 'ok',
+                            id: dbResult.id
+                        });
                     }
                 }
             }
