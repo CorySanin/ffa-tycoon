@@ -1,0 +1,18 @@
+@charset "utf-8";
+
+$red: hsl(348, 100%, 70%);
+$orange: hsl(14, 94%, 59%);
+$green: hsl(153, 53%, 53%);
+
+:root {
+    --ffa-red: #ff5457;
+    --ffa-orange: #ff470f;
+    --ffa-green: #00935f;
+    --ffa-selected: #b2ebf2;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --ffa-selected: #314549;
+    }
+}

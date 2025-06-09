@@ -42,10 +42,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     this.disabled = false;
                 }
                 else {
-                    this.parentElement.classList.add('is-danger');
+                    this.parentElement.classList.add('is-danger', 'is-outlined');
                 }
             }).catch(e => {
-                this.parentElement.classList.add('is-danger');
+                this.parentElement.classList.add('is-danger', 'is-outlined');
             });
     }
 
@@ -176,6 +176,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function sendMessage() {
+        if (!broadcastmsg.value) {
+            return;
+        }
         broadcastmsg.disabled = sendbtn.disabled = true;
         fetch(`/api/server/${serverid}/send`, {
             method: 'POST',
@@ -241,40 +244,40 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     archivebtn.addEventListener('click', () => {
         archivebtn.disabled = true;
-        archivebtn.classList.remove('is-primary', 'is-danger');
+        archivebtn.classList.remove('is-primary', 'is-outlined', 'is-danger');
         fetch(`/api/server/${serverid}/save`, {
             method: 'GET',
             cache: 'no-cache'
         }).then(response => response.json())
             .then(data => {
                 if ((archivebtn.disabled = !('status' in data && data.status === 'ok'))) {
-                    archivebtn.classList.add('is-danger');
+                    archivebtn.classList.add('is-danger', 'is-outlined');
                 }
                 else {
-                    archivebtn.classList.add('is-primary');
+                    archivebtn.classList.add('is-primary', 'is-outlined');
                 }
             }).catch(e => {
                 console.log(e);
-                archivebtn.classList.add('is-danger');
+                archivebtn.classList.add('is-danger', 'is-outlined');
             });
     });
     stopbtn.addEventListener('click', () => {
         stopbtn.disabled = true;
-        stopbtn.classList.remove('is-primary', 'is-danger');
+        stopbtn.classList.remove('is-primary', 'is-outlined', 'is-danger');
         fetch(`/api/server/${serverid}/stop`, {
             method: 'GET',
             cache: 'no-cache'
         }).then(response => response.json())
             .then(data => {
                 if ((stopbtn.disabled = !('status' in data && data.status === 'ok'))) {
-                    stopbtn.classList.add('is-danger');
+                    stopbtn.classList.add('is-danger', 'is-outlined');
                 }
                 else {
-                    stopbtn.classList.add('is-primary');
+                    stopbtn.classList.add('is-primary', 'is-outlined');
                 }
             }).catch(e => {
                 console.log(e);
-                stopbtn.classList.add('is-danger');
+                stopbtn.classList.add('is-danger', 'is-outlined');
             });
     });
     staffhirebtn.addEventListener('click', () => {
@@ -282,7 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
     fetchsavesbtn.addEventListener('click', () => {
         fetchsavesbtn.disabled = true;
-        fetchsavesbtn.classList.remove('is-primary', 'is-danger');
+        fetchsavesbtn.classList.remove('is-primary', 'is-outlined', 'is-danger');
         let saveid = saveidtxt.value;
         fetch(`/api/park/${saveid}/`, {
             method: 'GET',
@@ -306,10 +309,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
                 if ((fetchsavesbtn.disabled = !('status' in data && data.status === 'ok'))) {
-                    fetchsavesbtn.classList.add('is-danger');
+                    fetchsavesbtn.classList.add('is-danger', 'is-outlined');
                 }
                 else {
-                    fetchsavesbtn.classList.add('is-primary');
+                    fetchsavesbtn.classList.add('is-primary', 'is-outlined');
                     const publicurl = document.getElementById('publicurltxt').value;
                     data.files.forEach(file => {
                         file = file.name;
@@ -331,7 +334,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             }).catch(e => {
                 console.log(e);
-                fetchsavesbtn.classList.add('is-danger');
+                fetchsavesbtn.classList.add('is-danger', 'is-outlined');
             });
         removeAllChildren(parkfilesdiv);
     });

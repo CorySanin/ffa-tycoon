@@ -1,5 +1,3 @@
-@import "_variables.sass";
-
 html {
     height: 100%;
 }
@@ -127,7 +125,7 @@ footer>.box {
         }
 
         &.selected {
-            background-color: #B2EBF2;
+            background-color: var(--ffa-selected);
 
             .button {
                 display: none;
@@ -168,5 +166,19 @@ footer>.box {
 
     #sendbtn {
         grid-area: sendbtn;
+    }
+}
+
+.parkstats>div {
+    .is-danger {
+        color: var(--ffa-red);
+    }
+
+    .is-warning {
+        color: var(--ffa-orange);
+    }
+
+    .is-success {
+        color: var(--ffa-green);
     }
 }

@@ -30,7 +30,7 @@
     "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
     "@types/node": "^22.15.30",
-    "bulma": "0.9.4",
+    "bulma": "1.0.4",
     "forking-build-shit": "0.1.0",
     "openrct2-remote-control": "1.1.5",
     "typescript": "5.8.2"
