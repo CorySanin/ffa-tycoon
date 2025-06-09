@@ -31,7 +31,7 @@
     "@types/mv": "2.1.4",
     "@types/node": "^22.15.30",
     "bulma": "1.0.4",
-    "forking-build-shit": "0.1.0",
+    "forking-build-shit": "1.0.0",
     "openrct2-remote-control": "1.1.5",
     "typescript": "5.8.2"
   },

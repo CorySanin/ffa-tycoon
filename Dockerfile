@@ -4,9 +4,18 @@ FROM base AS build
 
 WORKDIR /usr/src/ffa-tycoon
 
+RUN apk add --no-cache curl libwebp libwebp-tools
+
 COPY ./package*json ./
 
 RUN npm install
+
+COPY . .
+
+ENV CWEBPTIMEOUT=360000
+
+RUN npm run pixi && npm run build && \
+ mkdir -p storage/archive storage/config storage/db && npm install --production
 
 FROM base AS deploy
 
@@ -17,10 +26,7 @@ WORKDIR /usr/src/ffa-tycoon
 
 COPY --from=build /usr/src/ffa-tycoon /usr/src/ffa-tycoon
 
-COPY . .
-
-RUN apk add --no-cache curl && npm run pixi && npm run build && npm install --production && \
- mkdir -p storage/archive storage/config storage/db
+RUN apk add --no-cache curl
 
 USER node
 

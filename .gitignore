@@ -103,6 +103,6 @@ public
 storage/
 assets/css/
 assets/js/
-assets/webp/
+assets/images/webp/
 *:Zone.Identifier
 pixi.min.js
