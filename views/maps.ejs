@@ -12,14 +12,38 @@
     <!-- Map List -->
     <div class="box">
         <h1 id="rules">Map List</h1>
-        <p>There is a variety of maps, both vanilla and custom-made, that are shuffled through the FFA Tycoon servers.</p>
+        <p>Here's the complete map pool used by the FFA Tycoon servers.</p>
         <p>If you want to play a specific map after the next server reset, use the <strong class="has-text-weight-semibold">!vote</strong> command in-game and type in the map's ID (e.g. <span style="font-size: 0.9em" class="is-family-monospace">!vote arid_heights</span>). Whichever map receives the most votes will be the one selected upon reset. Each map listed here will contain a designated vote string command which can be copied to your clipboard when clicked.</p>
+        <p>To submit a new map, follow the <a href="/submit-map">submission guide</a>.</p>
     </div>
     <!-- Vanilla Maps -->
     <div class="box">
         <h2>Vanilla Maps</h2>
         <p class="mb-4">The vanilla maps, based off the original scenarios from <em>RollerCoaster Tycoon</em> and <em>RollerCoaster Tycoon 2</em>, contain all non-expansion ride types from RCT2, as well as the ones officially added to OpenRCT2. All vanilla maps were designed by Chris Sawyer and edited by RGTM for FFA Tycoon.</p>
         <div class="columns mt-4 mb-4 is-multiline">
+            <% if (maps) {
+                maps.forEach(function(map){ %>
+            <div class="column is-full-mobile is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
+                <div class="map">
+                    <img src="maps/images/<%= map.baseParkName %>.png" alt="Preview image for the FFA Tycoon scenario &quot;<%= map.prettyParkName %>&quot;">
+                    <div>
+                        <h3 class="mb-0"><%= map.prettyParkName %></h3>
+                        <p class="is-size-7 is-italic"><%= map.source %></p>
+                        <p><%= map.description %></p>
+                        <hr>
+                        <h4 class="is-size-6 has-text-weight-medium">Starting Rides</h4>
+                        <ul class="is-size-7">
+                            <% (map.existingRides || []).forEach(function(ride){ %>
+                            <li><%= ride %></li>
+                            <% }); %>
+                        </ul>
+                        <hr>
+                        <h4 class="is-size-6 has-text-weight-medium">Vote String</h4>
+                        <span class="is-size-7 is-family-monospace">!vote <%= map.baseParkName %></span>
+                    </div>
+                </div>
+            </div>
+            <% }); } %>
             <!-- Arid Heights -->
             <div class="column is-full-mobile is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd">
                 <div class="map">
