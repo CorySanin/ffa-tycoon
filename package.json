@@ -1,6 +1,6 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "ffa-tycoon.com",
   "type": "module",
   "main": "src/index.ts",
@@ -29,11 +29,11 @@
     "@types/express": "5.0.3",
     "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
-    "@types/node": "^22.15.30",
+    "@types/node": "^24.0.4",
     "bulma": "1.0.4",
     "forking-build-shit": "1.0.0",
     "openrct2-remote-control": "1.1.5",
-    "typescript": "5.8.2"
+    "typescript": "5.8.3"
   },
   "repository": {
     "type": "git",

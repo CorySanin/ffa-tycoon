@@ -51,6 +51,7 @@ interface WebOptions extends VpnapiOptions {
     motd: string;
     screenshotter: string;
     archivedir: string;
+    mapsMetaDir: string;
     db: Partial<AdapterOptions>;
     servers: ServerDefinition[];
 }
@@ -61,6 +62,7 @@ class Web {
     private prom: prom.Registry;
     private screenshotter: string;
     private archive: string;
+    private mapsMeta: string;
     private parktypes: string[];
     private parklists: { [type: string]: string[]; };
     private webserver: Server;
@@ -80,6 +82,7 @@ class Web {
         const defaultMotd = process.env.MOTD || options.motd || null;
         this.screenshotter = process.env.SCREENSHOTTER || options.screenshotter || 'screenshotterhost';
         this.archive = options.archivedir || 'storage/archive';
+        this.mapsMeta = options.mapsMetaDir || 'maps';
         this.servers = [];
         this.parktypes = [];
         this.parklists = {};
@@ -157,6 +160,31 @@ class Web {
                         res.send(err);
                     }
                 });
+        });
+
+        app.get('/maps', async (_, res) => {
+            const maps = JSON.parse((await fsp.readFile(path.join(this.mapsMeta, 'meta.json'))).toString());
+            res.render('template',
+                {
+                    page: {
+                        view: 'maps',
+                        title: 'Map Pool'
+                    },
+                    site: {
+                        description: 'Details for park scenarios that run on FFA Tycoon OpenRCT2 servers. Screenshots, descriptions, credits, and more. Don\'t forget to vote for the next map!'
+                    },
+                    maps: maps && maps['parks']
+                },
+                function (err, html) {
+                    if (!err) {
+                        res.send(html);
+                    }
+                    else {
+                        res.send('something went uh-oh');
+                        console.error(err);
+                    }
+                }
+            );
         });
 
         app.get('/archive/{:page}', (req, res) => {
@@ -1024,6 +1052,7 @@ class Web {
 
         app.use('/assets/', express.static('assets'));
         app.use('/archive/', express.static(this.archive));
+        app.use('/maps/images/', express.static(path.join(this.mapsMeta, 'thumbnails')));
 
         privateapp.use('/', app);
 
@@ -1107,7 +1136,7 @@ class Web {
             }
         });
 
-        function logServiceRunning(error: Error, name: string, port: string|number) {
+        function logServiceRunning(error: Error, name: string, port: string | number) {
             if (error) {
                 throw error;
             }
