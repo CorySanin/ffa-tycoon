@@ -11,7 +11,7 @@
     img {
         width: 100%;
         border-radius: 0.25em 0.25em 0 0;
-        border-bottom: 1px solid var(--bulma-text);
+        border-bottom: 2px solid var(--bulma-hr-background-color)
     }
 
     .box {
@@ -19,7 +19,11 @@
     }
 }
 
-#maps #body {
-    max-width: calc(100% - 1em);
-    margin: auto;
+#maps {
+    overflow: hidden;
+
+    #body {
+        max-width: calc(100% - 1em);
+        margin: auto;
+    }
 }

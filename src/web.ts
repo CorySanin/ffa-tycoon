@@ -104,7 +104,7 @@ class Web {
         }).catch(err => console.log(err)).then(this.UpdateAllParkLists).then(() => {
             this.parktypes.forEach(type => {
                 app.get(`/${type}`, (_, res) => {
-                    res.redirect(`https://github.com/CorySanin/ffa-tycoon-parks/tree/master/parks/${type}`);
+                    res.redirect(`/maps`);
                 });
             });
         });

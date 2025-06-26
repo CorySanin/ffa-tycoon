@@ -2,37 +2,35 @@
 
 <div class="content">
     <div class="block">
-        <h1 id="rules">Map List</h1>
+        <h1>Map List</h1>
         <p>Below is the complete map pool used by the FFA Tycoon servers.</p>
         <p>If you want to play a specific map after the next server reset, use the <code>!vote</code> command in-game and type in the map's ID (e.g. <code>!vote arid_heights</code>). Whichever map receives the most votes will be the one selected upon reset.</p>
         <p>To submit a new map, follow the <a href="/submit-map">submission guide</a>. Park files can be found in the <a href="https://github.com/CorySanin/ffa-tycoon-parks/tree/master/parks">ffa-tycoon-parks git repository</a>.</p>
     </div>
-    <div class="block">
-        <div class="columns mt-4 mb-4 is-multiline">
-            <% if (maps) {
-                maps.forEach(function(map){ %>
-            <div class="column is-full-mobile is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd map">
-                <div class="box">
-                    <img src="/maps/images/<%= map.baseParkName %>.png" alt="Preview image for the FFA Tycoon scenario &quot;<%= map.prettyParkName %>&quot;">
-                    <div>
-                        <h3 class="mb-0"><%= map.prettyParkName %></h3>
-                        <p class="is-size-7 is-italic"><%= map.source %></p>
-                        <p><%= map.description %></p>
-                        <hr>
-                        <h4 class="is-size-6 has-text-weight-medium">Starting Rides</h4>
-                        <ul class="is-size-7">
-                            <% (map.existingRides || []).forEach(function(ride){ %>
-                            <li><%= ride %></li>
-                            <% }); %>
-                        </ul>
-                        <hr>
-                        <h4 class="is-size-6 has-text-weight-medium">Vote String</h4>
-                        <code class="votestr">!vote <%= map.baseParkName %></code>
-                    </div>
+    <div class="columns mt-4 mb-4 is-multiline">
+        <% if (maps) {
+            maps.forEach(function(map){ %>
+        <div class="column is-full-mobile is-half-tablet is-one-third-desktop is-one-quarter-widescreen is-one-fifth-fullhd map">
+            <div class="box">
+                <img src="/maps/images/<%= map.baseParkName %>.png" alt="Preview image for the FFA Tycoon scenario &quot;<%= map.prettyParkName %>&quot;">
+                <div>
+                    <h3 class="mb-0"><%= map.prettyParkName %></h3>
+                    <p class="is-size-7 is-italic"><%= map.source %></p>
+                    <p><%= map.description %></p>
+                    <hr>
+                    <h4 class="is-size-6 has-text-weight-medium">Starting Rides</h4>
+                    <ul class="is-size-7">
+                        <% (map.existingRides || []).forEach(function(ride){ %>
+                        <li><%= ride %></li>
+                        <% }); %>
+                    </ul>
+                    <hr>
+                    <h4 class="is-size-6 has-text-weight-medium">Vote String</h4>
+                    <code class="votestr">!vote <%= map.baseParkName %></code>
                 </div>
             </div>
-            <% }); } %>
         </div>
+        <% }); } %>
     </div>
 </div>
 <script src="/assets/js/maps-index.js?v1"></script>
