@@ -1,0 +1,25 @@
+#toast.notification {
+    position: fixed;
+    bottom: 5vh;
+    left: 16vw;
+    right: 16vw;
+}
+
+.column.map {
+    display: flex;
+
+    img {
+        width: 100%;
+        border-radius: 0.25em 0.25em 0 0;
+        border-bottom: 1px solid var(--bulma-text);
+    }
+
+    .box {
+        --bulma-box-padding: 1em 1em 1.25em;
+    }
+}
+
+#maps #body {
+    max-width: calc(100% - 1em);
+    margin: auto;
+}

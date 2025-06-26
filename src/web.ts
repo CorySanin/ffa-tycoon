@@ -173,7 +173,7 @@ class Web {
                     site: {
                         description: 'Details for park scenarios that run on FFA Tycoon OpenRCT2 servers. Screenshots, descriptions, credits, and more. Don\'t forget to vote for the next map!'
                     },
-                    maps
+                    maps: maps && maps['parks']
                 },
                 function (err, html) {
                     if (!err) {
@@ -181,6 +181,7 @@ class Web {
                     }
                     else {
                         res.send('something went uh-oh');
+                        console.error(err);
                     }
                 }
             );
@@ -1051,6 +1052,7 @@ class Web {
 
         app.use('/assets/', express.static('assets'));
         app.use('/archive/', express.static(this.archive));
+        app.use('/maps/images/', express.static(path.join(this.mapsMeta, 'thumbnails')));
 
         privateapp.use('/', app);
 
