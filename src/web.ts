@@ -446,7 +446,9 @@ class Web {
                 const files = await fsp.readdir(dir);
                 const file = files[Math.floor(Math.random() * files.length)];
                 res.set('Content-Disposition', `attachment; filename="${file}"`);
-                res.sendFile(path.join(dir, file), (err) => {
+                res.sendFile(path.join(dir, file), {
+                    root: process.cwd()
+                },(err) => {
                     if (err) {
                         res.status(500).send('500 server error');
                         console.log(`Error sending park file: ${err}`);
