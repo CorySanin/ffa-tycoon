@@ -18,6 +18,7 @@ env:
 
 jobs:
   lowercasify:
+    permissions: {}
     runs-on: ubuntu-24.04
     outputs:
       image_name: ${{ steps.image.outputs.image_name }}
