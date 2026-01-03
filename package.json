@@ -1,39 +1,38 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.6.3",
+  "version": "1.6.4",
   "description": "ffa-tycoon.com",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
     "pixi": "curl https://pixijs.download/v7.3.2/pixi.min.js > scripts/pixi.min.js",
-    "build": "npx build-shit && tsc -p tsconfig.plugin.json && tsc",
+    "build": "npx build-shit && npx tsc -p tsconfig.plugin.json && npx tsc",
     "watch": "npx build-shit --watch",
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
-    "body-parser": "2.2.0",
-    "dayjs": "1.11.13",
+    "body-parser": "2.2.1",
+    "dayjs": "1.11.19",
     "ejs": "3.1.10",
-    "express": "5.1.0",
-    "express-fileupload": "1.5.1",
+    "express": "5.2.1",
+    "express-fileupload": "1.5.2",
     "helmet": "8.1.0",
     "json5": "2.2.3",
-    "log": "6.3.2",
-    "lru-cache": "11.1.0",
+    "lru-cache": "11.2.4",
     "mv": "2.1.1",
     "prom-client": "15.1.3",
     "sequelize": "6.37.7",
     "sqlite3": "5.1.7"
   },
   "devDependencies": {
-    "@types/express": "5.0.3",
+    "@types/express": "5.0.6",
     "@types/express-fileupload": "1.5.1",
     "@types/mv": "2.1.4",
-    "@types/node": "^24.0.4",
+    "@types/node": "^24.1.0",
     "bulma": "1.0.4",
-    "forking-build-shit": "1.0.0",
+    "forking-build-shit": "1.0.5",
     "openrct2-remote-control": "1.1.5",
-    "typescript": "5.8.3"
+    "typescript": "5.9.3"
   },
   "repository": {
     "type": "git",

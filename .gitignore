@@ -104,5 +104,6 @@ storage/
 assets/css/
 assets/js/
 assets/images/webp/
+assets/images/avif/
 *:Zone.Identifier
 pixi.min.js
