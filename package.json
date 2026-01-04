@@ -1,6 +1,6 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.6.4",
+  "version": "1.6.5",
   "description": "ffa-tycoon.com",
   "type": "module",
   "main": "src/index.ts",
