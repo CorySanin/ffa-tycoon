@@ -14,7 +14,7 @@ env:
   DH_REGISTRY: docker.io
   GH_REGISTRY: ghcr.io
   DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
-  TAG: _sha-${{ github.sha }}-${{ github.run_id }}
+  TAG: _sha-${{ github.sha }}
 
 jobs:
   lowercasify:
@@ -76,9 +76,6 @@ jobs:
           target: deploy
           push: true
           tags: ${{ env.GH_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.TAG }}-${{ matrix.arch }}
-          labels: |
-            org.opencontainers.image.ci-run-id=${{ github.run_id }}
-            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha,scope=${{ github.workflow }}
           cache-to: type=gha,mode=max,scope=${{ github.workflow }}
   
