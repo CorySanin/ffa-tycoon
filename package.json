@@ -1,6 +1,6 @@
 {
   "name": "ffa-tycoon",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "ffa-tycoon.com",
   "type": "module",
   "main": "src/index.ts",
@@ -11,14 +11,14 @@
     "gettypes": "mkdir -p plugin/types && curl https://raw.githubusercontent.com/OpenRCT2/OpenRCT2/develop/distribution/openrct2.d.ts > plugin/types/openrct2.d.ts"
   },
   "dependencies": {
-    "body-parser": "2.2.1",
+    "body-parser": "2.2.2",
     "dayjs": "1.11.19",
-    "ejs": "3.1.10",
+    "ejs": "4.0.1",
     "express": "5.2.1",
     "express-fileupload": "1.5.2",
     "helmet": "8.1.0",
     "json5": "2.2.3",
-    "lru-cache": "11.2.4",
+    "lru-cache": "11.2.6",
     "mv": "2.1.1",
     "prom-client": "15.1.3",
     "sequelize": "6.37.7",
